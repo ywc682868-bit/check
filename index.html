@@ -1200,7 +1200,16 @@ function localInfer(rows) {
     }
 
     // 【所有其他類型】三者完全一致才套用
-    const strictMatch = (state.examples || []).find(e =>
+    const allExamples = state.examples || [];
+    // Debug: log mismatches for 格式錯誤
+    if (desc.includes('格式錯誤') || desc.includes('非整數')) {
+      const sameVar = allExamples.filter(e => e.varName === r.varName);
+      if (sameVar.length > 0) {
+        console.log(`[DEBUG] ${r.varName} 格式錯誤：row.origVal="${orig}" row.errorDesc="${desc}"`);
+        sameVar.forEach(e => console.log(`  範例: origVal="${e.origVal}" errorDesc="${e.errorDesc}" reply="${e.reply}" match=${e.origVal===orig && e.errorDesc===desc}`));
+      }
+    }
+    const strictMatch = allExamples.find(e =>
       e.varName === r.varName &&
       e.origVal === orig &&
       e.errorDesc === desc
@@ -1537,6 +1546,17 @@ function saveExamplesToStorage(examples) {
 }
 
 state.examples = loadExamplesFromStorage();
+
+function debugExamples() {
+  // Show all examples for v94 in an alert
+  const examples = state.examples || [];
+  const v94 = examples.filter(e => e.varName === 'v94');
+  if (!v94.length) { alert('沒有 v94 的範例'); return; }
+  const msg = v94.map(e =>
+    `origVal: "${e.origVal}"\nerrorDesc: "${e.errorDesc}"\nreply: "${e.reply}"\n---`
+  ).join('\n');
+  alert('v94 範例內容：\n\n' + msg);
+}
 
 function saveExamples() {
   const id = state.currentId;
