@@ -428,6 +428,59 @@
     color: var(--text-hint);
     font-size: 13px;
   }
+  .group-header {
+    padding: 6px 20px 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  .group-header:first-child { border-top: none; }
+  .group-toggle { font-size: 10px; color: var(--text-hint); transition: transform 0.15s; }
+  .group-toggle.collapsed { transform: rotate(-90deg); }
+  .group-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-hint); text-transform: uppercase; flex: 1; }
+  .group-check {
+    width: 14px; height: 14px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 3px;
+    cursor: pointer;
+    appearance: none;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .group-check:checked { background: var(--accent); border-color: var(--accent); }
+  .group-check:indeterminate { background: var(--accent-light); border-color: var(--accent); }
+  .group-stats { font-size: 10px; color: var(--text-hint); font-family: var(--mono); }
+  .group-body { }
+  .group-body.collapsed { display: none; }
+  .resp-item { padding-left: 28px; }
+  .resp-check {
+    width: 12px; height: 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+    appearance: none;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .resp-check:checked { background: var(--accent); border-color: var(--accent); }
+  .batch-bar {
+    padding: 8px 16px;
+    background: var(--accent-light);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    display: none;
+  }
+  .batch-bar.show { display: flex; }
 
   .learn-panel {
     background: var(--surface);
@@ -503,6 +556,12 @@
 
     <div class="sidebar-section" style="padding-bottom: 8px;">
       <h2>受訪者</h2>
+    </div>
+    <div class="batch-bar" id="batchBar">
+      <span id="batchSelCount">0 筆已選</span>
+      <button class="btn" style="font-size:11px;padding:4px 10px;" onclick="runBatchSelected('infer')">推論選取</button>
+      <button class="btn btn-primary" style="font-size:11px;padding:4px 10px;" onclick="runBatchSelected('ai')">AI 辨識選取</button>
+      <button class="btn" style="font-size:11px;padding:4px 10px;margin-left:auto;" onclick="clearSelection()">取消選取</button>
     </div>
     <div class="respondent-list" id="respondentList">
       <div class="empty-msg">載入 Excel 後顯示</div>
@@ -760,24 +819,148 @@ function startSystem() {
   renderLearnPanel();
 }
 
-// ── Respondent list ──
+// ── Respondent list with grouping ──
+// Group key: extract school prefix e.g. s112191313 → first 10 chars or until last 3 digits
+function getGroupKey(id) {
+  // e.g. s112191313028 → s112191313, s112191313028b → s112191313
+  const m = id.match(/^(s\d{9,10})/i);
+  return m ? m[1] : id.slice(0, 10);
+}
+
 function renderRespondentList() {
   const el = document.getElementById('respondentList');
   const ids = Object.keys(state.respondents);
   if (!ids.length) { el.innerHTML = '<div class="empty-msg">無資料</div>'; return; }
 
-  el.innerHTML = ids.map(id => {
-    const rows = state.respondents[id];
-    const doneCount = rows.filter(r => r.reply).length;
-    const total = rows.length;
-    const done = doneCount === total;
-    return `<div class="resp-item ${done ? 'done' : ''} ${id === state.currentId ? 'active' : ''}" onclick="selectRespondent('${id}')">
-      <span class="resp-id">${id}</span>
-      <span class="resp-count">${doneCount}/${total}</span>
+  // Group IDs
+  const groups = {};
+  ids.forEach(id => {
+    const gk = getGroupKey(id);
+    if (!groups[gk]) groups[gk] = [];
+    groups[gk].push(id);
+  });
+
+  const collapsedGroups = state.collapsedGroups || {};
+
+  el.innerHTML = Object.entries(groups).map(([gk, gids]) => {
+    const collapsed = collapsedGroups[gk];
+    const totalItems = gids.reduce((s, id) => s + state.respondents[id].length, 0);
+    const doneItems = gids.reduce((s, id) => s + state.respondents[id].filter(r => r.reply && r.reply.trim()).length, 0);
+    const allSelected = gids.every(id => state.selectedIds && state.selectedIds.has(id));
+    const someSelected = gids.some(id => state.selectedIds && state.selectedIds.has(id));
+
+    const items = gids.map(id => {
+      const rows = state.respondents[id];
+      const doneCount = rows.filter(r => r.reply && r.reply.trim()).length;
+      const total = rows.length;
+      const done = doneCount === total;
+      const sel = state.selectedIds && state.selectedIds.has(id);
+      return `<div class="resp-item ${done ? 'done' : ''} ${id === state.currentId ? 'active' : ''}" onclick="selectRespondent('${id}')">
+        <input type="checkbox" class="resp-check" ${sel ? 'checked' : ''} onclick="event.stopPropagation();toggleSelectId('${id}',this)" />
+        <span class="resp-id">${id}</span>
+        <span class="resp-count">${doneCount}/${total}</span>
+      </div>`;
+    }).join('');
+
+    return `<div class="group-block">
+      <div class="group-header" onclick="toggleGroup('${gk}')">
+        <input type="checkbox" class="group-check" ${allSelected ? 'checked' : ''} id="gc-${gk}"
+          onclick="event.stopPropagation();toggleSelectGroup('${gk}',this)" />
+        <span class="group-toggle ${collapsed ? 'collapsed' : ''}">▼</span>
+        <span class="group-label">${gk}</span>
+        <span class="group-stats">${doneItems}/${totalItems}</span>
+      </div>
+      <div class="group-body ${collapsed ? 'collapsed' : ''}" id="gb-${gk}">
+        ${items}
+      </div>
     </div>`;
   }).join('');
 
+  // Fix indeterminate state
+  Object.entries(groups).forEach(([gk, gids]) => {
+    const allSel = gids.every(id => state.selectedIds && state.selectedIds.has(id));
+    const someSel = gids.some(id => state.selectedIds && state.selectedIds.has(id));
+    const cb = document.getElementById('gc-' + gk);
+    if (cb) cb.indeterminate = !allSel && someSel;
+  });
+
   document.getElementById('statResp').textContent = ids.length;
+  updateBatchBar();
+}
+
+function toggleGroup(gk) {
+  if (!state.collapsedGroups) state.collapsedGroups = {};
+  state.collapsedGroups[gk] = !state.collapsedGroups[gk];
+  renderRespondentList();
+}
+
+function toggleSelectId(id, cb) {
+  if (!state.selectedIds) state.selectedIds = new Set();
+  if (cb.checked) state.selectedIds.add(id);
+  else state.selectedIds.delete(id);
+  updateBatchBar();
+  renderRespondentList();
+}
+
+function toggleSelectGroup(gk, cb) {
+  if (!state.selectedIds) state.selectedIds = new Set();
+  const ids = Object.keys(state.respondents).filter(id => getGroupKey(id) === gk);
+  if (cb.checked) ids.forEach(id => state.selectedIds.add(id));
+  else ids.forEach(id => state.selectedIds.delete(id));
+  updateBatchBar();
+  renderRespondentList();
+}
+
+function clearSelection() {
+  state.selectedIds = new Set();
+  updateBatchBar();
+  renderRespondentList();
+}
+
+function updateBatchBar() {
+  const bar = document.getElementById('batchBar');
+  const cnt = document.getElementById('batchSelCount');
+  const n = state.selectedIds ? state.selectedIds.size : 0;
+  bar.classList.toggle('show', n > 0);
+  if (cnt) cnt.textContent = `已選 ${n} 位受訪者`;
+}
+
+async function runBatchSelected(mode) {
+  if (!state.selectedIds || state.selectedIds.size === 0) return;
+  const ids = Array.from(state.selectedIds);
+
+  if (mode === 'infer') {
+    ids.forEach(id => localInfer(state.respondents[id]));
+    if (state.currentId) renderErrorTable();
+    updateStats();
+    renderRespondentList();
+    showToast(`已對 ${ids.length} 位受訪者完成自動推論`);
+    return;
+  }
+
+  if (mode === 'ai') {
+    if (!state.apiKey) { showToast('請先輸入 Gemini API Key'); return; }
+    const btn = document.querySelector('#batchBar .btn-primary');
+    if (btn) { btn.disabled = true; btn.textContent = '辨識中...'; }
+
+    let ok = 0, fail = 0;
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i];
+      const pdfFile = findPDF(id);
+      if (!pdfFile) { fail++; continue; }
+      try {
+        await processOneRespondent(id, state.respondents[id], pdfFile);
+        ok++;
+      } catch(e) { fail++; console.warn(id, e.message); }
+      if (i < ids.length - 1) await new Promise(r => setTimeout(r, 4000));
+    }
+
+    if (state.currentId) renderErrorTable();
+    updateStats();
+    renderRespondentList();
+    showToast(`完成！成功 ${ok} 筆，失敗 ${fail} 筆`);
+    if (btn) { btn.disabled = false; btn.textContent = 'AI 辨識選取'; }
+  }
 }
 
 // ── Select respondent ──
@@ -1000,58 +1183,33 @@ function localInfer(rows) {
       return;
     }
 
-    // 【格式錯誤 / 非整數】只用完全相同變項名稱+說明的範例，其餘留空
-    if (desc.includes('格式錯誤') || desc.includes('非整數')) {
-      const strictMatch = (state.examples || []).find(e =>
-        e.varName === r.varName && e.errorDesc === desc
-      );
-      if (strictMatch) {
-        r.reply = strictMatch.reply;
-        r._inferMethod = 'local';
-      }
-      // 否則留空，等 AI 辨識或手動填寫
-      return;
-    }
+    // 所有類型統一規則：變項名稱 + 原始答案 + 說明 三者完全一致才套用，否則留空
+    // 例外：欄位為空 / 數值為0 / 時間數值 這三種已在上方處理，不走這裡
 
-    // 【範圍檢誤】永遠留空，需查閱 PDF 確認實際值，不套用任何範例
-    if (desc.includes('範圍') || desc.includes('超出')) {
-      // 不預填，留空等使用者手動判斷
-      return;
-    }
-
-    // 【Other欄位內容】只用完全相同說明的範例，否則填 ok（Other 欄位不需查 PDF）
+    // 【Other欄位內容】原始答案通常每筆不同，但 Other 本身邏輯固定，允許只比對變項+說明
     if (desc.includes('Other') || desc.includes('other')) {
       const strictOther = (state.examples || []).find(e =>
-        e.varName === r.varName && e.errorDesc === desc
+        e.varName === r.varName && e.origVal === orig && e.errorDesc === desc
       );
-      r.reply = strictOther ? strictOther.reply : 'ok';
-      r._inferMethod = 'local';
-      return;
-    }
-
-    // 【邏輯錯誤類】只用完全相同變項名稱+完全相同說明的範例，否則留空
-    if (desc.includes('邏輯') || desc.includes('作息') || desc.includes('年齡') ||
-        desc.includes('出生') || desc.includes('結婚') || desc.includes('單身')) {
-      const strictLogic = (state.examples || []).find(e =>
-        e.varName === r.varName && e.errorDesc === desc
-      );
-      if (strictLogic) {
-        r.reply = strictLogic.reply;
+      // 找不到完全一致的 → 留空（不再預設 ok，讓使用者確認）
+      if (strictOther) {
+        r.reply = strictOther.reply;
         r._inferMethod = 'local';
       }
-      // 否則留空，等 AI 辨識或手動填寫
       return;
     }
 
-    // 【其他：有範例就用，但必須是完全相同的變項名稱+說明】
-    const strictFallback = (state.examples || []).find(e =>
-      e.varName === r.varName && e.errorDesc === desc
+    // 【所有其他類型】三者完全一致才套用
+    const strictMatch = (state.examples || []).find(e =>
+      e.varName === r.varName &&
+      e.origVal === orig &&
+      e.errorDesc === desc
     );
-    if (strictFallback) {
-      r.reply = strictFallback.reply;
+    if (strictMatch) {
+      r.reply = strictMatch.reply;
       r._inferMethod = 'local';
     }
-    // 否則留空
+    // 否則留空，等使用者手動判斷後儲存為學習範例
   });
 }
 
