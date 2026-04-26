@@ -852,7 +852,7 @@ function renderErrorTable() {
               style="width:${isLogicError ? '160px' : '100px'};"
               onchange="updateReply(${r._idx}, this.value)"
               oninput="updateReply(${r._idx}, this.value)" />
-            ${r._inferMethod === 'ai' ? `<span class="ai-badge" style="background:#E6F1FB;color:#185FA5;">AI</span>` : ''}
+            ${r._inferMethod === 'ai' ? `<span class="ai-badge" style="background:#E6F1FB;color:#185FA5;" title="${escHtml(r._pdfContent||'AI辨識')}">AI</span>` : ''}
             ${r._inferMethod === 'local' ? `<span class="ai-badge" style="background:#EAF3DE;color:#2D6A4F;">推論</span>` : ''}
           </div>
           ${isFilled ? `<span style="font-family:var(--mono);font-size:11px;color:var(--success);">→ ${escHtml(preview)}</span>` : ''}
@@ -945,26 +945,40 @@ function localInfer(rows) {
     const myGroup = getVarPrefix(r.varName);     // e.g. v88, v93_2
     const myGroupTop = r.varName.split('_')[0];  // e.g. v88, v93
 
-    // 【第0優先】完全相同的變項名稱 + 完全相同的原始答案
-    const exactMatch = examples.find(e => e.varName === r.varName && e.origVal === orig);
-    if (exactMatch) return exactMatch.reply;
+    // 【第0優先】完全相同的變項名稱 + 完全相同的原始答案 + 完全相同的說明
+    const exactFull = examples.find(e =>
+      e.varName === r.varName && e.origVal === orig && e.errorDesc === desc
+    );
+    if (exactFull) return exactFull.reply;
 
-    // 【第1優先】完全相同的變項名稱（多筆時用情境分流）
-    const exactVar = examples.filter(e => e.varName === r.varName);
+    // 【第1優先】完全相同的變項名稱 + 相同說明類型（同一種錯誤才能互用）
+    const sameDescType = (a, b) => {
+      const types = ['數值為0','欄位為空','時間數值','格式錯誤','範圍','Other','邏輯'];
+      for (const t of types) {
+        if (a.includes(t) && b.includes(t)) return true;
+      }
+      return a === b;
+    };
+    const exactVar = examples.filter(e =>
+      e.varName === r.varName && sameDescType(e.errorDesc, desc)
+    );
     if (exactVar.length === 1) return exactVar[0].reply;
     if (exactVar.length > 1) {
-      // First try hasSibling match
-      const ctx = exactVar.find(e => e.hasSibling === hasSib);
-      if (ctx) return ctx.reply;
-      // Then try origPattern match
+      // origVal 完全相同優先
+      const byOrig = exactVar.find(e => e.origVal === orig);
+      if (byOrig) return byOrig.reply;
+      // hasSibling 情境相同次之
+      const bySib = exactVar.find(e => e.hasSibling === hasSib);
+      if (bySib) return bySib.reply;
+      // origPattern 相同
       const byPat = exactVar.find(e => e.origPattern === pattern);
       if (byPat) return byPat.reply;
       return exactVar[exactVar.length - 1].reply;
     }
 
-    // 【第2優先】同題組前綴 + 同說明 + 同情境
+    // 【第2優先】同題組前綴 + 同說明類型 + 同情境
     const byGroupDesc = examples.filter(e =>
-      e.errorDesc === desc &&
+      sameDescType(e.errorDesc, desc) &&
       e.varGroup === myGroup
     );
     if (byGroupDesc.length > 0) {
@@ -972,9 +986,9 @@ function localInfer(rows) {
       return ctx ? ctx.reply : byGroupDesc[byGroupDesc.length - 1].reply;
     }
 
-    // 【第3優先】同頂層題組（如 v88）+ 同說明
+    // 【第3優先】同頂層題組（如 v88）+ 同說明類型
     const byTopGroup = examples.filter(e =>
-      e.errorDesc === desc &&
+      sameDescType(e.errorDesc, desc) &&
       e.varName && e.varName.split('_')[0] === myGroupTop
     );
     if (byTopGroup.length > 0) {
@@ -982,9 +996,9 @@ function localInfer(rows) {
       return ctx ? ctx.reply : byTopGroup[byTopGroup.length - 1].reply;
     }
 
-    // 【第4優先】同說明 + 同情境（hasSibling）→ 多數決
+    // 【第4優先】同說明類型 + 同情境（hasSibling）→ 多數決
     const byDescSib = examples.filter(e =>
-      e.errorDesc === desc && e.hasSibling === hasSib
+      sameDescType(e.errorDesc, desc) && e.hasSibling === hasSib
     );
     if (byDescSib.length > 0) {
       // 多數決：找出出現最多次的回覆值
@@ -994,8 +1008,8 @@ function localInfer(rows) {
       return majority;
     }
 
-    // 【第5優先】同說明（忽略情境）
-    const byDesc = examples.filter(e => e.errorDesc === desc);
+    // 【第5優先】同說明類型（忽略情境）
+    const byDesc = examples.filter(e => sameDescType(e.errorDesc, desc));
     if (byDesc.length === 1) return byDesc[0].reply;
     if (byDesc.length > 1) {
       // 有情境相同的優先，否則多數決
@@ -1023,25 +1037,19 @@ function localInfer(rows) {
 
     // ── 步驟2：根據情境套用正確規則 ──
 
-    // 【數值為0】受訪者填了0，不是空白
-    // 範例有告訴我們：通常是 ok，但需確認
+    // 【數值為0】受訪者確實填了0 → ok
+    // 只接受同說明類型的範例，否則強制 ok
     if (desc.includes('數值為0')) {
-      if (exReply !== null) {
-        r.reply = exReply;
-      } else {
-        r.reply = 'ok';
-      }
+      const safeReply = (exReply !== null && exReply !== '-9' && exReply !== '空白') ? exReply : 'ok';
+      r.reply = safeReply;
       r._inferMethod = 'local';
       return;
     }
 
-    // 【時間數值皆為0】
+    // 【時間數值皆為0】受訪者確實填了0 → ok
     if (desc.includes('時間數值')) {
-      if (exReply !== null) {
-        r.reply = exReply;
-      } else {
-        r.reply = 'ok';
-      }
+      const safeReply = (exReply !== null && exReply !== '-9' && exReply !== '空白') ? exReply : 'ok';
+      r.reply = safeReply;
       r._inferMethod = 'local';
       return;
     }
@@ -1077,10 +1085,13 @@ function localInfer(rows) {
       return;
     }
 
-    // 【範圍檢誤】
+    // 【範圍檢誤】有範例就用，否則空白讓手動輸入（範圍錯誤需查 PDF 確認實際值）
     if (desc.includes('範圍') || desc.includes('超出')) {
-      r.reply = exReply !== null ? exReply : '（請查閱 PDF）';
-      r._inferMethod = 'local';
+      if (exReply !== null && exReply !== '-9' && !exReply.includes('請查閱')) {
+        r.reply = exReply;
+        r._inferMethod = 'local';
+      }
+      // 否則留空，讓使用者手動輸入
       return;
     }
 
@@ -1154,9 +1165,6 @@ async function runAIOne() {
   document.getElementById('aiOneBtn').innerHTML = '<span class="spinner"></span>辨識中...';
 
   try {
-    // 先跑本地推論填基本欄位
-    localInfer(rows);
-    // 再用 AI 精確辨識 PDF
     await processOneRespondent(id, rows, pdfFile);
     renderErrorTable();
     updateStats();
@@ -1203,7 +1211,10 @@ async function runAIAll() {
     const pdfFile = findPDF(id);
     if (!pdfFile) return false;
     const rows = state.respondents[id];
-    const hasUnfilled = rows.some(r => !r.reply || r.reply.trim() === '' || r.reply.includes('請確認') || r.reply.includes('請查閱'));
+    const hasUnfilled = rows.some(r => {
+      const v = (r.reply || '').trim();
+      return v === '' || v.includes('請確認') || v.includes('請查閱') || v.includes('請參閱');
+    });
     return hasUnfilled;
   });
 
@@ -1221,10 +1232,6 @@ async function runAIAll() {
     document.getElementById('batchFill').style.width = pct + '%';
     btn.textContent = `停止 (${i+1}/${toProcess.length})`;
 
-    // First run local infer
-    localInfer(rows);
-
-    // Then AI
     try {
       await processOneRespondent(id, rows, pdfFile);
       success++;
@@ -1270,33 +1277,54 @@ async function processOneRespondent(id, rows, pdfFile) {
   const base64 = await fileToBase64(pdfFile);
   const isPDF = pdfFile.type === 'application/pdf' || pdfFile.name.toLowerCase().endsWith('.pdf');
 
-  // 只送還未填妥的 rows 給 AI
-  const pendingRows = rows.filter(r => !r.reply || r.reply.includes('請確認') || r.reply.includes('請查閱'));
+  // 送全部未完成的 rows（空白、或含提示文字的）
+  const pendingRows = rows.filter(r => {
+    const v = (r.reply || '').trim();
+    return v === '' || v.includes('請確認') || v.includes('請查閱') || v.includes('請參閱');
+  });
 
-  if (!pendingRows.length) return; // 全部本地推論已搞定
+  if (!pendingRows.length) return;
+
+  // 整理學習範例供 AI 參考（含變項名、說明、原始值、對應回覆）
+  const exampleLines = (state.examples || []).map(e =>
+    `  {"varName":"${e.varName}","errorDesc":"${e.errorDesc}","origVal":"${e.origVal}","reply":"${e.reply}"}`
+  ).join(',\n');
 
   const varList = pendingRows.map(r =>
-    `- 變項 ${r.varName}：原始答案="${r.origVal}"，不符合說明="${r.errorDesc}"`
-  ).join('\n');
+    `  {"variable":"${r.varName}","origVal":"${r.origVal}","errorDesc":"${r.errorDesc}"}`
+  ).join(',\n');
 
-  const prompt = `你是資料檢誤專家。這是受訪者 ${id} 的問卷掃描檔。
+  const prompt = `你是問卷資料檢誤專家。請仔細閱讀這份問卷掃描檔，對以下每個需要確認的變項：
+1. 找到該題在問卷中的實際填答內容
+2. 對照下方【學習範例】，找出最相符的範例，使用範例中的回覆值
+3. 如果找不到相符的範例，請回傳 "reply": null（留空讓使用者自行判斷）
 
-需要確認的變項：
+【需要確認的變項】：
+[
 ${varList}
+]
 
-規則：
-- 欄位空白且同組子題有填答 → 回覆 變項名=0
-- 整題空白 → 回覆 變項名=空白
-- 有填寫但格式錯誤 → 回覆正確值（如 v13_6=1）
-- 時間欄位空白且同組有填 → 回覆 變項名=0
+【學習範例（你已經學習過的回覆模式）】：
+[
+${exampleLines || '（尚無範例）'}
+]
 
-只輸出 JSON，格式：
-[{"variable":"v93_2_5","reply":"v93_2_5=0","reason":"同組有作答"}]
-不要其他文字。${buildFewShotPrompt()}`;
+【對照範例的規則】：
+- 同一個變項名稱（varName）+ 相同說明類型（errorDesc）→ 優先使用
+- 同題組變項（如 v93_2_1 和 v93_2_5 同屬 v93_2）且說明相同 → 可參考使用
+- 不同說明類型的範例不可混用（「數值為0」和「欄位為空」是不同情況）
+- 找不到相符範例 → reply 填 null，不要猜測
 
-  const parts = [];
-  parts.push({ inline_data: { mime_type: isPDF ? 'application/pdf' : pdfFile.type, data: base64 } });
-  parts.push({ text: prompt });
+【輸出格式（只輸出 JSON，不要其他文字）】：
+[
+  {"variable":"v93_2_5","reply":"0","pdfContent":"掃描中該題空白","reason":"同組v93_2_1有填答，範例v93_2_3也是0"},
+  {"variable":"v58_m","reply":null,"pdfContent":"掃描中顯示數字0","reason":"無符合範例，留空讓使用者判斷"}
+]`;
+
+  const parts = [
+    { inline_data: { mime_type: isPDF ? 'application/pdf' : pdfFile.type, data: base64 } },
+    { text: prompt }
+  ];
 
   const resp = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.apiKey}`,
@@ -1317,14 +1345,21 @@ ${varList}
   const clean = text.replace(/```json|```/g, '').trim();
 
   let parsed;
-  try { parsed = JSON.parse(clean); } catch(e) { throw new Error('解析失敗：' + text.slice(0, 80)); }
+  try { parsed = JSON.parse(clean); } catch(e) { throw new Error('解析失敗：' + text.slice(0, 120)); }
 
   parsed.forEach(item => {
     const row = rows.find(r => r.varName === item.variable);
-    if (row && item.reply) {
-      row.reply = stripPrefix(item.reply, item.variable);
+    if (!row) return;
+    if (item.reply === null || item.reply === undefined || item.reply === '') {
+      // 找不到範例 → 留空，等使用者手動填寫並學習
+      row.reply = '';
+      row._inferMethod = null;
+    } else {
+      row.reply = stripPrefix(String(item.reply), item.variable);
       row._modified = true;
       row._inferMethod = 'ai';
+      // 存入 pdfContent 供顯示
+      if (item.pdfContent) row._pdfContent = item.pdfContent;
     }
   });
 }
