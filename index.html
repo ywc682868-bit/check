@@ -957,11 +957,16 @@ function localInfer(rows) {
 
     // 【第1優先】完全相同的變項名稱 + 相同說明類型（同一種錯誤才能互用）
     const sameDescType = (a, b) => {
-      const types = ['數值為0','欄位為空','時間數值','格式錯誤','範圍','Other','邏輯'];
+      if (a === b) return true;
+      // 邏輯/作息/年齡/單身類：必須完全相同，不允許模糊配對
+      const strictTypes = ['邏輯','作息','年齡','出生','結婚','單身'];
+      if (strictTypes.some(t => a.includes(t) || b.includes(t))) return false;
+      // 其他類型允許關鍵字配對
+      const types = ['數值為0','欄位為空','時間數值','格式錯誤','非整數','範圍','Other'];
       for (const t of types) {
         if (a.includes(t) && b.includes(t)) return true;
       }
-      return a === b;
+      return false;
     };
     const exactVar = examples.filter(e =>
       e.varName === r.varName && sameDescType(e.errorDesc, desc)
@@ -1105,22 +1110,29 @@ function localInfer(rows) {
       return;
     }
 
-    // 【邏輯錯誤類】不自動填值，留空讓人工修正
+    // 【邏輯錯誤類】只用完全相同變項名稱+完全相同說明的範例，否則留空
     if (desc.includes('邏輯') || desc.includes('作息') || desc.includes('年齡') ||
-        desc.includes('出生') || desc.includes('結婚')) {
-      // 有範例才填，否則空白讓手動
-      if (exReply !== null) {
-        r.reply = exReply;
+        desc.includes('出生') || desc.includes('結婚') || desc.includes('單身')) {
+      const strictLogic = (state.examples || []).find(e =>
+        e.varName === r.varName && e.errorDesc === desc
+      );
+      if (strictLogic) {
+        r.reply = strictLogic.reply;
         r._inferMethod = 'local';
       }
+      // 否則留空，等 AI 辨識或手動填寫
       return;
     }
 
-    // 【其他：有範例就用範例】
-    if (exReply !== null) {
-      r.reply = exReply;
+    // 【其他：有範例就用，但必須是完全相同的變項名稱+說明】
+    const strictFallback = (state.examples || []).find(e =>
+      e.varName === r.varName && e.errorDesc === desc
+    );
+    if (strictFallback) {
+      r.reply = strictFallback.reply;
       r._inferMethod = 'local';
     }
+    // 否則留空
   });
 }
 
