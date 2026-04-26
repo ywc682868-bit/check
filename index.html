@@ -514,6 +514,10 @@
     <div class="topbar">
       <h2 id="topbarTitle">問卷資料檢誤系統</h2>
       <button class="btn" id="exportBtn" style="display:none" onclick="exportExcel()">匯出 Excel</button>
+      <label class="btn" id="addPdfBtn" style="display:none;cursor:pointer;" title="可重複上傳不同資料夾的 PDF">
+        + 追加 PDF
+        <input type="file" accept=".pdf" multiple style="display:none" onchange="loadPDFs(this)" />
+      </label>
       <button class="btn" id="localAllBtn" style="display:none" onclick="runLocalInferAll()">全部自動推論</button>
       <button class="btn btn-primary" id="aiAllBtn" style="display:none" onclick="runAIAll()">AI 批次辨識</button>
     </div>
@@ -708,18 +712,33 @@ function groupByRespondent() {
   renderRespondentList();
 }
 
-// ── PDF loading ──
+// ── PDF loading（累積，不清空）──
 function loadPDFs(input) {
   const files = Array.from(input.files);
+  let added = 0;
   files.forEach(f => {
-    // Store with lowercase key for case-insensitive matching
     const nameNoExt = f.name.replace(/\.pdf$/i, '');
-    state.pdfs[nameNoExt.toLowerCase()] = f;
-    state.pdfs[f.name.toLowerCase()] = f;
+    const keyNoExt = nameNoExt.toLowerCase();
+    const keyFull = f.name.toLowerCase();
+    if (!state.pdfs[keyNoExt]) added++;
+    state.pdfs[keyNoExt] = f;
+    state.pdfs[keyFull] = f;
   });
-  document.getElementById('pdfLabel').textContent = `已載入 ${files.length} 個 PDF`;
+  // Reset input so same folder can be re-selected
+  input.value = '';
+  const total = Object.keys(state.pdfs).filter(k => k.endsWith('.pdf')).length;
+  document.getElementById('pdfLabel').textContent = `共 ${total} 個 PDF（本次新增 ${added}）`;
   document.getElementById('pdfBox').classList.add('loaded');
-  showToast(`載入 ${files.length} 個 PDF 檔案`);
+  showToast(`新增 ${added} 個 PDF，累計 ${total} 個`);
+  updatePDFMatchStats();
+}
+
+function updatePDFMatchStats() {
+  const ids = Object.keys(state.respondents);
+  if (!ids.length) return;
+  const matched = ids.filter(id => findPDF(id)).length;
+  document.getElementById('pdfLabel').textContent =
+    `共 ${Object.keys(state.pdfs).filter(k=>k.endsWith('.pdf')).length} 個 PDF，比對到 ${matched}/${ids.length} 位受訪者`;
 }
 
 // ── System start ──
@@ -731,6 +750,7 @@ function startSystem() {
   document.getElementById('workScreen').style.display = 'block';
   document.getElementById('exportBtn').style.display = '';
   document.getElementById('localAllBtn').style.display = '';
+  document.getElementById('addPdfBtn').style.display = '';
   document.getElementById('aiAllBtn').style.display = '';
   renderLearnPanel();
 }
@@ -1079,31 +1099,96 @@ async function runAIOne() {
 }
 
 // ── AI batch ──
+let _batchStop = false;
+
 async function runAIAll() {
   const ids = Object.keys(state.respondents);
   if (!ids.length) { showToast('沒有資料'); return; }
+  if (!state.apiKey) { showToast('需要 Gemini API Key 才能使用 AI 辨識'); return; }
 
-  document.getElementById('aiAllBtn').disabled = true;
+  _batchStop = false;
+  const btn = document.getElementById('aiAllBtn');
+  btn.disabled = true;
+  btn.textContent = '停止';
+  btn.onclick = () => { _batchStop = true; btn.textContent = '停止中...'; };
 
-  for (let i = 0; i < ids.length; i++) {
-    const id = ids[i];
-    document.getElementById('aiAllBtn').textContent = `處理 ${i+1}/${ids.length}...`;
-    const rows = state.respondents[id];
-    // 先本地推論
-    localInfer(rows);
-    // 若有 PDF 且有 API key，再用 AI
+  // Show progress bar
+  let progressBar = document.getElementById('batchProgress');
+  if (!progressBar) {
+    progressBar = document.createElement('div');
+    progressBar.id = 'batchProgress';
+    progressBar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:9999;';
+    progressBar.innerHTML = '<div id="batchFill" style="height:100%;background:var(--accent);width:0%;transition:width 0.3s;"></div>';
+    document.body.appendChild(progressBar);
+  }
+  progressBar.style.display = 'block';
+
+  let done = 0, success = 0, skipped = 0, failed = 0;
+  // Only process IDs with PDF, skip fully-filled ones
+  const toProcess = ids.filter(id => {
     const pdfFile = findPDF(id);
-    if (pdfFile && state.apiKey) {
-      try { await processOneRespondent(id, rows, pdfFile); } catch(e) { console.warn(id, e.message); }
+    if (!pdfFile) return false;
+    const rows = state.respondents[id];
+    const hasUnfilled = rows.some(r => !r.reply || r.reply.trim() === '' || r.reply.includes('請確認') || r.reply.includes('請查閱'));
+    return hasUnfilled;
+  });
+
+  showToast(`開始 AI 批次辨識，共 ${toProcess.length} 位受訪者有待處理項目`);
+
+  for (let i = 0; i < toProcess.length; i++) {
+    if (_batchStop) break;
+
+    const id = toProcess[i];
+    const rows = state.respondents[id];
+    const pdfFile = findPDF(id);
+
+    // Update progress
+    const pct = Math.round(i / toProcess.length * 100);
+    document.getElementById('batchFill').style.width = pct + '%';
+    btn.textContent = `停止 (${i+1}/${toProcess.length})`;
+
+    // First run local infer
+    localInfer(rows);
+
+    // Then AI
+    try {
+      await processOneRespondent(id, rows, pdfFile);
+      success++;
+    } catch(e) {
+      failed++;
+      console.warn(`[AI] ${id} 失敗:`, e.message);
+    }
+    done++;
+
+    // Update UI every 3 items or on last
+    if (done % 3 === 0 || i === toProcess.length - 1) {
+      if (state.currentId) renderErrorTable();
+      updateStats();
+      renderRespondentList();
+    }
+
+    // Rate limit: wait 1s between calls to avoid API throttle
+    if (i < toProcess.length - 1 && !_batchStop) {
+      await new Promise(res => setTimeout(res, 1000));
     }
   }
+
+  document.getElementById('batchFill').style.width = '100%';
+  setTimeout(() => { progressBar.style.display = 'none'; }, 1500);
 
   if (state.currentId) renderErrorTable();
   updateStats();
   renderRespondentList();
-  showToast('批次處理完成！');
-  document.getElementById('aiAllBtn').disabled = false;
-  document.getElementById('aiAllBtn').textContent = 'AI 批次辨識';
+
+  const msg = _batchStop
+    ? `已停止。成功 ${success} 筆，失敗 ${failed} 筆`
+    : `批次完成！成功 ${success} 筆，失敗 ${failed} 筆`;
+  showToast(msg);
+
+  btn.disabled = false;
+  btn.textContent = 'AI 批次辨識';
+  btn.onclick = runAIAll;
+  _batchStop = false;
 }
 
 // ── Core AI logic ──
