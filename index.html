@@ -746,6 +746,10 @@ function updatePDFMatchStats() {
 function startSystem() {
   state.apiKey = document.getElementById('apiKeyInput').value.trim();
   if (!state.rows.length) { showToast('請先載入 Excel 報表'); return; }
+  // 記住 API Key
+  if (state.apiKey) {
+    try { localStorage.setItem('gemini_api_key', state.apiKey); } catch(e) {}
+  }
 
   document.getElementById('welcomeScreen').style.display = 'none';
   document.getElementById('workScreen').style.display = 'block';
@@ -1072,32 +1076,31 @@ function localInfer(rows) {
       return;
     }
 
-    // 【格式錯誤 / 非整數】
+    // 【格式錯誤 / 非整數】只用完全相同變項名稱+說明的範例，其餘留空
     if (desc.includes('格式錯誤') || desc.includes('非整數')) {
-      if (exReply !== null) {
-        r.reply = exReply;
-      } else {
-        // 嘗試取第一個合法數字
-        const firstNum = rawVal.split(/[,，\s]/)[0].trim();
-        r.reply = (firstNum && !isNaN(firstNum)) ? firstNum + '（請確認）' : '（請確認）';
-      }
-      r._inferMethod = 'local';
-      return;
-    }
-
-    // 【範圍檢誤】有範例就用，否則空白讓手動輸入（範圍錯誤需查 PDF 確認實際值）
-    if (desc.includes('範圍') || desc.includes('超出')) {
-      if (exReply !== null && exReply !== '-9' && !exReply.includes('請查閱')) {
-        r.reply = exReply;
+      const strictMatch = (state.examples || []).find(e =>
+        e.varName === r.varName && e.errorDesc === desc
+      );
+      if (strictMatch) {
+        r.reply = strictMatch.reply;
         r._inferMethod = 'local';
       }
-      // 否則留空，讓使用者手動輸入
+      // 否則留空，等 AI 辨識或手動填寫
       return;
     }
 
-    // 【Other欄位內容】
+    // 【範圍檢誤】永遠留空，需查閱 PDF 確認實際值，不套用任何範例
+    if (desc.includes('範圍') || desc.includes('超出')) {
+      // 不預填，留空等使用者手動判斷
+      return;
+    }
+
+    // 【Other欄位內容】只用完全相同說明的範例，否則填 ok（Other 欄位不需查 PDF）
     if (desc.includes('Other') || desc.includes('other')) {
-      r.reply = exReply !== null ? exReply : 'ok';
+      const strictOther = (state.examples || []).find(e =>
+        e.varName === r.varName && e.errorDesc === desc
+      );
+      r.reply = strictOther ? strictOther.reply : 'ok';
       r._inferMethod = 'local';
       return;
     }
@@ -1158,26 +1161,36 @@ async function runAIOne() {
   if (!id) return;
   const rows = state.respondents[id];
   const pdfFile = findPDF(id);
-  if (!pdfFile) { showToast('找不到對應 PDF，改用本地推論'); runLocalInfer(); return; }
-  if (!state.apiKey) { showToast('未設定 API Key，改用本地推論'); runLocalInfer(); return; }
 
-  document.getElementById('aiOneBtn').disabled = true;
-  document.getElementById('aiOneBtn').innerHTML = '<span class="spinner"></span>辨識中...';
+  if (!pdfFile) {
+    showToast(`❌ 找不到 ${id} 的 PDF，請先上傳對應檔案`);
+    return;
+  }
+  if (!state.apiKey) {
+    showToast('❌ 請先輸入 Gemini API Key');
+    return;
+  }
+
+  const btn = document.getElementById('aiOneBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>AI 辨識中...';
 
   try {
     await processOneRespondent(id, rows, pdfFile);
     renderErrorTable();
     updateStats();
     renderRespondentList();
-    showToast(`${id} 辨識完成`);
+    const filled = rows.filter(r => r.reply && r.reply.trim()).length;
+    const blank = rows.filter(r => !r.reply || !r.reply.trim()).length;
+    showToast(`${id} 辨識完成：已填 ${filled} 筆，待判斷 ${blank} 筆`);
   } catch(e) {
-    showToast('AI 失敗，已套用本地推論：' + e.message);
+    showToast('❌ AI 辨識失敗：' + e.message);
     renderErrorTable();
     updateStats();
   }
 
-  document.getElementById('aiOneBtn').disabled = false;
-  document.getElementById('aiOneBtn').textContent = 'AI 辨識此受訪者';
+  btn.disabled = false;
+  btn.textContent = 'AI 辨識此受訪者';
 }
 
 // ── AI batch ──
@@ -1411,6 +1424,17 @@ async function pdfPagePrev() {
 // ── Learning system ──
 // examples: [{errorDesc, origPattern, reply, varName}]
 const STORAGE_KEY = 'questionnaire_checker_examples';
+
+// Auto-fill saved API key
+(function() {
+  try {
+    const saved = localStorage.getItem('gemini_api_key');
+    if (saved) {
+      const el = document.getElementById('apiKeyInput');
+      if (el) el.value = saved;
+    }
+  } catch(e) {}
+})();
 
 function loadExamplesFromStorage() {
   try {
