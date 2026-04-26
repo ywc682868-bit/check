@@ -712,11 +712,10 @@ function groupByRespondent() {
 function loadPDFs(input) {
   const files = Array.from(input.files);
   files.forEach(f => {
-    // Match by filename containing the ID
+    // Store with lowercase key for case-insensitive matching
     const nameNoExt = f.name.replace(/\.pdf$/i, '');
-    state.pdfs[nameNoExt] = f;
-    // Also store by full name
-    state.pdfs[f.name] = f;
+    state.pdfs[nameNoExt.toLowerCase()] = f;
+    state.pdfs[f.name.toLowerCase()] = f;
   });
   document.getElementById('pdfLabel').textContent = `已載入 ${files.length} 個 PDF`;
   document.getElementById('pdfBox').classList.add('loaded');
@@ -776,11 +775,11 @@ function selectRespondent(id) {
 }
 
 function findPDF(id) {
-  // Try exact match, then partial
-  if (state.pdfs[id]) return state.pdfs[id];
-  if (state.pdfs[id + '.pdf']) return state.pdfs[id + '.pdf'];
-  // Partial match
-  const key = Object.keys(state.pdfs).find(k => k.includes(id));
+  const idLow = id.toLowerCase();
+  if (state.pdfs[idLow]) return state.pdfs[idLow];
+  if (state.pdfs[idLow + '.pdf']) return state.pdfs[idLow + '.pdf'];
+  // Partial match (case-insensitive)
+  const key = Object.keys(state.pdfs).find(k => k.includes(idLow));
   return key ? state.pdfs[key] : null;
 }
 
@@ -896,29 +895,37 @@ function localInfer(rows) {
   function matchExample(r) {
     const desc = r.errorDesc || '';
     const orig = String(r.origVal || '').trim();
-    const rawVal = extractVal(orig);
-    const examples = state.examples || [];
-
-    // 完全配對：同不符合說明 + 同原始值型態
     const pattern = classifyOrigVal(orig);
-    let best = examples.find(e => e.errorDesc === desc && e.origPattern === pattern);
-    if (best) return best.reply;
+    const examples = state.examples || [];
+    const hasSib = siblingHasAnswer(r);
 
-    // 次佳：同不符合說明
-    best = examples.find(e => e.errorDesc === desc);
-    if (best) return best.reply;
+    // 候選：同不符合說明 + 同原始值型態
+    const candidates = examples.filter(e =>
+      e.errorDesc === desc && e.origPattern === pattern
+    );
 
-    // 部分配對：說明包含關鍵字
-    const keywords = ['數值為0','欄位為空','時間數值','格式錯誤','Other欄位','範圍'];
-    for (const kw of keywords) {
-      if (desc.includes(kw)) {
-        best = examples.find(e => e.errorDesc.includes(kw) && e.origPattern === pattern);
-        if (best) return best.reply;
-        best = examples.find(e => e.errorDesc.includes(kw));
-        if (best) return best.reply;
+    if (candidates.length === 0) {
+      // 退而求其次：只配對不符合說明
+      const byDesc = examples.filter(e => e.errorDesc === desc);
+      if (byDesc.length === 1) return byDesc[0].reply;
+      // 多個候選：優先用 hasSibling 相同的
+      if (byDesc.length > 1) {
+        const ctx = byDesc.find(e => e.hasSibling === hasSib);
+        if (ctx) return ctx.reply;
+        // 若有明確多數回覆，用最新的
+        return byDesc[byDesc.length - 1].reply;
       }
+      return null;
     }
-    return null;
+
+    if (candidates.length === 1) return candidates[0].reply;
+
+    // 多個候選（同說明+同原始值型態，但可能回覆不同）
+    // 用 hasSibling 情境分流
+    const ctx = candidates.find(e => e.hasSibling === hasSib);
+    if (ctx) return ctx.reply;
+    // 回傳最新儲存的
+    return candidates[candidates.length - 1].reply;
   }
 
   rows.forEach(r => {
@@ -1232,34 +1239,51 @@ function saveExamples() {
 
   rows.forEach(r => {
     if (!r.reply || !r.reply.trim()) return;
-    if (r._savedAsExample) return;
 
     const example = {
       id: Date.now() + Math.random(),
       errorDesc: r.errorDesc || '',
       origPattern: classifyOrigVal(r.origVal),
       origVal: r.origVal,
+      varName: r.varName,
       varGroup: getVarPrefix(r.varName),
+      // Context signals for smarter matching
+      hasSibling: siblingHasAnswerStatic(r),
       reply: r.reply,
       timestamp: new Date().toISOString(),
     };
 
-    // Avoid exact duplicates
+    // Allow multiple examples for same desc+pattern (different replies are valid!)
+    // Only avoid exact same (desc + origVal + reply) triple
     const dup = state.examples.find(e =>
       e.errorDesc === example.errorDesc &&
-      e.origPattern === example.origPattern &&
+      e.origVal === example.origVal &&
       e.reply === example.reply
     );
     if (!dup) {
       state.examples.push(example);
       added++;
+      r._savedAsExample = true;
     }
-    r._savedAsExample = true;
   });
 
   saveExamplesToStorage(state.examples);
   renderLearnPanel();
   showToast(added > 0 ? `已儲存 ${added} 筆學習範例` : '無新增範例（已存在或尚未填寫）');
+}
+
+// Static version of siblingHasAnswer for use outside localInfer
+function siblingHasAnswerStatic(r) {
+  const allRows = state.rows;
+  const prefix = getVarPrefix(r.varName);
+  return allRows.some(x => {
+    if (x.respId !== r.respId) return false;
+    if (x.varName === r.varName) return false;
+    if (getVarPrefix(x.varName) !== prefix) return false;
+    const m = String(x.origVal || '').match(/=(.*)$/);
+    const v = m ? m[1].trim() : String(x.origVal || '').trim();
+    return v !== '' && v !== '=';
+  });
 }
 
 // Classify origVal into a pattern type for matching
