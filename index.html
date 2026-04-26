@@ -655,7 +655,6 @@ function loadPDFs(input) {
 function startSystem() {
   state.apiKey = document.getElementById('apiKeyInput').value.trim();
   if (!state.rows.length) { showToast('請先載入 Excel 報表'); return; }
-  if (!state.apiKey) { showToast('請輸入 Anthropic API Key'); return; }
 
   document.getElementById('welcomeScreen').style.display = 'none';
   document.getElementById('workScreen').style.display = 'block';
@@ -722,22 +721,31 @@ function renderErrorTable() {
   }
 
   tbody.innerHTML = rows.map((r, i) => {
-    const filled = r.reply && r.reply.trim();
+    // r.reply stores raw value only (e.g. "0", "-9", "空白")
+    // Strip "varName=" prefix if it was stored in old format
+    const rawVal = stripPrefix(r.reply || '', r.varName);
+    const filled = rawVal.trim() !== '';
+    const preview = filled ? `${r.varName}=${rawVal}` : '';
     return `<tr id="row-${r._idx}" class="${filled ? 'done-row' : ''}">
       <td style="color:var(--text-hint);font-family:var(--mono);">${i + 1}</td>
       <td><span class="tag tag-info" style="font-size:11px;">${escHtml(r.varName)}</span></td>
       <td style="font-family:var(--mono);font-size:11px;">${escHtml(r.origVal)}</td>
       <td style="color:var(--text-muted);font-size:12px;">${escHtml(r.errorDesc)}</td>
       <td>
-        <div class="reply-cell">
-          <input class="reply-input ${filled ? 'filled' : ''}" 
-            id="reply-${r._idx}"
-            value="${escHtml(r.reply || '')}" 
-            placeholder="${r.varName}=?"
-            onchange="updateReply(${r._idx}, this.value)"
-            oninput="updateReply(${r._idx}, this.value)" />
-          ${r._inferMethod === 'ai' ? `<span class="ai-badge" style="background:#E6F1FB;color:#185FA5;">AI</span>` : ''}
-          ${r._inferMethod === 'local' ? `<span class="ai-badge" style="background:#EAF3DE;color:#2D6A4F;">推論</span>` : ''}
+        <div class="reply-cell" style="flex-direction:column;align-items:flex-start;gap:4px;">
+          <div style="display:flex;align-items:center;gap:6px;width:100%;">
+            <span style="font-family:var(--mono);font-size:12px;color:var(--text-muted);white-space:nowrap;">${escHtml(r.varName)}=</span>
+            <input class="reply-input ${filled ? 'filled' : ''}" 
+              id="reply-${r._idx}"
+              value="${escHtml(rawVal)}" 
+              placeholder="數值"
+              style="width:100px;"
+              onchange="updateReply(${r._idx}, this.value)"
+              oninput="updateReply(${r._idx}, this.value)" />
+            ${r._inferMethod === 'ai' ? `<span class="ai-badge" style="background:#E6F1FB;color:#185FA5;">AI</span>` : ''}
+            ${r._inferMethod === 'local' ? `<span class="ai-badge" style="background:#EAF3DE;color:#2D6A4F;">推論</span>` : ''}
+          </div>
+          ${filled ? `<span style="font-family:var(--mono);font-size:11px;color:var(--success);">→ ${escHtml(preview)}</span>` : ''}
         </div>
       </td>
       <td>
@@ -752,18 +760,23 @@ function renderErrorTable() {
 function updateReply(idx, val) {
   const row = state.rows[idx];
   if (!row) return;
-  row.reply = val;
+  // Store raw value only (no prefix)
+  row.reply = stripPrefix(val.trim(), row.varName);
   row._modified = true;
 
   const input = document.getElementById('reply-' + idx);
   const tr = document.getElementById('row-' + idx);
-  if (input) input.classList.toggle('filled', !!val.trim());
+  const filled = row.reply.trim() !== '';
+  if (input) input.classList.toggle('filled', filled);
   if (tr) {
     const tag = tr.querySelector('.tag');
     if (tag) {
-      tag.className = val.trim() ? 'tag tag-ok' : 'tag tag-error';
-      tag.textContent = val.trim() ? '已填寫' : '待填寫';
+      tag.className = filled ? 'tag tag-ok' : 'tag tag-error';
+      tag.textContent = filled ? '已填寫' : '待填寫';
     }
+    // Update preview
+    const preview = tr.querySelector('span[data-preview]');
+    if (preview) preview.textContent = filled ? `→ ${row.varName}=${row.reply}` : '';
   }
   updateStats();
   renderRespondentList();
@@ -800,10 +813,10 @@ function localInfer(rows) {
         String(x.origVal || '').trim() !== '='
       );
       if (siblings.length > 0) {
-        r.reply = `${varName}=0`;
+        r.reply = '0';
         r._inferMethod = 'local';
       } else {
-        r.reply = `${varName}=空白`;
+        r.reply = '空白';
         r._inferMethod = 'local';
       }
       return;
@@ -820,10 +833,10 @@ function localInfer(rows) {
         String(x.origVal || '').trim() !== '='
       );
       if (siblings.length > 0) {
-        r.reply = `${varName}=0`;
+        r.reply = '0';
         r._inferMethod = 'local';
       } else {
-        r.reply = `${varName}=空白`;
+        r.reply = '空白';
         r._inferMethod = 'local';
       }
       return;
@@ -838,7 +851,7 @@ function localInfer(rows) {
         // 若有逗號（如 1,3），取第一個數字作建議
         const firstNum = raw.split(/[,，\s]/)[0].trim();
         if (firstNum && !isNaN(firstNum)) {
-          r.reply = `${varName}=${firstNum}（請確認原始問卷）`;
+          r.reply = `${firstNum}（請確認）`;
           r._inferMethod = 'local';
         }
       }
@@ -849,7 +862,7 @@ function localInfer(rows) {
     if (desc.includes('範圍') || desc.includes('超出')) {
       const m = orig.match(/=(.+)$/);
       if (m) {
-        r.reply = `${varName}=（請查閱 PDF 確認）`;
+        r.reply = '（請查閱 PDF 確認）';
         r._inferMethod = 'local';
       }
       return;
@@ -857,7 +870,7 @@ function localInfer(rows) {
 
     // ── 規則 5：時間數值（hr/min）──
     if (desc.includes('時間數值') || varName.includes('_hr') || varName.includes('_min')) {
-      r.reply = `${varName}=0`;
+      r.reply = '0';
       r._inferMethod = 'local';
       return;
     }
@@ -1011,11 +1024,9 @@ ${varList}
   parsed.forEach(item => {
     const row = rows.find(r => r.varName === item.variable);
     if (row && item.reply) {
-      row.reply = item.reply;
+      row.reply = stripPrefix(item.reply, item.variable);
       row._modified = true;
       row._inferMethod = 'ai';
-      const badge = document.getElementById('aibadge-' + row._idx);
-      if (badge) badge.style.display = '';
     }
   });
 }
@@ -1065,15 +1076,16 @@ async function pdfPagePrev() {
 
 // ── Export Excel ──
 function exportExcel() {
-  // Re-construct original sheet with updated reply column
   const out = state.rows.map(r => {
     const raw = { ...r._raw };
-    // Try to find and update the reply column
     const replyKey = Object.keys(raw).find(k =>
       ['計畫回覆', '回覆', 'reply', '修正'].some(p => k.includes(p))
     );
-    if (replyKey) raw[replyKey] = r.reply;
-    else raw['計畫回覆'] = r.reply;
+    // Format as varName=value for export
+    const rawVal = stripPrefix(r.reply || '', r.varName);
+    const formatted = rawVal.trim() !== '' ? `${r.varName}=${rawVal}` : '';
+    if (replyKey) raw[replyKey] = formatted;
+    else raw['計畫回覆'] = formatted;
     return raw;
   });
 
@@ -1106,6 +1118,14 @@ function fileToBase64(file) {
 
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Strip "varName=" prefix from reply value if present
+function stripPrefix(val, varName) {
+  if (!val) return '';
+  const prefix = varName + '=';
+  if (String(val).startsWith(prefix)) return String(val).slice(prefix.length);
+  return String(val);
 }
 
 let toastTimer;
