@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>問卷資料檢誤系統</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #F4F1EB;
+    --surface: #FDFCF9;
+    --border: #D8D3C8;
+    --border-strong: #A09890;
+    --text: #1A1714;
+    --text-muted: #6B635A;
+    --text-hint: #9D9088;
+    --accent: #2C5F8A;
+    --accent-light: #E8F0F8;
+    --accent-muted: #4A7FAD;
+    --success: #2D6A4F;
+    --success-bg: #EAF4EE;
+    --warn: #8A5A00;
+    --warn-bg: #FFF5DC;
+    --danger: #8A1C1C;
+    --danger-bg: #FDEAEA;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Noto Sans TC', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── Layout ── */
+  .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .sidebar-brand {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+  .sidebar-brand p {
+    font-size: 11px;
+    color: var(--text-hint);
+    margin-top: 2px;
+    font-family: var(--mono);
+  }
+
+  .sidebar-section {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-section h2 {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    margin-bottom: 10px;
+  }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+  .stat-box .val {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--accent);
+    display: block;
+  }
+  .stat-box .lbl {
+    font-size: 10px;
+    color: var(--text-hint);
+    display: block;
+  }
+
+  .respondent-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+  .respondent-list::-webkit-scrollbar { width: 4px; }
+  .respondent-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .resp-item {
+    padding: 8px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.1s;
+    border-left: 3px solid transparent;
+  }
+  .resp-item:hover { background: var(--bg); }
+  .resp-item.active { background: var(--accent-light); border-left-color: var(--accent); }
+  .resp-item .resp-id { font-family: var(--mono); font-size: 11px; color: var(--text); flex: 1; }
+  .resp-item .resp-count {
+    font-size: 11px;
+    font-family: var(--mono);
+    background: var(--warn-bg);
+    color: var(--warn);
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-weight: 500;
+  }
+  .resp-item.done .resp-count {
+    background: var(--success-bg);
+    color: var(--success);
+  }
+
+  /* ── Main ── */
+  .main { display: flex; flex-direction: column; min-height: 100vh; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .topbar h2 { font-size: 14px; font-weight: 500; flex: 1; font-family: var(--mono); }
+
+  .btn {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg); border-color: var(--border-strong); }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { background: var(--accent-muted); border-color: var(--accent-muted); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .content { flex: 1; padding: 28px; }
+
+  /* ── Welcome / upload ── */
+  .welcome {
+    max-width: 640px;
+    margin: 40px auto;
+  }
+  .welcome-title {
+    font-size: 26px;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+  .welcome-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 32px; }
+
+  .step-cards { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .step-num {
+    width: 26px; height: 26px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-card h3 { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .step-card p { font-size: 12px; color: var(--text-muted); }
+
+  .upload-area {
+    background: var(--surface);
+    border: 1.5px dashed var(--border-strong);
+    border-radius: 12px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .upload-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .upload-box {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: var(--bg);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    position: relative;
+  }
+  .upload-box:hover { border-color: var(--accent); background: var(--accent-light); }
+  .upload-box.loaded { border-color: var(--success); background: var(--success-bg); }
+  .upload-box input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-box .icon { font-size: 22px; margin-bottom: 6px; }
+  .upload-box .label { font-size: 12px; font-weight: 500; }
+  .upload-box .sublabel { font-size: 11px; color: var(--text-hint); margin-top: 2px; }
+
+  .api-key-row { display: flex; gap: 10px; align-items: flex-end; }
+  .api-key-row input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .api-key-row label { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px; }
+
+  /* ── Error table ── */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  thead th {
+    background: var(--bg);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 0.5px solid var(--border);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg); }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .tag-error { background: var(--danger-bg); color: var(--danger); }
+  .tag-warn { background: var(--warn-bg); color: var(--warn); }
+  .tag-ok { background: var(--success-bg); color: var(--success); }
+  .tag-info { background: var(--accent-light); color: var(--accent); }
+
+  .reply-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .reply-input {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--bg);
+    color: var(--text);
+    width: 180px;
+    transition: border-color 0.15s;
+  }
+  .reply-input:focus { outline: none; border-color: var(--accent); }
+  .reply-input.filled { border-color: var(--success); background: var(--success-bg); }
+
+  .ai-badge {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .panel-header h3 { font-size: 16px; font-weight: 500; flex: 1; }
+
+  .pdf-viewer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 20px;
+  }
+  .pdf-viewer-header {
+    padding: 10px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #pdfCanvas {
+    width: 100%;
+    display: block;
+    cursor: zoom-in;
+  }
+
+  .processing-row td { background: var(--accent-light) !important; }
+  .done-row td:last-child { color: var(--success); font-weight: 500; }
+
+  /* ── Progress ── */
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--text);
+    color: var(--surface);
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; }
+    .upload-row { grid-template-columns: 1fr; }
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 2px solid var(--accent-light);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-msg {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-hint);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h1>檢誤系統</h1>
+      <p>Data Validation Tool</p>
+    </div>
+
+    <div class="sidebar-section">
+      <h2>統計</h2>
+      <div class="stats-grid">
+        <div class="stat-box"><span class="val" id="statTotal">0</span><span class="lbl">待修筆數</span></div>
+        <div class="stat-box"><span class="val" id="statDone">0</span><span class="lbl">已填回覆</span></div>
+        <div class="stat-box"><span class="val" id="statResp">0</span><span class="lbl">受訪者數</span></div>
+        <div class="stat-box"><span class="val" id="statPct">0%</span><span class="lbl">完成率</span></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section" style="padding-bottom: 8px;">
+      <h2>受訪者</h2>
+    </div>
+    <div class="respondent-list" id="respondentList">
+      <div class="empty-msg">載入 Excel 後顯示</div>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+    <div class="topbar">
+      <h2 id="topbarTitle">問卷資料檢誤系統</h2>
+      <button class="btn" id="exportBtn" style="display:none" onclick="exportExcel()">匯出 Excel</button>
+      <button class="btn btn-primary" id="aiAllBtn" style="display:none" onclick="runAIAll()">AI 批次辨識</button>
+    </div>
+
+    <div class="content" id="contentArea">
+      <!-- Welcome screen -->
+      <div class="welcome" id="welcomeScreen">
+        <div class="welcome-title">資料檢誤工具</div>
+        <p class="welcome-sub">上傳 Excel 報表與掃描 PDF，AI 自動比對並填寫計畫回覆欄位。</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div>
+              <h3>上傳 Excel 檢誤報表</h3>
+              <p>包含受訪者編號、變項名稱、原始答案、不符合說明等欄位的 xlsx 檔案</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div>
+              <h3>上傳掃描 PDF 資料夾</h3>
+              <p>PDF 檔名需包含受訪者 ID（例如：s112191313028.pdf），可多選批次上傳</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div>
+              <h3>AI 自動辨識並填寫回覆</h3>
+              <p>系統讀取 PDF 對應頁面，辨識變項值，自動填入「計畫回覆」欄位</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-area">
+          <div class="upload-row">
+            <div class="upload-box" id="xlsxBox">
+              <input type="file" id="xlsxInput" accept=".xlsx,.xls" onchange="loadExcel(this)" />
+              <div class="icon">📊</div>
+              <div class="label">Excel 報表</div>
+              <div class="sublabel" id="xlsxLabel">點擊選擇 .xlsx 檔案</div>
+            </div>
+            <div class="upload-box" id="pdfBox">
+              <input type="file" id="pdfInput" accept=".pdf" multiple onchange="loadPDFs(this)" />
+              <div class="icon">📄</div>
+              <div class="label">掃描 PDF（可多選）</div>
+              <div class="sublabel" id="pdfLabel">點擊選擇 PDF 檔案</div>
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Anthropic API Key（用於 AI 辨識）</label>
+            <div class="api-key-row">
+              <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
+              <button class="btn btn-primary" onclick="startSystem()">載入系統</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main work screen -->
+      <div id="workScreen" style="display:none;">
+        <div class="panel-header">
+          <h3 id="workTitle">選擇受訪者</h3>
+          <button class="btn" id="aiOneBtn" onclick="runAIOne()" style="display:none">
+            AI 辨識此受訪者
+          </button>
+          <button class="btn" onclick="showPDF()" id="viewPdfBtn" style="display:none">檢視 PDF</button>
+        </div>
+
+        <div class="table-wrap">
+          <table id="errorTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>變項名稱</th>
+                <th>原始答案</th>
+                <th>不符合說明</th>
+                <th>計畫回覆</th>
+                <th>狀態</th>
+              </tr>
+            </thead>
+            <tbody id="errorTbody">
+              <tr><td colspan="6" class="empty-msg">請從左側選擇受訪者</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pdf-viewer" id="pdfViewer" style="display:none;">
+          <div class="pdf-viewer-header">
+            <span id="pdfViewerLabel">PDF 預覽</span>
+            <div style="display:flex;gap:8px;">
+              <button class="btn" onclick="pdfPagePrev()">◀ 上頁</button>
+              <span id="pdfPageInfo" style="font-size:12px;align-self:center;"></span>
+              <button class="btn" onclick="pdfPageNext()">下頁 ▶</button>
+            </div>
+          </div>
+          <canvas id="pdfCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+// ── State ──
+const state = {
+  apiKey: '',
+  rows: [],           // all rows from Excel
+  respondents: {},    // { id: [rows] }
+  pdfs: {},           // { id: File }
+  currentId: null,
+  pdfDoc: null,
+  pdfPage: 1,
+  pdfTotalPages: 0,
+};
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ── Excel loading ──
+function loadExcel(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('xlsxLabel').textContent = file.name;
+  document.getElementById('xlsxBox').classList.add('loaded');
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+    // Normalize headers — try to detect column names flexibly
+    state.rows = data.map((row, i) => {
+      const keys = Object.keys(row);
+      // Find columns by partial match
+      const find = (patterns) => {
+        const k = keys.find(k => patterns.some(p => k.includes(p)));
+        return k ? String(row[k]).trim() : '';
+      };
+      return {
+        _idx: i,
+        respId: find(['受訪者編號', 'ID', 'id', '編號']),
+        varName: find(['變項名稱', '變項', 'var', 'variable']),
+        origVal: find(['原始答案', '原始', 'original']),
+        errorDesc: find(['不符合說明', '不符合', '錯誤說明', '說明', 'error']),
+        reply: find(['計畫回覆', '回覆', 'reply', '修正']),
+        _raw: row,
+        _modified: false,
+      };
+    }).filter(r => r.respId);
+
+    groupByRespondent();
+    updateStats();
+    showToast(`載入 ${state.rows.length} 筆資料`);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function groupByRespondent() {
+  state.respondents = {};
+  state.rows.forEach(r => {
+    if (!state.respondents[r.respId]) state.respondents[r.respId] = [];
+    state.respondents[r.respId].push(r);
+  });
+  renderRespondentList();
+}
+
+// ── PDF loading ──
+function loadPDFs(input) {
+  const files = Array.from(input.files);
+  files.forEach(f => {
+    // Match by filename containing the ID
+    const nameNoExt = f.name.replace(/\.pdf$/i, '');
+    state.pdfs[nameNoExt] = f;
+    // Also store by full name
+    state.pdfs[f.name] = f;
+  });
+  document.getElementById('pdfLabel').textContent = `已載入 ${files.length} 個 PDF`;
+  document.getElementById('pdfBox').classList.add('loaded');
+  showToast(`載入 ${files.length} 個 PDF 檔案`);
+}
+
+// ── System start ──
+function startSystem() {
+  state.apiKey = document.getElementById('apiKeyInput').value.trim();
+  if (!state.rows.length) { showToast('請先載入 Excel 報表'); return; }
+  if (!state.apiKey) { showToast('請輸入 Anthropic API Key'); return; }
+
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('workScreen').style.display = 'block';
+  document.getElementById('exportBtn').style.display = '';
+  document.getElementById('aiAllBtn').style.display = '';
+}
+
+// ── Respondent list ──
+function renderRespondentList() {
+  const el = document.getElementById('respondentList');
+  const ids = Object.keys(state.respondents);
+  if (!ids.length) { el.innerHTML = '<div class="empty-msg">無資料</div>'; return; }
+
+  el.innerHTML = ids.map(id => {
+    const rows = state.respondents[id];
+    const doneCount = rows.filter(r => r.reply).length;
+    const total = rows.length;
+    const done = doneCount === total;
+    return `<div class="resp-item ${done ? 'done' : ''} ${id === state.currentId ? 'active' : ''}" onclick="selectRespondent('${id}')">
+      <span class="resp-id">${id}</span>
+      <span class="resp-count">${doneCount}/${total}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('statResp').textContent = ids.length;
+}
+
+// ── Select respondent ──
+function selectRespondent(id) {
+  state.currentId = id;
+  state.pdfPage = 1;
+  renderRespondentList();
+  renderErrorTable();
+
+  document.getElementById('workTitle').textContent = id;
+  document.getElementById('topbarTitle').textContent = id;
+
+  const hasPDF = findPDF(id) !== null;
+  document.getElementById('aiOneBtn').style.display = hasPDF ? '' : 'none';
+  document.getElementById('viewPdfBtn').style.display = hasPDF ? '' : 'none';
+
+  if (hasPDF) loadPDFDoc(id);
+}
+
+function findPDF(id) {
+  // Try exact match, then partial
+  if (state.pdfs[id]) return state.pdfs[id];
+  if (state.pdfs[id + '.pdf']) return state.pdfs[id + '.pdf'];
+  // Partial match
+  const key = Object.keys(state.pdfs).find(k => k.includes(id));
+  return key ? state.pdfs[key] : null;
+}
+
+// ── Error table ──
+function renderErrorTable() {
+  const rows = state.respondents[state.currentId] || [];
+  const tbody = document.getElementById('errorTbody');
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">此受訪者無需修正項目</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.map((r, i) => {
+    const filled = r.reply && r.reply.trim();
+    return `<tr id="row-${r._idx}" class="${filled ? 'done-row' : ''}">
+      <td style="color:var(--text-hint);font-family:var(--mono);">${i + 1}</td>
+      <td><span class="tag tag-info" style="font-size:11px;">${escHtml(r.varName)}</span></td>
+      <td style="font-family:var(--mono);font-size:11px;">${escHtml(r.origVal)}</td>
+      <td style="color:var(--text-muted);font-size:12px;">${escHtml(r.errorDesc)}</td>
+      <td>
+        <div class="reply-cell">
+          <input class="reply-input ${filled ? 'filled' : ''}" 
+            id="reply-${r._idx}"
+            value="${escHtml(r.reply || '')}" 
+            placeholder="${r.varName}=?"
+            onchange="updateReply(${r._idx}, this.value)"
+            oninput="updateReply(${r._idx}, this.value)" />
+          <span class="ai-badge" id="aibadge-${r._idx}" style="display:none">AI</span>
+        </div>
+      </td>
+      <td>
+        ${filled
+          ? `<span class="tag tag-ok">已填寫</span>`
+          : `<span class="tag tag-error">待填寫</span>`}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function updateReply(idx, val) {
+  const row = state.rows[idx];
+  if (!row) return;
+  row.reply = val;
+  row._modified = true;
+
+  const input = document.getElementById('reply-' + idx);
+  const tr = document.getElementById('row-' + idx);
+  if (input) input.classList.toggle('filled', !!val.trim());
+  if (tr) {
+    const tag = tr.querySelector('.tag');
+    if (tag) {
+      tag.className = val.trim() ? 'tag tag-ok' : 'tag tag-error';
+      tag.textContent = val.trim() ? '已填寫' : '待填寫';
+    }
+  }
+  updateStats();
+  renderRespondentList();
+}
+
+// ── AI for one respondent ──
+async function runAIOne() {
+  const id = state.currentId;
+  if (!id) return;
+  const rows = state.respondents[id];
+  const pdfFile = findPDF(id);
+  if (!pdfFile) { showToast('找不到對應的 PDF 檔案'); return; }
+
+  document.getElementById('aiOneBtn').disabled = true;
+  document.getElementById('aiOneBtn').innerHTML = '<span class="spinner"></span>辨識中...';
+
+  try {
+    await processOneRespondent(id, rows, pdfFile);
+    renderErrorTable();
+    updateStats();
+    renderRespondentList();
+    showToast(`${id} 辨識完成`);
+  } catch(e) {
+    showToast('辨識失敗：' + e.message);
+  }
+
+  document.getElementById('aiOneBtn').disabled = false;
+  document.getElementById('aiOneBtn').textContent = 'AI 辨識此受訪者';
+}
+
+// ── AI batch ──
+async function runAIAll() {
+  const ids = Object.keys(state.respondents).filter(id => findPDF(id));
+  if (!ids.length) { showToast('沒有找到對應的 PDF 檔案'); return; }
+
+  document.getElementById('aiAllBtn').disabled = true;
+
+  for (let i = 0; i < ids.length; i++) {
+    const id = ids[i];
+    document.getElementById('aiAllBtn').textContent = `處理 ${i+1}/${ids.length}...`;
+    const rows = state.respondents[id];
+    const pdfFile = findPDF(id);
+    try {
+      await processOneRespondent(id, rows, pdfFile);
+    } catch(e) {
+      console.warn(id, e.message);
+    }
+  }
+
+  if (state.currentId) renderErrorTable();
+  updateStats();
+  renderRespondentList();
+  showToast('批次辨識完成！');
+  document.getElementById('aiAllBtn').disabled = false;
+  document.getElementById('aiAllBtn').textContent = 'AI 批次辨識';
+}
+
+// ── Core AI logic ──
+async function processOneRespondent(id, rows, pdfFile) {
+  // Convert PDF to base64
+  const base64 = await fileToBase64(pdfFile);
+  const isPDF = pdfFile.type === 'application/pdf' || pdfFile.name.toLowerCase().endsWith('.pdf');
+
+  // Build variable list for this respondent
+  const varList = rows.map(r =>
+    `- 變項 ${r.varName}：原始答案="${r.origVal}"，不符合說明="${r.errorDesc}"`
+  ).join('\n');
+
+  const prompt = `你是資料檢誤專家。這是受訪者 ${id} 的問卷掃描檔。
+
+以下是需要修正的變項清單：
+${varList}
+
+請仔細閱讀問卷掃描圖片，對每個變項：
+1. 找到該題的實際作答
+2. 判斷正確值應為何（例如：若子題系列中其他題有填答，空白子題應填 0；若整題空白，填空白）
+3. 輸出計畫回覆格式為：「變項名=正確值」
+
+邏輯規則：
+- 若某變項是子題組（如 v93_2_5），且同組其他子題有填答，空白值應回覆 v93_2_5=0
+- 若整題完全空白，回覆 v93_2_5=空白
+- 若有實際填答但輸入錯誤，回覆正確值
+
+只輸出 JSON 陣列，格式：
+[{"variable":"v93_2_5","reply":"v93_2_5=0","reason":"同組子題有作答，此題空白應為0"}]
+不要輸出其他文字。`;
+
+  const content = isPDF
+    ? [
+        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+        { type: 'text', text: prompt }
+      ]
+    : [
+        { type: 'image', source: { type: 'base64', media_type: pdfFile.type, data: base64 } },
+        { type: 'text', text: prompt }
+      ];
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': state.apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content }]
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json();
+    throw new Error(err.error?.message || resp.statusText);
+  }
+
+  const data = await resp.json();
+  const text = (data.content || []).map(c => c.text || '').join('');
+  const clean = text.replace(/```json|```/g, '').trim();
+
+  let parsed;
+  try { parsed = JSON.parse(clean); } catch(e) { throw new Error('AI 輸出解析失敗：' + text.slice(0, 100)); }
+
+  // Apply results back to rows
+  parsed.forEach(item => {
+    const row = rows.find(r => r.varName === item.variable || r.varName.toLowerCase() === item.variable.toLowerCase());
+    if (row) {
+      row.reply = item.reply;
+      row._modified = true;
+      // Show AI badge
+      const badge = document.getElementById('aibadge-' + row._idx);
+      if (badge) badge.style.display = '';
+    }
+  });
+}
+
+// ── PDF viewer ──
+async function loadPDFDoc(id) {
+  const file = findPDF(id);
+  if (!file) return;
+  const ab = await file.arrayBuffer();
+  state.pdfDoc = await pdfjsLib.getDocument({ data: ab }).promise;
+  state.pdfTotalPages = state.pdfDoc.numPages;
+  state.pdfPage = 1;
+}
+
+async function showPDF() {
+  const viewer = document.getElementById('pdfViewer');
+  if (viewer.style.display === 'none' || !viewer.style.display) {
+    viewer.style.display = 'block';
+    await renderPDFPage();
+  } else {
+    viewer.style.display = 'none';
+  }
+}
+
+async function renderPDFPage() {
+  if (!state.pdfDoc) return;
+  const page = await state.pdfDoc.getPage(state.pdfPage);
+  const canvas = document.getElementById('pdfCanvas');
+  const ctx = canvas.getContext('2d');
+  const vp = page.getViewport({ scale: 1.5 });
+  canvas.width = vp.width;
+  canvas.height = vp.height;
+  await page.render({ canvasContext: ctx, viewport: vp }).promise;
+
+  document.getElementById('pdfViewerLabel').textContent =
+    `${state.currentId}.pdf`;
+  document.getElementById('pdfPageInfo').textContent =
+    `第 ${state.pdfPage} / ${state.pdfTotalPages} 頁`;
+}
+
+async function pdfPageNext() {
+  if (state.pdfPage < state.pdfTotalPages) { state.pdfPage++; await renderPDFPage(); }
+}
+async function pdfPagePrev() {
+  if (state.pdfPage > 1) { state.pdfPage--; await renderPDFPage(); }
+}
+
+// ── Export Excel ──
+function exportExcel() {
+  // Re-construct original sheet with updated reply column
+  const out = state.rows.map(r => {
+    const raw = { ...r._raw };
+    // Try to find and update the reply column
+    const replyKey = Object.keys(raw).find(k =>
+      ['計畫回覆', '回覆', 'reply', '修正'].some(p => k.includes(p))
+    );
+    if (replyKey) raw[replyKey] = r.reply;
+    else raw['計畫回覆'] = r.reply;
+    return raw;
+  });
+
+  const ws = XLSX.utils.json_to_sheet(out);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  XLSX.writeFile(wb, `檢誤回覆_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('已匯出 Excel');
+}
+
+// ── Stats ──
+function updateStats() {
+  const total = state.rows.length;
+  const done = state.rows.filter(r => r.reply && r.reply.trim()).length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statPct').textContent =
+    total ? Math.round(done / total * 100) + '%' : '0%';
+}
+
+// ── Utils ──
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('Read failed'));
+    r.readAsDataURL(file);
+  });
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
