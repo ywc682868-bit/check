@@ -599,9 +599,10 @@
             </div>
           </div>
           <div class="learn-panel-body" id="learnPanelBody" style="display:none;">
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;">
+            <div style="display:grid;grid-template-columns:90px 1fr 1fr 80px auto;gap:8px;margin-bottom:8px;">
+              <span class="ex-label">變項</span>
               <span class="ex-label">不符合說明</span>
-              <span class="ex-label">原始答案型態</span>
+              <span class="ex-label">原始答案</span>
               <span class="ex-label">回覆值</span>
               <span></span>
             </div>
@@ -862,10 +863,11 @@ function updateReply(idx, val) {
   const filled = row.reply.trim() !== '';
   if (input) input.classList.toggle('filled', filled);
   if (tr) {
-    const tag = tr.querySelector('.tag');
-    if (tag) {
-      tag.className = filled ? 'tag tag-ok' : 'tag tag-error';
-      tag.textContent = filled ? '已填寫' : '待填寫';
+    // Target only the status tag (last td .tag), not the varName tag
+    const statusTd = tr.querySelector('td:last-child .tag');
+    if (statusTd) {
+      statusTd.className = filled ? 'tag tag-ok' : 'tag tag-error';
+      statusTd.textContent = filled ? '已填寫' : '待填寫';
     }
     // Update preview
     const preview = tr.querySelector('span[data-preview]');
@@ -912,40 +914,72 @@ function localInfer(rows) {
   }
 
   // 從學習範例中找最佳配對
+  // 優先順序：
+  //   1. 完全相同的變項名稱
+  //   2. 同題組前綴（varGroup）+ 同說明 + 同情境（hasSibling）
+  //   3. 同說明 + 同情境（hasSibling）→ 多數決
+  //   4. 同說明 → 依情境選
+  //   5. null
   function matchExample(r) {
     const desc = r.errorDesc || '';
     const orig = String(r.origVal || '').trim();
     const pattern = classifyOrigVal(orig);
     const examples = state.examples || [];
     const hasSib = siblingHasAnswer(r);
+    const myGroup = getVarPrefix(r.varName);     // e.g. v88, v93_2
+    const myGroupTop = r.varName.split('_')[0];  // e.g. v88, v93
 
-    // 候選：同不符合說明 + 同原始值型態
-    const candidates = examples.filter(e =>
-      e.errorDesc === desc && e.origPattern === pattern
-    );
-
-    if (candidates.length === 0) {
-      // 退而求其次：只配對不符合說明
-      const byDesc = examples.filter(e => e.errorDesc === desc);
-      if (byDesc.length === 1) return byDesc[0].reply;
-      // 多個候選：優先用 hasSibling 相同的
-      if (byDesc.length > 1) {
-        const ctx = byDesc.find(e => e.hasSibling === hasSib);
-        if (ctx) return ctx.reply;
-        // 若有明確多數回覆，用最新的
-        return byDesc[byDesc.length - 1].reply;
-      }
-      return null;
+    // 【第1優先】完全相同的變項名稱
+    const exactVar = examples.filter(e => e.varName === r.varName);
+    if (exactVar.length === 1) return exactVar[0].reply;
+    if (exactVar.length > 1) {
+      const ctx = exactVar.find(e => e.hasSibling === hasSib);
+      return ctx ? ctx.reply : exactVar[exactVar.length - 1].reply;
     }
 
-    if (candidates.length === 1) return candidates[0].reply;
+    // 【第2優先】同題組前綴 + 同說明 + 同情境
+    const byGroupDesc = examples.filter(e =>
+      e.errorDesc === desc &&
+      e.varGroup === myGroup
+    );
+    if (byGroupDesc.length > 0) {
+      const ctx = byGroupDesc.find(e => e.hasSibling === hasSib);
+      return ctx ? ctx.reply : byGroupDesc[byGroupDesc.length - 1].reply;
+    }
 
-    // 多個候選（同說明+同原始值型態，但可能回覆不同）
-    // 用 hasSibling 情境分流
-    const ctx = candidates.find(e => e.hasSibling === hasSib);
-    if (ctx) return ctx.reply;
-    // 回傳最新儲存的
-    return candidates[candidates.length - 1].reply;
+    // 【第3優先】同頂層題組（如 v88）+ 同說明
+    const byTopGroup = examples.filter(e =>
+      e.errorDesc === desc &&
+      e.varName && e.varName.split('_')[0] === myGroupTop
+    );
+    if (byTopGroup.length > 0) {
+      const ctx = byTopGroup.find(e => e.hasSibling === hasSib);
+      return ctx ? ctx.reply : byTopGroup[byTopGroup.length - 1].reply;
+    }
+
+    // 【第4優先】同說明 + 同情境（hasSibling）→ 多數決
+    const byDescSib = examples.filter(e =>
+      e.errorDesc === desc && e.hasSibling === hasSib
+    );
+    if (byDescSib.length > 0) {
+      // 多數決：找出出現最多次的回覆值
+      const freq = {};
+      byDescSib.forEach(e => { freq[e.reply] = (freq[e.reply] || 0) + 1; });
+      const majority = Object.entries(freq).sort((a,b) => b[1]-a[1])[0][0];
+      return majority;
+    }
+
+    // 【第5優先】同說明（忽略情境）
+    const byDesc = examples.filter(e => e.errorDesc === desc);
+    if (byDesc.length === 1) return byDesc[0].reply;
+    if (byDesc.length > 1) {
+      // 有情境相同的優先，否則多數決
+      const freq = {};
+      byDesc.forEach(e => { freq[e.reply] = (freq[e.reply] || 0) + 1; });
+      return Object.entries(freq).sort((a,b) => b[1]-a[1])[0][0];
+    }
+
+    return null;
   }
 
   rows.forEach(r => {
@@ -1408,9 +1442,10 @@ function renderLearnPanel() {
   if (n === 0) { list.innerHTML = '<div style="color:var(--text-hint);font-size:12px;">尚無範例</div>'; return; }
 
   list.innerHTML = state.examples.map(e => `
-    <div class="example-row">
-      <span class="example-chip" title="${escHtml(e.errorDesc)}">${escHtml(e.errorDesc.slice(0, 20))}${e.errorDesc.length > 20 ? '…' : ''}</span>
-      <span class="example-chip" title="${escHtml(e.origVal)}">${escHtml(e.origPattern)} (${escHtml(e.origVal.slice(0,12))})</span>
+    <div class="example-row" style="grid-template-columns:90px 1fr 1fr 80px auto;">
+      <span class="example-chip" style="font-size:10px;" title="${escHtml(e.varName||'')}">${escHtml((e.varName||'').slice(0,12))}</span>
+      <span class="example-chip" title="${escHtml(e.errorDesc)}">${escHtml(e.errorDesc.slice(0, 22))}${e.errorDesc.length > 22 ? '…' : ''}</span>
+      <span class="example-chip" title="${escHtml(e.origVal||'')}">${escHtml((e.origVal||'').slice(0,14))}${(e.origVal||'').length>14?'…':''} <small style="opacity:.6">${e.hasSibling?'有同組':'無同組'}</small></span>
       <span class="example-chip reply">${escHtml(e.reply)}</span>
       <button class="del-ex" onclick="deleteExample(${e.id})" title="刪除">×</button>
     </div>`).join('');
