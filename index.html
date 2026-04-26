@@ -513,9 +513,9 @@
           </div>
 
           <div>
-            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Anthropic API Key（用於 AI 辨識）</label>
+            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Google Gemini API Key（免費，於 <a href="https://aistudio.google.com" target="_blank" style="color:var(--accent)">aistudio.google.com</a> 取得）</label>
             <div class="api-key-row">
-              <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
+              <input type="password" id="apiKeyInput" placeholder="AIza..." />
               <button class="btn btn-primary" onclick="startSystem()">載入系統</button>
             </div>
           </div>
@@ -846,29 +846,25 @@ ${varList}
 [{"variable":"v93_2_5","reply":"v93_2_5=0","reason":"同組子題有作答，此題空白應為0"}]
 不要輸出其他文字。`;
 
-  const content = isPDF
-    ? [
-        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-        { type: 'text', text: prompt }
-      ]
-    : [
-        { type: 'image', source: { type: 'base64', media_type: pdfFile.type, data: base64 } },
-        { type: 'text', text: prompt }
-      ];
+  // Build Gemini parts array
+  const parts = [];
+  if (isPDF) {
+    parts.push({ inline_data: { mime_type: 'application/pdf', data: base64 } });
+  } else {
+    parts.push({ inline_data: { mime_type: pdfFile.type, data: base64 } });
+  }
+  parts.push({ text: prompt });
 
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': state.apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      messages: [{ role: 'user', content }]
-    })
-  });
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts }]
+      })
+    }
+  );
 
   if (!resp.ok) {
     const err = await resp.json();
@@ -876,7 +872,7 @@ ${varList}
   }
 
   const data = await resp.json();
-  const text = (data.content || []).map(c => c.text || '').join('');
+  const text = data.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
   const clean = text.replace(/```json|```/g, '').trim();
 
   let parsed;
