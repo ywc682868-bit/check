@@ -41,7 +41,7 @@
   }
 
   /* ── Layout ── */
-  .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+  .layout { display: grid; grid-template-columns: 360px 1fr; min-height: 100vh; }
 
   .sidebar {
     background: var(--surface);
@@ -444,7 +444,7 @@
   .group-header:first-child { border-top: none; }
   .group-toggle { font-size: 10px; color: var(--text-hint); transition: transform 0.15s; }
   .group-toggle.collapsed { transform: rotate(-90deg); }
-  .group-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-hint); text-transform: uppercase; flex: 1; }
+  .group-label { font-size: 11px; font-weight: 500; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .group-check {
     width: 14px; height: 14px;
     border: 1.5px solid var(--border-strong);
@@ -560,7 +560,7 @@
     <div class="batch-bar" id="batchBar">
       <span id="batchSelCount">0 筆已選</span>
       <button class="btn" style="font-size:11px;padding:4px 10px;" onclick="runBatchSelected('infer')">推論選取</button>
-      <button class="btn btn-primary" style="font-size:11px;padding:4px 10px;" onclick="runBatchSelected('ai')">AI 辨識選取</button>
+
       <button class="btn" style="font-size:11px;padding:4px 10px;margin-left:auto;" onclick="clearSelection()">取消選取</button>
     </div>
     <div class="respondent-list" id="respondentList">
@@ -573,12 +573,16 @@
     <div class="topbar">
       <h2 id="topbarTitle">問卷資料檢誤系統</h2>
       <button class="btn" id="exportBtn" style="display:none" onclick="exportExcel()">匯出 Excel</button>
-      <label class="btn" id="addPdfBtn" style="display:none;cursor:pointer;" title="可重複上傳不同資料夾的 PDF">
+      <label class="btn" id="addPdfBtn" style="display:none;cursor:pointer;" title="追加個別 PDF 檔案">
         + 追加 PDF
         <input type="file" accept=".pdf" multiple style="display:none" onchange="loadPDFs(this)" />
       </label>
+      <label class="btn" id="addFolderBtn" style="display:none;cursor:pointer;" title="追加整個資料夾的 PDF">
+        + 追加資料夾
+        <input type="file" webkitdirectory mozdirectory style="display:none" onchange="loadPDFsFromFolder(this)" />
+      </label>
       <button class="btn" id="localAllBtn" style="display:none" onclick="runLocalInferAll()">全部自動推論</button>
-      <button class="btn btn-primary" id="aiAllBtn" style="display:none" onclick="runAIAll()">AI 批次辨識</button>
+
     </div>
 
     <div class="content" id="contentArea">
@@ -605,8 +609,8 @@
           <div class="step-card">
             <div class="step-num">3</div>
             <div>
-              <h3>AI 自動辨識並填寫回覆</h3>
-              <p>系統讀取 PDF 對應頁面，辨識變項值，自動填入「計畫回覆」欄位</p>
+              <h3>自動推論並填寫回覆</h3>
+              <p>系統根據學習範例自動推論，填入「計畫回覆」欄位，不確定的留空讓您手動填寫</p>
             </div>
           </div>
         </div>
@@ -619,20 +623,24 @@
               <div class="label">Excel 報表</div>
               <div class="sublabel" id="xlsxLabel">點擊選擇 .xlsx 檔案</div>
             </div>
-            <div class="upload-box" id="pdfBox">
-              <input type="file" id="pdfInput" accept=".pdf" multiple onchange="loadPDFs(this)" />
-              <div class="icon">📄</div>
-              <div class="label">掃描 PDF（可多選）</div>
-              <div class="sublabel" id="pdfLabel">點擊選擇 PDF 檔案</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div class="upload-box" id="pdfBox">
+                <input type="file" id="pdfInput" accept=".pdf" multiple onchange="loadPDFs(this)" />
+                <div class="icon">📄</div>
+                <div class="label">掃描 PDF（可多選）</div>
+                <div class="sublabel" id="pdfLabel">點擊選擇多個 PDF 檔案</div>
+              </div>
+              <div class="upload-box" id="pdfFolderBox" style="border-style:solid;background:var(--accent-light);">
+                <input type="file" id="pdfFolderInput" webkitdirectory mozdirectory onchange="loadPDFsFromFolder(this)" />
+                <div class="icon">📁</div>
+                <div class="label">或選擇整個資料夾</div>
+                <div class="sublabel">自動讀取資料夾內所有 PDF</div>
+              </div>
             </div>
           </div>
 
           <div>
-            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Google Gemini API Key（免費，於 <a href="https://aistudio.google.com" target="_blank" style="color:var(--accent)">aistudio.google.com</a> 取得）</label>
-            <div class="api-key-row">
-              <input type="password" id="apiKeyInput" placeholder="AIza..." />
-              <button class="btn btn-primary" onclick="startSystem()">載入系統</button>
-            </div>
+            <button class="btn btn-primary" onclick="startSystem()" style="width:100%;padding:12px;">載入系統</button>
           </div>
         </div>
       </div>
@@ -643,9 +651,6 @@
           <h3 id="workTitle">選擇受訪者</h3>
           <button class="btn" onclick="runLocalInfer()" id="localOneBtn" style="display:none">自動推論</button>
           <button class="btn" id="saveExBtn" onclick="saveExamples()" style="display:none">儲存為學習範例</button>
-          <button class="btn" id="aiOneBtn" onclick="runAIOne()" style="display:none">
-            AI 辨識（需 PDF + API Key）
-          </button>
           <button class="btn" onclick="showPDF()" id="viewPdfBtn" style="display:none">檢視 PDF</button>
         </div>
 
@@ -772,6 +777,29 @@ function groupByRespondent() {
   renderRespondentList();
 }
 
+// ── PDF loading from folder ──
+function loadPDFsFromFolder(input) {
+  const files = Array.from(input.files).filter(f =>
+    f.name.toLowerCase().endsWith('.pdf')
+  );
+  let added = 0;
+  files.forEach(f => {
+    const nameNoExt = f.name.replace(/\.pdf$/i, '');
+    const keyNoExt = nameNoExt.toLowerCase();
+    const keyFull = f.name.toLowerCase();
+    if (!state.pdfs[keyNoExt]) added++;
+    state.pdfs[keyNoExt] = f;
+    state.pdfs[keyFull] = f;
+  });
+  input.value = '';
+  const total = Object.keys(state.pdfs).filter(k => k.endsWith('.pdf')).length;
+  document.getElementById('pdfLabel').textContent = `共 ${total} 個 PDF（資料夾新增 ${added}）`;
+  document.getElementById('pdfBox').classList.add('loaded');
+  document.getElementById('pdfFolderBox').classList.add('loaded');
+  showToast(`從資料夾新增 ${added} 個 PDF，累計 ${total} 個`);
+  updatePDFMatchStats();
+}
+
 // ── PDF loading（累積，不清空）──
 function loadPDFs(input) {
   const files = Array.from(input.files);
@@ -803,19 +831,15 @@ function updatePDFMatchStats() {
 
 // ── System start ──
 function startSystem() {
-  state.apiKey = document.getElementById('apiKeyInput').value.trim();
   if (!state.rows.length) { showToast('請先載入 Excel 報表'); return; }
-  // 記住 API Key
-  if (state.apiKey) {
-    try { localStorage.setItem('gemini_api_key', state.apiKey); } catch(e) {}
-  }
 
   document.getElementById('welcomeScreen').style.display = 'none';
   document.getElementById('workScreen').style.display = 'block';
   document.getElementById('exportBtn').style.display = '';
   document.getElementById('localAllBtn').style.display = '';
   document.getElementById('addPdfBtn').style.display = '';
-  document.getElementById('aiAllBtn').style.display = '';
+  document.getElementById('addFolderBtn').style.display = '';
+  
   renderLearnPanel();
 }
 
@@ -1169,7 +1193,7 @@ function selectRespondent(id) {
   const hasPDF = findPDF(id) !== null;
   document.getElementById('localOneBtn').style.display = '';
   document.getElementById('saveExBtn').style.display = '';
-  document.getElementById('aiOneBtn').style.display = hasPDF ? '' : 'none';
+  
   document.getElementById('viewPdfBtn').style.display = hasPDF ? '' : 'none';
 
   if (hasPDF) loadPDFDoc(id);
