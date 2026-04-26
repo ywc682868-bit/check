@@ -815,35 +815,51 @@ function renderErrorTable() {
   }
 
   tbody.innerHTML = rows.map((r, i) => {
-    // r.reply stores raw value only (e.g. "0", "-9", "空白")
-    // Strip "varName=" prefix if it was stored in old format
     const rawVal = stripPrefix(r.reply || '', r.varName);
     const filled = rawVal.trim() !== '';
-    const preview = filled ? `${r.varName}=${rawVal}` : '';
-    return `<tr id="row-${r._idx}" class="${filled ? 'done-row' : ''}">
+    const isOk = rawVal.trim().toLowerCase() === 'ok';
+    // ok: export as just "ok", preview shows ok
+    const preview = filled ? (isOk ? 'ok' : `${r.varName}=${rawVal}`) : '';
+
+    // Detect row type for display logic
+    const desc = r.errorDesc || '';
+    const isLogicError = desc.includes('邏輯') || desc.includes('作息') || desc.includes('年齡') || desc.includes('出生') || desc.includes('結婚');
+    const isNeedsReview = rawVal.includes('請參閱') || rawVal.includes('請確認') || rawVal.includes('請查閱');
+
+    // For logic errors: show origVal in input box for editing
+    // For needs-review: clear the value so user manually fills
+    const displayVal = isNeedsReview ? '' : rawVal;
+    const isFilled = displayVal.trim() !== '';
+
+    // Prefix label: logic errors show origVal format hint, others show varName=
+    const prefixLabel = isLogicError
+      ? `<span style="font-family:var(--mono);font-size:11px;color:var(--warn);white-space:nowrap;" title="請修改原始答案格式">${escHtml(r.origVal)} →</span>`
+      : `<span style="font-family:var(--mono);font-size:12px;color:var(--text-muted);white-space:nowrap;">${escHtml(r.varName)}=</span>`;
+
+    return `<tr id="row-${r._idx}" class="${isFilled ? 'done-row' : ''}">
       <td style="color:var(--text-hint);font-family:var(--mono);">${i + 1}</td>
       <td><span class="tag tag-info" style="font-size:11px;">${escHtml(r.varName)}</span></td>
       <td style="font-family:var(--mono);font-size:11px;">${escHtml(r.origVal)}</td>
-      <td style="color:var(--text-muted);font-size:12px;">${escHtml(r.errorDesc)}</td>
+      <td style="color:var(--text-muted);font-size:12px;">${escHtml(desc)}</td>
       <td>
         <div class="reply-cell" style="flex-direction:column;align-items:flex-start;gap:4px;">
-          <div style="display:flex;align-items:center;gap:6px;width:100%;">
-            <span style="font-family:var(--mono);font-size:12px;color:var(--text-muted);white-space:nowrap;">${escHtml(r.varName)}=</span>
-            <input class="reply-input ${filled ? 'filled' : ''}" 
+          <div style="display:flex;align-items:center;gap:6px;width:100%;flex-wrap:wrap;">
+            ${prefixLabel}
+            <input class="reply-input ${isFilled ? 'filled' : ''}" 
               id="reply-${r._idx}"
-              value="${escHtml(rawVal)}" 
-              placeholder="數值"
-              style="width:100px;"
+              value="${escHtml(displayVal)}" 
+              placeholder="${isLogicError ? '修正後的值' : '數值'}"
+              style="width:${isLogicError ? '160px' : '100px'};"
               onchange="updateReply(${r._idx}, this.value)"
               oninput="updateReply(${r._idx}, this.value)" />
             ${r._inferMethod === 'ai' ? `<span class="ai-badge" style="background:#E6F1FB;color:#185FA5;">AI</span>` : ''}
             ${r._inferMethod === 'local' ? `<span class="ai-badge" style="background:#EAF3DE;color:#2D6A4F;">推論</span>` : ''}
           </div>
-          ${filled ? `<span style="font-family:var(--mono);font-size:11px;color:var(--success);">→ ${escHtml(preview)}</span>` : ''}
+          ${isFilled ? `<span style="font-family:var(--mono);font-size:11px;color:var(--success);">→ ${escHtml(preview)}</span>` : ''}
         </div>
       </td>
       <td>
-        ${filled
+        ${isFilled
           ? `<span class="tag tag-ok">已填寫</span>`
           : `<span class="tag tag-error">待填寫</span>`}
       </td>
@@ -929,12 +945,21 @@ function localInfer(rows) {
     const myGroup = getVarPrefix(r.varName);     // e.g. v88, v93_2
     const myGroupTop = r.varName.split('_')[0];  // e.g. v88, v93
 
-    // 【第1優先】完全相同的變項名稱
+    // 【第0優先】完全相同的變項名稱 + 完全相同的原始答案
+    const exactMatch = examples.find(e => e.varName === r.varName && e.origVal === orig);
+    if (exactMatch) return exactMatch.reply;
+
+    // 【第1優先】完全相同的變項名稱（多筆時用情境分流）
     const exactVar = examples.filter(e => e.varName === r.varName);
     if (exactVar.length === 1) return exactVar[0].reply;
     if (exactVar.length > 1) {
+      // First try hasSibling match
       const ctx = exactVar.find(e => e.hasSibling === hasSib);
-      return ctx ? ctx.reply : exactVar[exactVar.length - 1].reply;
+      if (ctx) return ctx.reply;
+      // Then try origPattern match
+      const byPat = exactVar.find(e => e.origPattern === pattern);
+      if (byPat) return byPat.reply;
+      return exactVar[exactVar.length - 1].reply;
     }
 
     // 【第2優先】同題組前綴 + 同說明 + 同情境
@@ -983,7 +1008,11 @@ function localInfer(rows) {
   }
 
   rows.forEach(r => {
-    if (r.reply && r.reply.trim()) return; // 已有值跳過
+    // 跳過：已有值（但「請確認/參閱」類允許重新推論）
+    if (r.reply && r.reply.trim() &&
+        !r.reply.includes('請確認') &&
+        !r.reply.includes('請查閱') &&
+        !r.reply.includes('請參閱')) return;
 
     const desc = r.errorDesc || '';
     const orig = String(r.origVal || '').trim();
@@ -1059,6 +1088,17 @@ function localInfer(rows) {
     if (desc.includes('Other') || desc.includes('other')) {
       r.reply = exReply !== null ? exReply : 'ok';
       r._inferMethod = 'local';
+      return;
+    }
+
+    // 【邏輯錯誤類】不自動填值，留空讓人工修正
+    if (desc.includes('邏輯') || desc.includes('作息') || desc.includes('年齡') ||
+        desc.includes('出生') || desc.includes('結婚')) {
+      // 有範例才填，否則空白讓手動
+      if (exReply !== null) {
+        r.reply = exReply;
+        r._inferMethod = 'local';
+      }
       return;
     }
 
@@ -1475,9 +1515,12 @@ function exportExcel() {
     const replyKey = Object.keys(raw).find(k =>
       ['計畫回覆', '回覆', 'reply', '修正'].some(p => k.includes(p))
     );
-    // Format as varName=value for export
+    // Format as varName=value for export; "ok" exports as just "ok"
     const rawVal = stripPrefix(r.reply || '', r.varName);
-    const formatted = rawVal.trim() !== '' ? `${r.varName}=${rawVal}` : '';
+    const isOk = rawVal.trim().toLowerCase() === 'ok';
+    const formatted = rawVal.trim() !== ''
+      ? (isOk ? 'ok' : `${r.varName}=${rawVal}`)
+      : '';
     if (replyKey) raw[replyKey] = formatted;
     else raw['計畫回覆'] = formatted;
     return raw;
