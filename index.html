@@ -856,15 +856,17 @@ function updateReply(idx, val) {
   renderRespondentList();
 }
 
-// ── 本地自動推論（不需 AI）──
+// ── 本地自動推論（優先使用學習範例）──
 function localInfer(rows) {
   const allRows = state.rows;
 
+  // 取 = 後的純值
   function extractVal(orig) {
-    const m = String(orig).match(/=(.*)$/);
-    return m ? m[1].trim() : String(orig).trim();
+    const m = String(orig || '').match(/=(.*)$/);
+    return m ? m[1].trim() : String(orig || '').trim();
   }
 
+  // 同組子題（同前綴）中，有任一題有填答（含0）
   function siblingHasAnswer(r) {
     const prefix = getVarPrefix(r.varName);
     return allRows.some(x => {
@@ -876,55 +878,133 @@ function localInfer(rows) {
     });
   }
 
+  // 相鄰題（±2題）是否有填答，用來判斷是否為整體跳答
+  function neighborHasAnswer(r) {
+    const idx = allRows.findIndex(x => x.respId === r.respId && x.varName === r.varName);
+    if (idx < 0) return false;
+    const sameResp = allRows.filter(x => x.respId === r.respId);
+    const myIdx = sameResp.findIndex(x => x.varName === r.varName);
+    for (let d = -3; d <= 3; d++) {
+      if (d === 0) continue;
+      const neighbor = sameResp[myIdx + d];
+      if (neighbor && extractVal(neighbor.origVal) !== '' && extractVal(neighbor.origVal) !== '=') return true;
+    }
+    return false;
+  }
+
+  // 從學習範例中找最佳配對
+  function matchExample(r) {
+    const desc = r.errorDesc || '';
+    const orig = String(r.origVal || '').trim();
+    const rawVal = extractVal(orig);
+    const examples = state.examples || [];
+
+    // 完全配對：同不符合說明 + 同原始值型態
+    const pattern = classifyOrigVal(orig);
+    let best = examples.find(e => e.errorDesc === desc && e.origPattern === pattern);
+    if (best) return best.reply;
+
+    // 次佳：同不符合說明
+    best = examples.find(e => e.errorDesc === desc);
+    if (best) return best.reply;
+
+    // 部分配對：說明包含關鍵字
+    const keywords = ['數值為0','欄位為空','時間數值','格式錯誤','Other欄位','範圍'];
+    for (const kw of keywords) {
+      if (desc.includes(kw)) {
+        best = examples.find(e => e.errorDesc.includes(kw) && e.origPattern === pattern);
+        if (best) return best.reply;
+        best = examples.find(e => e.errorDesc.includes(kw));
+        if (best) return best.reply;
+      }
+    }
+    return null;
+  }
+
   rows.forEach(r => {
-    if (r.reply && r.reply.trim()) return;
+    if (r.reply && r.reply.trim()) return; // 已有值跳過
 
     const desc = r.errorDesc || '';
     const orig = String(r.origVal || '').trim();
-    const varName = r.varName;
     const rawVal = extractVal(orig);
 
-    // 規則1: 數值為0 - 受訪者確實填了0，直接回覆0
+    // ── 步驟1：先查學習範例 ──
+    const exReply = matchExample(r);
+
+    // ── 步驟2：根據情境套用正確規則 ──
+
+    // 【數值為0】受訪者填了0，不是空白
+    // 範例有告訴我們：通常是 ok，但需確認
     if (desc.includes('數值為0')) {
-      r.reply = '0';
+      if (exReply !== null) {
+        r.reply = exReply;
+      } else {
+        r.reply = 'ok';
+      }
       r._inferMethod = 'local';
       return;
     }
 
-    // 規則2: 欄位為空 - 同組有填答→0，全組空→空白
-    if (desc.includes('欄位為空') || rawVal === '' || orig === '=') {
-      r.reply = siblingHasAnswer(r) ? '0' : '空白';
-      r._inferMethod = 'local';
-      return;
-    }
-
-    // 規則3: 格式錯誤/非整數 - 取第一個數字建議
-    if (desc.includes('格式錯誤') || desc.includes('非整數')) {
-      const firstNum = rawVal.split(/[,，\s]/)[0].trim();
-      r.reply = (firstNum && !isNaN(firstNum)) ? firstNum + '（請確認）' : '（請確認）';
-      r._inferMethod = 'local';
-      return;
-    }
-
-    // 規則4: 範圍檢誤
-    if (desc.includes('範圍') || desc.includes('超出')) {
-      r.reply = '（請查閱 PDF）';
-      r._inferMethod = 'local';
-      return;
-    }
-
-    // 規則5: 時間數值皆為0
+    // 【時間數值皆為0】
     if (desc.includes('時間數值')) {
-      r.reply = '0';
+      if (exReply !== null) {
+        r.reply = exReply;
+      } else {
+        r.reply = 'ok';
+      }
       r._inferMethod = 'local';
       return;
     }
 
-    // 規則6: Other欄位內容
-    if (desc.includes('Other欄位') || desc.toLowerCase().includes('other')) {
-      r.reply = 'ok';
+    // 【欄位為空】三種情境：
+    //   a) 同組子題有填答 → 0（受訪者跳過此子題）
+    //   b) 前後題都沒填   → -9（整段跳答）
+    //   c) 其他           → 空白
+    if (desc.includes('欄位為空') || rawVal === '' || orig.endsWith('=')) {
+      if (siblingHasAnswer(r)) {
+        // 範例有指定同組情況的值就用，否則預設 0
+        r.reply = (exReply !== null && exReply !== '-9') ? exReply : '0';
+      } else if (!neighborHasAnswer(r)) {
+        // 前後題都沒填，整段跳答
+        r.reply = (exReply !== null) ? exReply : '-9';
+      } else {
+        r.reply = (exReply !== null) ? exReply : '空白';
+      }
       r._inferMethod = 'local';
       return;
+    }
+
+    // 【格式錯誤 / 非整數】
+    if (desc.includes('格式錯誤') || desc.includes('非整數')) {
+      if (exReply !== null) {
+        r.reply = exReply;
+      } else {
+        // 嘗試取第一個合法數字
+        const firstNum = rawVal.split(/[,，\s]/)[0].trim();
+        r.reply = (firstNum && !isNaN(firstNum)) ? firstNum + '（請確認）' : '（請確認）';
+      }
+      r._inferMethod = 'local';
+      return;
+    }
+
+    // 【範圍檢誤】
+    if (desc.includes('範圍') || desc.includes('超出')) {
+      r.reply = exReply !== null ? exReply : '（請查閱 PDF）';
+      r._inferMethod = 'local';
+      return;
+    }
+
+    // 【Other欄位內容】
+    if (desc.includes('Other') || desc.includes('other')) {
+      r.reply = exReply !== null ? exReply : 'ok';
+      r._inferMethod = 'local';
+      return;
+    }
+
+    // 【其他：有範例就用範例】
+    if (exReply !== null) {
+      r.reply = exReply;
+      r._inferMethod = 'local';
     }
   });
 }
