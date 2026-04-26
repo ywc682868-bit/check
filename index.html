@@ -933,101 +933,20 @@ function localInfer(rows) {
     return false;
   }
 
-  // 從學習範例中找最佳配對
-  // 優先順序：
-  //   1. 完全相同的變項名稱
-  //   2. 同題組前綴（varGroup）+ 同說明 + 同情境（hasSibling）
-  //   3. 同說明 + 同情境（hasSibling）→ 多數決
-  //   4. 同說明 → 依情境選
-  //   5. null
+  // 嚴格配對：必須變項名稱 + 原始答案 + 說明 三者完全一致才套用
+  // 否則一律回傳 null（留空讓使用者判斷）
   function matchExample(r) {
     const desc = r.errorDesc || '';
     const orig = String(r.origVal || '').trim();
-    const pattern = classifyOrigVal(orig);
     const examples = state.examples || [];
-    const hasSib = siblingHasAnswer(r);
-    const myGroup = getVarPrefix(r.varName);     // e.g. v88, v93_2
-    const myGroupTop = r.varName.split('_')[0];  // e.g. v88, v93
 
-    // 【第0優先】完全相同的變項名稱 + 完全相同的原始答案 + 完全相同的說明
-    const exactFull = examples.find(e =>
-      e.varName === r.varName && e.origVal === orig && e.errorDesc === desc
+    // 【唯一規則】三者完全相同
+    const exact = examples.find(e =>
+      e.varName === r.varName &&
+      e.origVal === orig &&
+      e.errorDesc === desc
     );
-    if (exactFull) return exactFull.reply;
-
-    // 【第1優先】完全相同的變項名稱 + 相同說明類型（同一種錯誤才能互用）
-    const sameDescType = (a, b) => {
-      if (a === b) return true;
-      // 邏輯/作息/年齡/單身類：必須完全相同，不允許模糊配對
-      const strictTypes = ['邏輯','作息','年齡','出生','結婚','單身'];
-      if (strictTypes.some(t => a.includes(t) || b.includes(t))) return false;
-      // 其他類型允許關鍵字配對
-      const types = ['數值為0','欄位為空','時間數值','格式錯誤','非整數','範圍','Other'];
-      for (const t of types) {
-        if (a.includes(t) && b.includes(t)) return true;
-      }
-      return false;
-    };
-    const exactVar = examples.filter(e =>
-      e.varName === r.varName && sameDescType(e.errorDesc, desc)
-    );
-    if (exactVar.length === 1) return exactVar[0].reply;
-    if (exactVar.length > 1) {
-      // origVal 完全相同優先
-      const byOrig = exactVar.find(e => e.origVal === orig);
-      if (byOrig) return byOrig.reply;
-      // hasSibling 情境相同次之
-      const bySib = exactVar.find(e => e.hasSibling === hasSib);
-      if (bySib) return bySib.reply;
-      // origPattern 相同
-      const byPat = exactVar.find(e => e.origPattern === pattern);
-      if (byPat) return byPat.reply;
-      return exactVar[exactVar.length - 1].reply;
-    }
-
-    // 【第2優先】同題組前綴 + 同說明類型 + 同情境
-    const byGroupDesc = examples.filter(e =>
-      sameDescType(e.errorDesc, desc) &&
-      e.varGroup === myGroup
-    );
-    if (byGroupDesc.length > 0) {
-      const ctx = byGroupDesc.find(e => e.hasSibling === hasSib);
-      return ctx ? ctx.reply : byGroupDesc[byGroupDesc.length - 1].reply;
-    }
-
-    // 【第3優先】同頂層題組（如 v88）+ 同說明類型
-    const byTopGroup = examples.filter(e =>
-      sameDescType(e.errorDesc, desc) &&
-      e.varName && e.varName.split('_')[0] === myGroupTop
-    );
-    if (byTopGroup.length > 0) {
-      const ctx = byTopGroup.find(e => e.hasSibling === hasSib);
-      return ctx ? ctx.reply : byTopGroup[byTopGroup.length - 1].reply;
-    }
-
-    // 【第4優先】同說明類型 + 同情境（hasSibling）→ 多數決
-    const byDescSib = examples.filter(e =>
-      sameDescType(e.errorDesc, desc) && e.hasSibling === hasSib
-    );
-    if (byDescSib.length > 0) {
-      // 多數決：找出出現最多次的回覆值
-      const freq = {};
-      byDescSib.forEach(e => { freq[e.reply] = (freq[e.reply] || 0) + 1; });
-      const majority = Object.entries(freq).sort((a,b) => b[1]-a[1])[0][0];
-      return majority;
-    }
-
-    // 【第5優先】同說明類型（忽略情境）
-    const byDesc = examples.filter(e => sameDescType(e.errorDesc, desc));
-    if (byDesc.length === 1) return byDesc[0].reply;
-    if (byDesc.length > 1) {
-      // 有情境相同的優先，否則多數決
-      const freq = {};
-      byDesc.forEach(e => { freq[e.reply] = (freq[e.reply] || 0) + 1; });
-      return Object.entries(freq).sort((a,b) => b[1]-a[1])[0][0];
-    }
-
-    return null;
+    return exact ? exact.reply : null;
   }
 
   rows.forEach(r => {
