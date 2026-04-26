@@ -463,6 +463,7 @@
     <div class="topbar">
       <h2 id="topbarTitle">問卷資料檢誤系統</h2>
       <button class="btn" id="exportBtn" style="display:none" onclick="exportExcel()">匯出 Excel</button>
+      <button class="btn" id="localAllBtn" style="display:none" onclick="runLocalInferAll()">全部自動推論</button>
       <button class="btn btn-primary" id="aiAllBtn" style="display:none" onclick="runAIAll()">AI 批次辨識</button>
     </div>
 
@@ -515,7 +516,7 @@
           <div>
             <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Google Gemini API Key（免費，於 <a href="https://aistudio.google.com" target="_blank" style="color:var(--accent)">aistudio.google.com</a> 取得）</label>
             <div class="api-key-row">
-              <input type="password" id="apiKeyInput" placeholder="AIzaSyA31bhKSWHtLgTBDTB2fAokjYApHnzYTzk" />
+              <input type="password" id="apiKeyInput" placeholder="AIza..." />
               <button class="btn btn-primary" onclick="startSystem()">載入系統</button>
             </div>
           </div>
@@ -526,8 +527,9 @@
       <div id="workScreen" style="display:none;">
         <div class="panel-header">
           <h3 id="workTitle">選擇受訪者</h3>
+          <button class="btn" onclick="runLocalInfer()" id="localOneBtn" style="display:none">自動推論</button>
           <button class="btn" id="aiOneBtn" onclick="runAIOne()" style="display:none">
-            AI 辨識此受訪者
+            AI 辨識（需 PDF + API Key）
           </button>
           <button class="btn" onclick="showPDF()" id="viewPdfBtn" style="display:none">檢視 PDF</button>
         </div>
@@ -658,6 +660,7 @@ function startSystem() {
   document.getElementById('welcomeScreen').style.display = 'none';
   document.getElementById('workScreen').style.display = 'block';
   document.getElementById('exportBtn').style.display = '';
+  document.getElementById('localAllBtn').style.display = '';
   document.getElementById('aiAllBtn').style.display = '';
 }
 
@@ -692,6 +695,7 @@ function selectRespondent(id) {
   document.getElementById('topbarTitle').textContent = id;
 
   const hasPDF = findPDF(id) !== null;
+  document.getElementById('localOneBtn').style.display = '';
   document.getElementById('aiOneBtn').style.display = hasPDF ? '' : 'none';
   document.getElementById('viewPdfBtn').style.display = hasPDF ? '' : 'none';
 
@@ -732,7 +736,8 @@ function renderErrorTable() {
             placeholder="${r.varName}=?"
             onchange="updateReply(${r._idx}, this.value)"
             oninput="updateReply(${r._idx}, this.value)" />
-          <span class="ai-badge" id="aibadge-${r._idx}" style="display:none">AI</span>
+          ${r._inferMethod === 'ai' ? `<span class="ai-badge" style="background:#E6F1FB;color:#185FA5;">AI</span>` : ''}
+          ${r._inferMethod === 'local' ? `<span class="ai-badge" style="background:#EAF3DE;color:#2D6A4F;">推論</span>` : ''}
         </div>
       </td>
       <td>
@@ -764,25 +769,157 @@ function updateReply(idx, val) {
   renderRespondentList();
 }
 
+// ── 本地自動推論（不需 AI）──
+// 根據不符合說明與變項名稱，自動推斷計畫回覆
+function localInfer(rows) {
+  // 收集同一受訪者所有變項的 origVal，用來判斷同組子題
+  // 找出所有「子題組」：變項名去掉最後一段數字後的前綴相同者
+  const varMap = {};
+  rows.forEach(r => { varMap[r.varName] = r; });
+
+  // 取得所有受訪者的全部 rows（含非錯誤），用來判斷同組有無填答
+  const allRows = state.rows;
+
+  rows.forEach(r => {
+    if (r.reply && r.reply.trim()) return; // 已有值，跳過
+
+    const desc = r.errorDesc || '';
+    const orig = String(r.origVal || '').trim();
+    const varName = r.varName;
+
+    // ── 規則 1：欄位為空 / 空白 ──
+    // 判斷同組子題是否有其他填答
+    if (desc.includes('欄位為空') || orig === '' || orig === '=') {
+      const prefix = getVarPrefix(varName);
+      // 在全部 rows 中找同前綴且有值的其他子題
+      const siblings = allRows.filter(x =>
+        x.respId === r.respId &&
+        x.varName !== varName &&
+        getVarPrefix(x.varName) === prefix &&
+        String(x.origVal || '').trim() !== '' &&
+        String(x.origVal || '').trim() !== '='
+      );
+      if (siblings.length > 0) {
+        r.reply = `${varName}=0`;
+        r._inferMethod = 'local';
+      } else {
+        r.reply = `${varName}=空白`;
+        r._inferMethod = 'local';
+      }
+      return;
+    }
+
+    // ── 規則 2：數值為 0（潛在錯誤：確認是否留空）──
+    if (desc.includes('數值為0') || orig === '0' || orig.endsWith('=0')) {
+      const prefix = getVarPrefix(varName);
+      const siblings = allRows.filter(x =>
+        x.respId === r.respId &&
+        x.varName !== varName &&
+        getVarPrefix(x.varName) === prefix &&
+        String(x.origVal || '').trim() !== '' &&
+        String(x.origVal || '').trim() !== '='
+      );
+      if (siblings.length > 0) {
+        r.reply = `${varName}=0`;
+        r._inferMethod = 'local';
+      } else {
+        r.reply = `${varName}=空白`;
+        r._inferMethod = 'local';
+      }
+      return;
+    }
+
+    // ── 規則 3：格式錯誤（如 v13_6=1,3 → 判斷原始填寫值）──
+    if (desc.includes('格式錯誤') || desc.includes('非整數')) {
+      // 嘗試從原始答案取最後一個 = 後的值
+      const m = orig.match(/=(.+)$/);
+      if (m) {
+        const raw = m[1].trim();
+        // 若有逗號（如 1,3），取第一個數字作建議
+        const firstNum = raw.split(/[,，\s]/)[0].trim();
+        if (firstNum && !isNaN(firstNum)) {
+          r.reply = `${varName}=${firstNum}（請確認原始問卷）`;
+          r._inferMethod = 'local';
+        }
+      }
+      return;
+    }
+
+    // ── 規則 4：範圍檢誤不符 ──
+    if (desc.includes('範圍') || desc.includes('超出')) {
+      const m = orig.match(/=(.+)$/);
+      if (m) {
+        r.reply = `${varName}=（請查閱 PDF 確認）`;
+        r._inferMethod = 'local';
+      }
+      return;
+    }
+
+    // ── 規則 5：時間數值（hr/min）──
+    if (desc.includes('時間數值') || varName.includes('_hr') || varName.includes('_min')) {
+      r.reply = `${varName}=0`;
+      r._inferMethod = 'local';
+      return;
+    }
+  });
+}
+
+// 取變項前綴：v93_2_5 → v93_2，v40_5 → v40，v13_6 → v13
+function getVarPrefix(varName) {
+  const parts = varName.split('_');
+  if (parts.length >= 3) return parts.slice(0, -1).join('_');
+  if (parts.length === 2) return parts[0];
+  return varName;
+}
+
+// ── 本地推論按鈕 ──
+function runLocalInfer() {
+  const id = state.currentId;
+  if (!id) return;
+  const rows = state.respondents[id];
+  localInfer(rows);
+  renderErrorTable();
+  updateStats();
+  renderRespondentList();
+  showToast('本地推論完成，請檢查並確認建議值');
+}
+
+// ── 批次本地推論 ──
+function runLocalInferAll() {
+  Object.keys(state.respondents).forEach(id => {
+    localInfer(state.respondents[id]);
+  });
+  if (state.currentId) renderErrorTable();
+  updateStats();
+  renderRespondentList();
+  showToast('全部受訪者推論完成！');
+}
+
 // ── AI for one respondent ──
 async function runAIOne() {
   const id = state.currentId;
   if (!id) return;
   const rows = state.respondents[id];
   const pdfFile = findPDF(id);
-  if (!pdfFile) { showToast('找不到對應的 PDF 檔案'); return; }
+  if (!pdfFile) { showToast('找不到對應 PDF，改用本地推論'); runLocalInfer(); return; }
+  if (!state.apiKey) { showToast('未設定 API Key，改用本地推論'); runLocalInfer(); return; }
 
   document.getElementById('aiOneBtn').disabled = true;
   document.getElementById('aiOneBtn').innerHTML = '<span class="spinner"></span>辨識中...';
 
   try {
+    // 先跑本地推論填基本欄位
+    localInfer(rows);
+    // 再用 AI 精確辨識 PDF
     await processOneRespondent(id, rows, pdfFile);
     renderErrorTable();
     updateStats();
     renderRespondentList();
     showToast(`${id} 辨識完成`);
   } catch(e) {
-    showToast('辨識失敗：' + e.message);
+    showToast('AI 失敗，已套用本地推論：' + e.message);
+    renderErrorTable();
+    updateStats();
   }
 
   document.getElementById('aiOneBtn').disabled = false;
@@ -791,8 +928,8 @@ async function runAIOne() {
 
 // ── AI batch ──
 async function runAIAll() {
-  const ids = Object.keys(state.respondents).filter(id => findPDF(id));
-  if (!ids.length) { showToast('沒有找到對應的 PDF 檔案'); return; }
+  const ids = Object.keys(state.respondents);
+  if (!ids.length) { showToast('沒有資料'); return; }
 
   document.getElementById('aiAllBtn').disabled = true;
 
@@ -800,59 +937,54 @@ async function runAIAll() {
     const id = ids[i];
     document.getElementById('aiAllBtn').textContent = `處理 ${i+1}/${ids.length}...`;
     const rows = state.respondents[id];
+    // 先本地推論
+    localInfer(rows);
+    // 若有 PDF 且有 API key，再用 AI
     const pdfFile = findPDF(id);
-    try {
-      await processOneRespondent(id, rows, pdfFile);
-    } catch(e) {
-      console.warn(id, e.message);
+    if (pdfFile && state.apiKey) {
+      try { await processOneRespondent(id, rows, pdfFile); } catch(e) { console.warn(id, e.message); }
     }
   }
 
   if (state.currentId) renderErrorTable();
   updateStats();
   renderRespondentList();
-  showToast('批次辨識完成！');
+  showToast('批次處理完成！');
   document.getElementById('aiAllBtn').disabled = false;
   document.getElementById('aiAllBtn').textContent = 'AI 批次辨識';
 }
 
 // ── Core AI logic ──
 async function processOneRespondent(id, rows, pdfFile) {
-  // Convert PDF to base64
   const base64 = await fileToBase64(pdfFile);
   const isPDF = pdfFile.type === 'application/pdf' || pdfFile.name.toLowerCase().endsWith('.pdf');
 
-  // Build variable list for this respondent
-  const varList = rows.map(r =>
+  // 只送還未填妥的 rows 給 AI
+  const pendingRows = rows.filter(r => !r.reply || r.reply.includes('請確認') || r.reply.includes('請查閱'));
+
+  if (!pendingRows.length) return; // 全部本地推論已搞定
+
+  const varList = pendingRows.map(r =>
     `- 變項 ${r.varName}：原始答案="${r.origVal}"，不符合說明="${r.errorDesc}"`
   ).join('\n');
 
   const prompt = `你是資料檢誤專家。這是受訪者 ${id} 的問卷掃描檔。
 
-以下是需要修正的變項清單：
+需要確認的變項：
 ${varList}
 
-請仔細閱讀問卷掃描圖片，對每個變項：
-1. 找到該題的實際作答
-2. 判斷正確值應為何（例如：若子題系列中其他題有填答，空白子題應填 0；若整題空白，填空白）
-3. 輸出計畫回覆格式為：「變項名=正確值」
+規則：
+- 欄位空白且同組子題有填答 → 回覆 變項名=0
+- 整題空白 → 回覆 變項名=空白
+- 有填寫但格式錯誤 → 回覆正確值（如 v13_6=1）
+- 時間欄位空白且同組有填 → 回覆 變項名=0
 
-邏輯規則：
-- 若某變項是子題組（如 v93_2_5），且同組其他子題有填答，空白值應回覆 v93_2_5=0
-- 若整題完全空白，回覆 v93_2_5=空白
-- 若有實際填答但輸入錯誤，回覆正確值
+只輸出 JSON，格式：
+[{"variable":"v93_2_5","reply":"v93_2_5=0","reason":"同組有作答"}]
+不要其他文字。`;
 
-只輸出 JSON 陣列，格式：
-[{"variable":"v93_2_5","reply":"v93_2_5=0","reason":"同組子題有作答，此題空白應為0"}]
-不要輸出其他文字。`;
-
-  // Build Gemini parts array
   const parts = [];
-  if (isPDF) {
-    parts.push({ inline_data: { mime_type: 'application/pdf', data: base64 } });
-  } else {
-    parts.push({ inline_data: { mime_type: pdfFile.type, data: base64 } });
-  }
+  parts.push({ inline_data: { mime_type: isPDF ? 'application/pdf' : pdfFile.type, data: base64 } });
   parts.push({ text: prompt });
 
   const resp = await fetch(
@@ -860,9 +992,7 @@ ${varList}
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts }]
-      })
+      body: JSON.stringify({ contents: [{ parts }] })
     }
   );
 
@@ -876,15 +1006,14 @@ ${varList}
   const clean = text.replace(/```json|```/g, '').trim();
 
   let parsed;
-  try { parsed = JSON.parse(clean); } catch(e) { throw new Error('AI 輸出解析失敗：' + text.slice(0, 100)); }
+  try { parsed = JSON.parse(clean); } catch(e) { throw new Error('解析失敗：' + text.slice(0, 80)); }
 
-  // Apply results back to rows
   parsed.forEach(item => {
-    const row = rows.find(r => r.varName === item.variable || r.varName.toLowerCase() === item.variable.toLowerCase());
-    if (row) {
+    const row = rows.find(r => r.varName === item.variable);
+    if (row && item.reply) {
       row.reply = item.reply;
       row._modified = true;
-      // Show AI badge
+      row._inferMethod = 'ai';
       const badge = document.getElementById('aibadge-' + row._idx);
       if (badge) badge.style.display = '';
     }
