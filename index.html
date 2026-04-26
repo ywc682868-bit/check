@@ -428,6 +428,57 @@
     color: var(--text-hint);
     font-size: 13px;
   }
+
+  .learn-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-top: 16px;
+    overflow: hidden;
+  }
+  .learn-panel-header {
+    padding: 10px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .learn-panel-header h4 {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-hint);
+  }
+  .learn-panel-body { padding: 12px 16px; }
+  .example-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .example-row .ex-label { color: var(--text-hint); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .example-chip {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .example-chip.reply { background: var(--success-bg); color: var(--success); border-color: var(--success); }
+  .del-ex { background: none; border: none; cursor: pointer; color: var(--text-hint); font-size: 14px; padding: 2px 6px; border-radius: 4px; }
+  .del-ex:hover { background: var(--danger-bg); color: var(--danger); }
+  .learn-count { font-size: 11px; color: var(--accent); font-weight: 600; background: var(--accent-light); border-radius: 10px; padding: 2px 8px; }
 </style>
 </head>
 <body>
@@ -528,10 +579,31 @@
         <div class="panel-header">
           <h3 id="workTitle">選擇受訪者</h3>
           <button class="btn" onclick="runLocalInfer()" id="localOneBtn" style="display:none">自動推論</button>
+          <button class="btn" id="saveExBtn" onclick="saveExamples()" style="display:none">儲存為學習範例</button>
           <button class="btn" id="aiOneBtn" onclick="runAIOne()" style="display:none">
             AI 辨識（需 PDF + API Key）
           </button>
           <button class="btn" onclick="showPDF()" id="viewPdfBtn" style="display:none">檢視 PDF</button>
+        </div>
+
+        <div class="learn-panel" id="learnPanel" style="display:none;">
+          <div class="learn-panel-header" onclick="toggleLearnPanel()">
+            <h4>已學習的回覆範例</h4>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="learn-count" id="learnCount">0 筆</span>
+              <span style="font-size:11px;color:var(--text-hint);" id="learnToggleIcon">▼</span>
+            </div>
+          </div>
+          <div class="learn-panel-body" id="learnPanelBody" style="display:none;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;">
+              <span class="ex-label">不符合說明</span>
+              <span class="ex-label">原始答案型態</span>
+              <span class="ex-label">回覆值</span>
+              <span></span>
+            </div>
+            <div id="exampleList"></div>
+            <button class="btn" onclick="clearExamples()" style="margin-top:8px;font-size:11px;">清除所有範例</button>
+          </div>
         </div>
 
         <div class="table-wrap">
@@ -661,6 +733,7 @@ function startSystem() {
   document.getElementById('exportBtn').style.display = '';
   document.getElementById('localAllBtn').style.display = '';
   document.getElementById('aiAllBtn').style.display = '';
+  renderLearnPanel();
 }
 
 // ── Respondent list ──
@@ -695,6 +768,7 @@ function selectRespondent(id) {
 
   const hasPDF = findPDF(id) !== null;
   document.getElementById('localOneBtn').style.display = '';
+  document.getElementById('saveExBtn').style.display = '';
   document.getElementById('aiOneBtn').style.display = hasPDF ? '' : 'none';
   document.getElementById('viewPdfBtn').style.display = hasPDF ? '' : 'none';
 
@@ -783,94 +857,72 @@ function updateReply(idx, val) {
 }
 
 // ── 本地自動推論（不需 AI）──
-// 根據不符合說明與變項名稱，自動推斷計畫回覆
 function localInfer(rows) {
-  // 收集同一受訪者所有變項的 origVal，用來判斷同組子題
-  // 找出所有「子題組」：變項名去掉最後一段數字後的前綴相同者
-  const varMap = {};
-  rows.forEach(r => { varMap[r.varName] = r; });
-
-  // 取得所有受訪者的全部 rows（含非錯誤），用來判斷同組有無填答
   const allRows = state.rows;
 
+  function extractVal(orig) {
+    const m = String(orig).match(/=(.*)$/);
+    return m ? m[1].trim() : String(orig).trim();
+  }
+
+  function siblingHasAnswer(r) {
+    const prefix = getVarPrefix(r.varName);
+    return allRows.some(x => {
+      if (x.respId !== r.respId) return false;
+      if (x.varName === r.varName) return false;
+      if (getVarPrefix(x.varName) !== prefix) return false;
+      const v = extractVal(x.origVal);
+      return v !== '' && v !== '=';
+    });
+  }
+
   rows.forEach(r => {
-    if (r.reply && r.reply.trim()) return; // 已有值，跳過
+    if (r.reply && r.reply.trim()) return;
 
     const desc = r.errorDesc || '';
     const orig = String(r.origVal || '').trim();
     const varName = r.varName;
+    const rawVal = extractVal(orig);
 
-    // ── 規則 1：欄位為空 / 空白 ──
-    // 判斷同組子題是否有其他填答
-    if (desc.includes('欄位為空') || orig === '' || orig === '=') {
-      const prefix = getVarPrefix(varName);
-      // 在全部 rows 中找同前綴且有值的其他子題
-      const siblings = allRows.filter(x =>
-        x.respId === r.respId &&
-        x.varName !== varName &&
-        getVarPrefix(x.varName) === prefix &&
-        String(x.origVal || '').trim() !== '' &&
-        String(x.origVal || '').trim() !== '='
-      );
-      if (siblings.length > 0) {
-        r.reply = '0';
-        r._inferMethod = 'local';
-      } else {
-        r.reply = '空白';
-        r._inferMethod = 'local';
-      }
-      return;
-    }
-
-    // ── 規則 2：數值為 0（潛在錯誤：確認是否留空）──
-    if (desc.includes('數值為0') || orig === '0' || orig.endsWith('=0')) {
-      const prefix = getVarPrefix(varName);
-      const siblings = allRows.filter(x =>
-        x.respId === r.respId &&
-        x.varName !== varName &&
-        getVarPrefix(x.varName) === prefix &&
-        String(x.origVal || '').trim() !== '' &&
-        String(x.origVal || '').trim() !== '='
-      );
-      if (siblings.length > 0) {
-        r.reply = '0';
-        r._inferMethod = 'local';
-      } else {
-        r.reply = '空白';
-        r._inferMethod = 'local';
-      }
-      return;
-    }
-
-    // ── 規則 3：格式錯誤（如 v13_6=1,3 → 判斷原始填寫值）──
-    if (desc.includes('格式錯誤') || desc.includes('非整數')) {
-      // 嘗試從原始答案取最後一個 = 後的值
-      const m = orig.match(/=(.+)$/);
-      if (m) {
-        const raw = m[1].trim();
-        // 若有逗號（如 1,3），取第一個數字作建議
-        const firstNum = raw.split(/[,，\s]/)[0].trim();
-        if (firstNum && !isNaN(firstNum)) {
-          r.reply = `${firstNum}（請確認）`;
-          r._inferMethod = 'local';
-        }
-      }
-      return;
-    }
-
-    // ── 規則 4：範圍檢誤不符 ──
-    if (desc.includes('範圍') || desc.includes('超出')) {
-      const m = orig.match(/=(.+)$/);
-      if (m) {
-        r.reply = '（請查閱 PDF 確認）';
-        r._inferMethod = 'local';
-      }
-      return;
-    }
-
-    // ── 規則 5：時間數值（hr/min）──
-    if (desc.includes('時間數值') || varName.includes('_hr') || varName.includes('_min')) {
+    // 規則1: 數值為0 - 受訪者確實填了0，直接回覆0
+    if (desc.includes('數值為0')) {
       r.reply = '0';
+      r._inferMethod = 'local';
+      return;
+    }
+
+    // 規則2: 欄位為空 - 同組有填答→0，全組空→空白
+    if (desc.includes('欄位為空') || rawVal === '' || orig === '=') {
+      r.reply = siblingHasAnswer(r) ? '0' : '空白';
+      r._inferMethod = 'local';
+      return;
+    }
+
+    // 規則3: 格式錯誤/非整數 - 取第一個數字建議
+    if (desc.includes('格式錯誤') || desc.includes('非整數')) {
+      const firstNum = rawVal.split(/[,，\s]/)[0].trim();
+      r.reply = (firstNum && !isNaN(firstNum)) ? firstNum + '（請確認）' : '（請確認）';
+      r._inferMethod = 'local';
+      return;
+    }
+
+    // 規則4: 範圍檢誤
+    if (desc.includes('範圍') || desc.includes('超出')) {
+      r.reply = '（請查閱 PDF）';
+      r._inferMethod = 'local';
+      return;
+    }
+
+    // 規則5: 時間數值皆為0
+    if (desc.includes('時間數值')) {
+      r.reply = '0';
+      r._inferMethod = 'local';
+      return;
+    }
+
+    // 規則6: Other欄位內容
+    if (desc.includes('Other欄位') || desc.toLowerCase().includes('other')) {
+      r.reply = 'ok';
       r._inferMethod = 'local';
       return;
     }
@@ -994,7 +1046,7 @@ ${varList}
 
 只輸出 JSON，格式：
 [{"variable":"v93_2_5","reply":"v93_2_5=0","reason":"同組有作答"}]
-不要其他文字。`;
+不要其他文字。${buildFewShotPrompt()}`;
 
   const parts = [];
   parts.push({ inline_data: { mime_type: isPDF ? 'application/pdf' : pdfFile.type, data: base64 } });
@@ -1072,6 +1124,124 @@ async function pdfPageNext() {
 }
 async function pdfPagePrev() {
   if (state.pdfPage > 1) { state.pdfPage--; await renderPDFPage(); }
+}
+
+
+// ── Learning system ──
+// examples: [{errorDesc, origPattern, reply, varName}]
+const STORAGE_KEY = 'questionnaire_checker_examples';
+
+function loadExamplesFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function saveExamplesToStorage(examples) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(examples)); } catch(e) {}
+}
+
+state.examples = loadExamplesFromStorage();
+
+function saveExamples() {
+  const id = state.currentId;
+  if (!id) return;
+  const rows = state.respondents[id];
+  let added = 0;
+
+  rows.forEach(r => {
+    if (!r.reply || !r.reply.trim()) return;
+    if (r._savedAsExample) return;
+
+    const example = {
+      id: Date.now() + Math.random(),
+      errorDesc: r.errorDesc || '',
+      origPattern: classifyOrigVal(r.origVal),
+      origVal: r.origVal,
+      varGroup: getVarPrefix(r.varName),
+      reply: r.reply,
+      timestamp: new Date().toISOString(),
+    };
+
+    // Avoid exact duplicates
+    const dup = state.examples.find(e =>
+      e.errorDesc === example.errorDesc &&
+      e.origPattern === example.origPattern &&
+      e.reply === example.reply
+    );
+    if (!dup) {
+      state.examples.push(example);
+      added++;
+    }
+    r._savedAsExample = true;
+  });
+
+  saveExamplesToStorage(state.examples);
+  renderLearnPanel();
+  showToast(added > 0 ? `已儲存 ${added} 筆學習範例` : '無新增範例（已存在或尚未填寫）');
+}
+
+// Classify origVal into a pattern type for matching
+function classifyOrigVal(orig) {
+  const v = String(orig || '').trim();
+  const val = v.includes('=') ? v.split('=').pop().trim() : v;
+  if (val === '' || val === '=') return 'empty';
+  if (val === '0') return 'zero';
+  if (!isNaN(val)) return 'number';
+  return 'other';
+}
+
+function clearExamples() {
+  if (!confirm('確定要清除所有學習範例嗎？')) return;
+  state.examples = [];
+  saveExamplesToStorage([]);
+  renderLearnPanel();
+  showToast('已清除所有範例');
+}
+
+function deleteExample(id) {
+  state.examples = state.examples.filter(e => e.id !== id);
+  saveExamplesToStorage(state.examples);
+  renderLearnPanel();
+}
+
+function renderLearnPanel() {
+  const panel = document.getElementById('learnPanel');
+  const list = document.getElementById('exampleList');
+  const count = document.getElementById('learnCount');
+  const n = state.examples.length;
+
+  panel.style.display = n > 0 ? '' : 'none';
+  count.textContent = n + ' 筆';
+
+  if (!list) return;
+  if (n === 0) { list.innerHTML = '<div style="color:var(--text-hint);font-size:12px;">尚無範例</div>'; return; }
+
+  list.innerHTML = state.examples.map(e => `
+    <div class="example-row">
+      <span class="example-chip" title="${escHtml(e.errorDesc)}">${escHtml(e.errorDesc.slice(0, 20))}${e.errorDesc.length > 20 ? '…' : ''}</span>
+      <span class="example-chip" title="${escHtml(e.origVal)}">${escHtml(e.origPattern)} (${escHtml(e.origVal.slice(0,12))})</span>
+      <span class="example-chip reply">${escHtml(e.reply)}</span>
+      <button class="del-ex" onclick="deleteExample(${e.id})" title="刪除">×</button>
+    </div>`).join('');
+}
+
+function toggleLearnPanel() {
+  const body = document.getElementById('learnPanelBody');
+  const icon = document.getElementById('learnToggleIcon');
+  const open = body.style.display === 'none';
+  body.style.display = open ? '' : 'none';
+  icon.textContent = open ? '▲' : '▼';
+}
+
+// Build few-shot examples string for AI prompt
+function buildFewShotPrompt() {
+  if (!state.examples.length) return '';
+  const lines = state.examples.slice(-15).map(e =>
+    `- 不符合說明="${e.errorDesc}"，原始答案="${e.origVal}" → 回覆值="${e.reply}"`
+  );
+  return `\n\n【你之前學習的回覆範例，請參考這些模式：】\n${lines.join('\n')}`;
 }
 
 // ── Export Excel ──
