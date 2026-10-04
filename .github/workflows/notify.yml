@@ -1,0 +1,38 @@
+name: Pokemon GO Telegram
+on:
+  schedule:
+    - cron: "52 0 * * *"
+    - cron: "52 4 * * *"
+    - cron: "52 12 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "morning or delta"
+        default: "morning"
+permissions:
+  contents: write
+concurrency: pogo-notify
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Send
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          MODE: ${{ github.event.inputs.mode || 'auto' }}
+        run: |
+          if [ -d pogo-telegram ]; then cd pogo-telegram; fi
+          python pogo_notify.py
+      - name: Save state
+        run: |
+          if [ -d pogo-telegram ]; then cd pogo-telegram; fi
+          git config user.name "pogo-bot"
+          git config user.email "pogo-bot@users.noreply.github.com"
+          git add state.json
+          git diff --cached --quiet || git commit -m "update state"
+          git push
