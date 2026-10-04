@@ -28,6 +28,7 @@ from zoneinfo import ZoneInfo
 HERE = Path(__file__).resolve().parent
 STATE_FILE = HERE / "state.json"
 LOCATIONS_FILE = HERE / "locations.json"
+NAMES_FILE = HERE / "pokemon_zh.json"
 TPE = ZoneInfo("Asia/Taipei")
 UA = "Mozilla/5.0 (compatible; pogo-telegram-notifier)"
 
@@ -146,7 +147,7 @@ class Event:
         return TYPE_NAMES.get(self.type, self.type)
 
     def title(self):
-        t = f"[{esc(self.label)}] {esc(self.name)}"
+        t = f"[{esc(self.label)}] {esc(getattr(self, 'zh', None) or self.name)}"
         return f'<a href="{html.escape(self.link)}">{t}</a>' if self.link else t
 
 
@@ -171,6 +172,14 @@ def zone_table(naive):
 
 def world_window_lines(ev, now):
     """當地時間活動：寫出台灣、巴西、全球最晚的結束時刻。"""
+    return _window(ev) + related_lines(ev)
+
+
+def related_lines(ev):
+    return [f"　※ 這是全球部分；另有地點限定內容，見〈{esc(n)}〉" for n in getattr(ev, "related", [])]
+
+
+def _window(ev):
     if not (ev.end and ev.end_local):
         return [f"　結束：{fmt(ev.end_in())}（全球同時）"] if ev.end else []
     lines = [
@@ -179,6 +188,131 @@ def world_window_lines(ev, now):
         f"　全球最晚（美屬薩摩亞）：{fmt(ev.end_in(LAST_ZONE))}",
     ]
     return lines
+
+
+
+# ---------- 翻譯成中文 ----------
+
+FORM_WORDS = [
+    ("Gigantamax", "超極巨化"), ("Dynamax", "極巨化"), ("Mega", "超級"), ("Primal", "原始"),
+    ("Shadow", "暗影"), ("Shiny", "異色"), ("Alolan", "阿羅拉"), ("Galarian", "伽勒爾"),
+    ("Hisuian", "洗翠"), ("Paldean", "帕底亞"), ("Incarnate Forme", "化身形態"),
+    ("Therian Forme", "靈獸形態"), ("Origin Forme", "起源形態"), ("Altered Forme", "別種形態"),
+    ("Armored", "裝甲"), ("Costumed", "特殊造型"),
+]
+MONTHS = dict(zip(
+    ["January", "February", "March", "April", "May", "June", "July", "August",
+     "September", "October", "November", "December"], range(1, 13)))
+NAME_PATTERNS = [
+    (r"^(.*) in 5-star Raid Battles$", "{} · 五星團體戰"),
+    (r"^(.*) in Mega Raids$", "{} · 超級團體戰"),
+    (r"^(.*) in Shadow Raids$", "{} · 暗影團體戰"),
+    (r"^(.*) in (?:\d|one|three)-star Raid Battles$", "{} · 團體戰"),
+    (r"^(.*) Raid Hour$", "{} · 團體戰時刻"),
+    (r"^(.*) Spotlight Hour$", "{} · 聚焦時刻"),
+    (r"^(.*) during Max Monday$", "{} · 極巨星期一"),
+    (r"^(.*) Max Battle Day$", "{} · 極巨對戰日"),
+    (r"^(.*) Max Battle Weekend$", "{} · 極巨對戰週末"),
+    (r"^(.*) Community Day Classic$", "{} · 經典社群日"),
+    (r"^(.*) Community Day$", "{} · 社群日"),
+    (r"^(.*) Hatch Day$", "{} · 孵化日"),
+    (r"^(.*) Raid Day$", "{} · 團體戰日"),
+    (r"^(.*) Research Day$", "{} · 調查日"),
+    (r"^(.*) Timed Research$", "{} · 限時調查"),
+]
+PHRASES = [
+    (": Applin Picking", ""), ("Super Mega", "極致超級"),
+    ("World Space Week", "世界太空週"), ("Harvest Festival", "豐收節"), ("Taken Over", "佔領活動"),
+    ("Fall Marathon: Buddy Trek", "秋季遠足：與夥伴同行"), ("Halloween", "萬聖節"),
+    ("Catch Mastery", "捕捉達人"), ("Wild Area", "曠野地帶"), ("Global", "全球"),
+    ("Part III", "第三部"), ("Part II", "第二部"), ("Part I", "第一部"),
+    ("Part 1", "第一部"), ("Part 2", "第二部"),
+    ("Minior Showers", "小隕星流星雨"), ("Southern Delta Aquariids", "南寶瓶座δ"),
+    ("Eta Aquariids", "寶瓶座η"), ("Orionids", "獵戶座"), ("Leonids", "獅子座"),
+    ("Geminids", "雙子座"), ("Perseids", "英仙座"), ("Meteor Shower", "流星雨"),
+    ("30th Celebration", "30 週年慶"), ("Sendai • Tohoku", "仙台・東北"),
+    ("Mexico City", "墨西哥城"), ("Kaohsiung", "高雄"), ("Los Angeles", "洛杉磯"),
+    ("Alola", "阿羅拉"), ("Community Day", "社群日"), ("Raid Day", "團體戰日"),
+    ("Timed Research", "限時調查"),
+] + [(m, f"{n}月") for m, n in MONTHS.items()]
+_names = None
+
+
+def pokemon_names():
+    global _names
+    if _names is None:
+        data = load_json(NAMES_FILE, {})
+        _names = sorted(data.items(), key=lambda kv: -len(kv[0]))
+    return _names
+
+
+def has_english(s):
+    s = re.sub(r"GO Pass|GO Tour|GO Fest|City Safari|Pokémon|GO|TCG|adidas|×", "", s)
+    return re.search(r"[A-Za-z]{3,}", s) is not None
+
+
+def online_translate(text, source="en"):
+    """最後手段：免費線上翻譯。失敗就回傳 None。"""
+    try:
+        url = ("https://translate.googleapis.com/translate_a/single?client=gtx&sl=" + source +
+               "&tl=zh-TW&dt=t&q=" + urllib.parse.quote(text))
+        data = json.loads(fetch(url, timeout=15))
+        out = "".join(seg[0] for seg in data[0] if seg and seg[0])
+        return out.strip() or None
+    except Exception:
+        return None
+
+
+def localize_terms(s):
+    for en, zh in PHRASES:
+        s = re.sub(r"(?<![A-Za-z])" + re.escape(en) + r"(?![A-Za-z])", zh, s)
+    for en, zh in pokemon_names():
+        if en in s:
+            s = re.sub(r"(?<![A-Za-z])" + re.escape(en) + r"(?![A-Za-z])", zh, s)
+    for en, zh in FORM_WORDS:
+        s = re.sub(r"(?<![A-Za-z])" + re.escape(en) + r"(?![A-Za-z])", zh, s)
+    s = re.sub(r"(?<=[\u4e00-\u9fff）]) +(?=[\u4e00-\u9fff（])", "", s)   # 中文之間不留空白
+    s = s.replace(", and ", "、").replace(" and ", "與").replace(", ", "、")
+    s = s.replace(" (", "（").replace("(", "（").replace(")", "）").replace(": ", "：")
+    return s
+
+
+def translate_name(name, cache, official_title=None):
+    if name in cache:
+        return cache[name]
+    out = None
+    m = re.match(r"^GO Pass: (\w+)$", name)
+    if m and m.group(1) in MONTHS:
+        out = f"GO Pass：{MONTHS[m.group(1)]}月"
+    if out is None:
+        for pat, tpl in NAME_PATTERNS:
+            m = re.match(pat, name)
+            if m:
+                out = tpl.format(localize_terms(m.group(1)))
+                break
+    if out is None:
+        out = localize_terms(name)
+    out = re.sub(r"(?<=[\u4e00-\u9fff）]) +(?=[\u4e00-\u9fff（])", "", out)
+    if has_english(out):
+        if official_title:
+            out = official_title
+        else:
+            out = online_translate(name) or out
+            out = localize_terms(out)
+    if not has_english(out):
+        cache[name] = out          # 只快取翻好的，沒翻好的下次再試
+    return out
+
+
+def match_official(event_id, news):
+    """用網址代稱比對官方中文標題。"""
+    best, score = None, 0.0
+    for title, url in news:
+        slug = url.rstrip("/").rsplit("/", 1)[-1]
+        r = difflib.SequenceMatcher(None, event_id, slug).ratio()
+        if r > score:
+            best, score = title, r
+    return best if score >= 0.8 else None
 
 
 # ---------- 官方新聞與攻略站 ----------
@@ -261,7 +395,10 @@ def locations_section(now, only_ending_days=None):
         if now < start:
             head += f"（{fmt(start)} 開始）"
         lines.append(head)
-        lines.append(f"　到 {end.astimezone(TPE).strftime('%Y/%m/%d %H:%M')}（台灣時間）｜{esc(g.get('reward', ''))}")
+        lines.append(f"　期間：到 {end.astimezone(TPE).strftime('%Y/%m/%d %H:%M')}（台灣時間）")
+        lines.append(f"　地點限定：{esc(g.get('reward', ''))}")
+        if g.get("global_note"):
+            lines.append(f"　全球都有：{esc(g['global_note'])}")
         for name, lat, lon in g.get("places", []):
             lines.append(f"　・{esc(name)}　<code>{lat},{lon}</code>")
     return lines
@@ -288,9 +425,16 @@ def build(mode, now, state):
             changed_events.append((ev, old))
         seen_events[ev.id] = sig
 
+    news = official_news()
+    cache = state.setdefault("zh", {})
+    groups = load_json(LOCATIONS_FILE, [])
+    for ev in events:
+        ev.zh = translate_name(ev.name, cache, match_official(ev.id, news))
+        ev.related = [g["name"] for g in groups if g.get("related") and g["related"] in ev.id]
+
     # --- 官方公告：新公告與內文更新 ---
     new_articles, updated_articles = [], []
-    for title, url in official_news():
+    for title, url in news:
         lines = article_lines(url)
         if lines is None:
             continue
@@ -311,6 +455,8 @@ def build(mode, now, state):
         for title, link in feed_items(label, url):
             if link not in seen_feed:
                 if not first_run:
+                    if label == "ポケらく":
+                        title = online_translate(title, "ja") or title
                     new_posts.append((label, title, link))
                 seen_feed.append(link)
     state["feed"] = seen_feed[-400:]
@@ -364,13 +510,14 @@ def build(mode, now, state):
 
         running = [ev for ev in events if ev.start_in(TPE) and ev.end_in(TPE) and ev.start_in(TPE) <= now <= ev.end_in(TPE)]
         if running:
-            msg.append("\n<b>進行中</b>")
+            msg.append("\n<b>進行中（全球）</b>")
             for ev in sorted(running, key=lambda x: x.end_in(TPE)):
                 msg.append(f"{ev.title()}　到 {fmt(ev.end_in(TPE))}")
+                msg += related_lines(ev)
 
         upcoming = [ev for ev in events if ev.start_in(TPE) and now < ev.start_in(TPE) <= now + timedelta(days=7)]
         if upcoming:
-            msg.append("\n<b>未來 7 天</b>")
+            msg.append("\n<b>未來 7 天（全球）</b>")
             for ev in sorted(upcoming, key=lambda x: x.start_in(TPE)):
                 early = ""
                 if ev.start_local:
@@ -379,7 +526,7 @@ def build(mode, now, state):
 
         loc = locations_section(now)
         if loc:
-            msg.append("\n<b>地點限定活動與座標</b>")
+            msg.append("\n<b>地點限定活動與座標（要到現場）</b>")
             msg += loc
     else:
         msg.append(f"<b>Pokémon GO 新增與變更</b>　{now.strftime('%m/%d %H:%M')}")
