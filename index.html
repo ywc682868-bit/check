@@ -1,1963 +1,482 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>問卷資料檢誤系統</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+#!/usr/bin/env python3
+"""Pokémon GO 活動提醒 → Telegram
 
-  :root {
-    --bg: #F4F1EB;
-    --surface: #FDFCF9;
-    --border: #D8D3C8;
-    --border-strong: #A09890;
-    --text: #1A1714;
-    --text-muted: #6B635A;
-    --text-hint: #9D9088;
-    --accent: #2C5F8A;
-    --accent-light: #E8F0F8;
-    --accent-muted: #4A7FAD;
-    --success: #2D6A4F;
-    --success-bg: #EAF4EE;
-    --warn: #8A5A00;
-    --warn-bg: #FFF5DC;
-    --danger: #8A1C1C;
-    --danger-bg: #FDEAEA;
-    --mono: 'IBM Plex Mono', monospace;
-    --sans: 'Noto Sans TC', sans-serif;
-  }
+每天執行三次（早上完整版、下午與晚上只報新增或變更）。
+只用 Python 標準函式庫，不需要安裝任何套件。
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+環境變數：
+  TELEGRAM_BOT_TOKEN  Telegram 機器人權杖（必填，除非 DRY_RUN=1）
+  TELEGRAM_CHAT_ID    你的聊天室 ID（必填，除非 DRY_RUN=1）
+  MODE                morning / delta / auto（預設 auto：台灣時間 11 點前跑完整版）
+  DRY_RUN             設為 1 時只印出訊息，不發送
+  NOW                 測試用，假裝現在是這個台灣時間，例如 2026-10-04T22:00
+"""
+import difflib
+import hashlib
+import html
+import json
+import os
+import re
+import sys
+import urllib.parse
+import urllib.request
+import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta
+from pathlib import Path
+from zoneinfo import ZoneInfo
 
-  body {
-    font-family: var(--sans);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-    line-height: 1.6;
-  }
+HERE = Path(__file__).resolve().parent
+STATE_FILE = HERE / "state.json"
+LOCATIONS_FILE = HERE / "locations.json"
+TPE = ZoneInfo("Asia/Taipei")
+UA = "Mozilla/5.0 (compatible; pogo-telegram-notifier)"
 
-  /* ── Layout ── */
-  .layout { display: grid; grid-template-columns: 360px 1fr; min-height: 100vh; }
-
-  .sidebar {
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  .sidebar-brand {
-    padding: 20px 20px 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .sidebar-brand h1 {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: var(--text);
-    text-transform: uppercase;
-  }
-  .sidebar-brand p {
-    font-size: 11px;
-    color: var(--text-hint);
-    margin-top: 2px;
-    font-family: var(--mono);
-  }
-
-  .sidebar-section {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .sidebar-section h2 {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-hint);
-    margin-bottom: 10px;
-  }
-
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .stat-box {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 8px 10px;
-  }
-  .stat-box .val {
-    font-family: var(--mono);
-    font-size: 20px;
-    font-weight: 500;
-    color: var(--accent);
-    display: block;
-  }
-  .stat-box .lbl {
-    font-size: 10px;
-    color: var(--text-hint);
-    display: block;
-  }
-
-  .respondent-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 8px 0;
-  }
-  .respondent-list::-webkit-scrollbar { width: 4px; }
-  .respondent-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  .resp-item {
-    padding: 8px 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: background 0.1s;
-    border-left: 3px solid transparent;
-  }
-  .resp-item:hover { background: var(--bg); }
-  .resp-item.active { background: var(--accent-light); border-left-color: var(--accent); }
-  .resp-item .resp-id { font-family: var(--mono); font-size: 11px; color: var(--text); flex: 1; }
-  .resp-item .resp-count {
-    font-size: 11px;
-    font-family: var(--mono);
-    background: var(--warn-bg);
-    color: var(--warn);
-    border-radius: 10px;
-    padding: 1px 7px;
-    font-weight: 500;
-  }
-  .resp-item.done .resp-count {
-    background: var(--success-bg);
-    color: var(--success);
-  }
-
-  /* ── Main ── */
-  .main { display: flex; flex-direction: column; min-height: 100vh; }
-
-  .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 28px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  .topbar h2 { font-size: 14px; font-weight: 500; flex: 1; font-family: var(--mono); }
-
-  .btn {
-    font-family: var(--sans);
-    font-size: 12px;
-    font-weight: 500;
-    padding: 7px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-  .btn:hover { background: var(--bg); border-color: var(--border-strong); }
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent);
-  }
-  .btn-primary:hover { background: var(--accent-muted); border-color: var(--accent-muted); }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .content { flex: 1; padding: 28px; }
-
-  /* ── Welcome / upload ── */
-  .welcome {
-    max-width: 640px;
-    margin: 40px auto;
-  }
-  .welcome-title {
-    font-size: 26px;
-    font-weight: 300;
-    letter-spacing: -0.01em;
-    margin-bottom: 8px;
-  }
-  .welcome-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 32px; }
-
-  .step-cards { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
-  .step-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px 20px;
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-  }
-  .step-num {
-    width: 26px; height: 26px;
-    background: var(--accent);
-    color: #fff;
-    border-radius: 50%;
-    font-size: 12px;
-    font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .step-card h3 { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
-  .step-card p { font-size: 12px; color: var(--text-muted); }
-
-  .upload-area {
-    background: var(--surface);
-    border: 1.5px dashed var(--border-strong);
-    border-radius: 12px;
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .upload-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  .upload-box {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
-    background: var(--bg);
-    cursor: pointer;
-    transition: all 0.15s;
-    text-align: center;
-    position: relative;
-  }
-  .upload-box:hover { border-color: var(--accent); background: var(--accent-light); }
-  .upload-box.loaded { border-color: var(--success); background: var(--success-bg); }
-  .upload-box input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .upload-box .icon { font-size: 22px; margin-bottom: 6px; }
-  .upload-box .label { font-size: 12px; font-weight: 500; }
-  .upload-box .sublabel { font-size: 11px; color: var(--text-hint); margin-top: 2px; }
-
-  .api-key-row { display: flex; gap: 10px; align-items: flex-end; }
-  .api-key-row input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-family: var(--mono);
-    font-size: 12px;
-    background: var(--bg);
-    color: var(--text);
-  }
-  .api-key-row label { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px; }
-
-  /* ── Error table ── */
-  .table-wrap { overflow-x: auto; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  thead th {
-    background: var(--bg);
-    padding: 10px 14px;
-    text-align: left;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-hint);
-    border-bottom: 1px solid var(--border);
-  }
-  tbody td {
-    padding: 9px 14px;
-    border-bottom: 0.5px solid var(--border);
-    vertical-align: middle;
-  }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover td { background: var(--bg); }
-
-  .tag {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-weight: 500;
-  }
-  .tag-error { background: var(--danger-bg); color: var(--danger); }
-  .tag-warn { background: var(--warn-bg); color: var(--warn); }
-  .tag-ok { background: var(--success-bg); color: var(--success); }
-  .tag-info { background: var(--accent-light); color: var(--accent); }
-
-  .reply-cell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .reply-input {
-    font-family: var(--mono);
-    font-size: 12px;
-    padding: 5px 10px;
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    background: var(--bg);
-    color: var(--text);
-    width: 180px;
-    transition: border-color 0.15s;
-  }
-  .reply-input:focus { outline: none; border-color: var(--accent); }
-  .reply-input.filled { border-color: var(--success); background: var(--success-bg); }
-
-  .ai-badge {
-    font-size: 10px;
-    padding: 2px 7px;
-    border-radius: 4px;
-    background: var(--accent-light);
-    color: var(--accent);
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    white-space: nowrap;
-  }
-
-  .panel-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-  .panel-header h3 { font-size: 16px; font-weight: 500; flex: 1; }
-
-  .pdf-viewer {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 20px;
-  }
-  .pdf-viewer-header {
-    padding: 10px 16px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
-    font-size: 12px;
-    font-family: var(--mono);
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  #pdfCanvas {
-    width: 100%;
-    display: block;
-    cursor: zoom-in;
-  }
-
-  .processing-row td { background: var(--accent-light) !important; }
-  .done-row td:last-child { color: var(--success); font-weight: 500; }
-
-  /* ── Progress ── */
-  .progress-bar {
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-top: 8px;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: width 0.3s;
-  }
-
-  /* ── Toast ── */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--text);
-    color: var(--surface);
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-size: 13px;
-    z-index: 999;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.2s;
-    pointer-events: none;
-  }
-  .toast.show { opacity: 1; transform: translateY(0); }
-
-  /* ── Responsive ── */
-  @media (max-width: 768px) {
-    .layout { grid-template-columns: 1fr; }
-    .sidebar { position: static; height: auto; }
-    .upload-row { grid-template-columns: 1fr; }
-  }
-
-  .spinner {
-    display: inline-block;
-    width: 12px; height: 12px;
-    border: 2px solid var(--accent-light);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    vertical-align: middle;
-    margin-right: 4px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .empty-msg {
-    text-align: center;
-    padding: 40px;
-    color: var(--text-hint);
-    font-size: 13px;
-  }
-  .group-header {
-    padding: 6px 20px 4px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    user-select: none;
-    border-top: 1px solid var(--border);
-    background: var(--bg);
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
-  .group-header:first-child { border-top: none; }
-  .group-toggle { font-size: 10px; color: var(--text-hint); transition: transform 0.15s; }
-  .group-toggle.collapsed { transform: rotate(-90deg); }
-  .group-label { font-size: 11px; font-weight: 500; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .group-check {
-    width: 14px; height: 14px;
-    border: 1.5px solid var(--border-strong);
-    border-radius: 3px;
-    cursor: pointer;
-    appearance: none;
-    background: var(--surface);
-    flex-shrink: 0;
-  }
-  .group-check:checked { background: var(--accent); border-color: var(--accent); }
-  .group-check:indeterminate { background: var(--accent-light); border-color: var(--accent); }
-  .group-stats { font-size: 10px; color: var(--text-hint); font-family: var(--mono); }
-  .group-body { }
-  .group-body.collapsed { display: none; }
-  .resp-item { padding-left: 28px; }
-  .resp-check {
-    width: 12px; height: 12px;
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    cursor: pointer;
-    appearance: none;
-    background: var(--surface);
-    flex-shrink: 0;
-  }
-  .resp-check:checked { background: var(--accent); border-color: var(--accent); }
-  .batch-bar {
-    padding: 8px 16px;
-    background: var(--accent-light);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    display: none;
-  }
-  .batch-bar.show { display: flex; }
-
-  .learn-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    margin-top: 16px;
-    overflow: hidden;
-  }
-  .learn-panel-header {
-    padding: 10px 16px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    user-select: none;
-  }
-  .learn-panel-header h4 {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-hint);
-  }
-  .learn-panel-body { padding: 12px 16px; }
-  .example-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
-    gap: 8px;
-    align-items: center;
-    margin-bottom: 6px;
-    font-size: 12px;
-  }
-  .example-row .ex-label { color: var(--text-hint); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
-  .example-chip {
-    background: var(--bg);
-    border: 0.5px solid var(--border);
-    border-radius: 5px;
-    padding: 4px 8px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .example-chip.reply { background: var(--success-bg); color: var(--success); border-color: var(--success); }
-  .del-ex { background: none; border: none; cursor: pointer; color: var(--text-hint); font-size: 14px; padding: 2px 6px; border-radius: 4px; }
-  .del-ex:hover { background: var(--danger-bg); color: var(--danger); }
-  .learn-count { font-size: 11px; color: var(--accent); font-weight: 600; background: var(--accent-light); border-radius: 10px; padding: 2px 8px; }
-</style>
-</head>
-<body>
-
-<div class="layout">
-  <!-- ── Sidebar ── -->
-  <aside class="sidebar">
-    <div class="sidebar-brand">
-      <h1>檢誤系統</h1>
-      <p>Data Validation Tool</p>
-    </div>
-
-    <div class="sidebar-section">
-      <h2>統計</h2>
-      <div class="stats-grid">
-        <div class="stat-box"><span class="val" id="statTotal">0</span><span class="lbl">待修筆數</span></div>
-        <div class="stat-box"><span class="val" id="statDone">0</span><span class="lbl">已填回覆</span></div>
-        <div class="stat-box"><span class="val" id="statResp">0</span><span class="lbl">受訪者數</span></div>
-        <div class="stat-box"><span class="val" id="statPct">0%</span><span class="lbl">完成率</span></div>
-      </div>
-    </div>
-
-    <div class="sidebar-section" style="padding-bottom: 8px;">
-      <h2>受訪者</h2>
-    </div>
-    <div class="batch-bar" id="batchBar">
-      <span id="batchSelCount">0 筆已選</span>
-      <button class="btn" style="font-size:11px;padding:4px 10px;" onclick="runBatchSelected('infer')">推論選取</button>
-
-      <button class="btn" style="font-size:11px;padding:4px 10px;margin-left:auto;" onclick="clearSelection()">取消選取</button>
-    </div>
-    <div class="respondent-list" id="respondentList">
-      <div class="empty-msg">載入 Excel 後顯示</div>
-    </div>
-  </aside>
-
-  <!-- ── Main ── -->
-  <div class="main">
-    <div class="topbar">
-      <h2 id="topbarTitle">問卷資料檢誤系統</h2>
-      <button class="btn" id="exportBtn" style="display:none" onclick="exportExcel()">匯出 Excel</button>
-      <label class="btn" id="addPdfBtn" style="display:none;cursor:pointer;" title="追加個別 PDF 檔案">
-        + 追加 PDF
-        <input type="file" accept=".pdf" multiple style="display:none" onchange="loadPDFs(this)" />
-      </label>
-      <label class="btn" id="addFolderBtn" style="display:none;cursor:pointer;" title="追加整個資料夾的 PDF">
-        + 追加資料夾
-        <input type="file" webkitdirectory mozdirectory style="display:none" onchange="loadPDFsFromFolder(this)" />
-      </label>
-      <button class="btn" id="localAllBtn" style="display:none" onclick="runLocalInferAll()">全部自動推論</button>
-
-    </div>
-
-    <div class="content" id="contentArea">
-      <!-- Welcome screen -->
-      <div class="welcome" id="welcomeScreen">
-        <div class="welcome-title">資料檢誤工具</div>
-        <p class="welcome-sub">上傳 Excel 報表與掃描 PDF，AI 自動比對並填寫計畫回覆欄位。</p>
-
-        <div class="step-cards">
-          <div class="step-card">
-            <div class="step-num">1</div>
-            <div>
-              <h3>上傳 Excel 檢誤報表</h3>
-              <p>包含受訪者編號、變項名稱、原始答案、不符合說明等欄位的 xlsx 檔案</p>
-            </div>
-          </div>
-          <div class="step-card">
-            <div class="step-num">2</div>
-            <div>
-              <h3>上傳掃描 PDF 資料夾</h3>
-              <p>PDF 檔名需包含受訪者 ID（例如：s112191313028.pdf），可多選批次上傳</p>
-            </div>
-          </div>
-          <div class="step-card">
-            <div class="step-num">3</div>
-            <div>
-              <h3>自動推論並填寫回覆</h3>
-              <p>系統根據學習範例自動推論，填入「計畫回覆」欄位，不確定的留空讓您手動填寫</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="upload-area">
-          <div class="upload-row">
-            <div class="upload-box" id="xlsxBox">
-              <input type="file" id="xlsxInput" accept=".xlsx,.xls" onchange="loadExcel(this)" />
-              <div class="icon">📊</div>
-              <div class="label">Excel 報表</div>
-              <div class="sublabel" id="xlsxLabel">點擊選擇 .xlsx 檔案</div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px;">
-              <div class="upload-box" id="pdfBox">
-                <input type="file" id="pdfInput" accept=".pdf" multiple onchange="loadPDFs(this)" />
-                <div class="icon">📄</div>
-                <div class="label">掃描 PDF（可多選）</div>
-                <div class="sublabel" id="pdfLabel">點擊選擇多個 PDF 檔案</div>
-              </div>
-              <div class="upload-box" id="pdfFolderBox" style="border-style:solid;background:var(--accent-light);">
-                <input type="file" id="pdfFolderInput" webkitdirectory mozdirectory onchange="loadPDFsFromFolder(this)" />
-                <div class="icon">📁</div>
-                <div class="label">或選擇整個資料夾</div>
-                <div class="sublabel">自動讀取資料夾內所有 PDF</div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <button class="btn btn-primary" onclick="startSystem()" style="width:100%;padding:12px;">載入系統</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Main work screen -->
-      <div id="workScreen" style="display:none;">
-        <div class="panel-header">
-          <h3 id="workTitle">選擇受訪者</h3>
-          <button class="btn" onclick="runLocalInfer()" id="localOneBtn" style="display:none">自動推論</button>
-          <button class="btn" id="saveExBtn" onclick="saveExamples()" style="display:none">儲存為學習範例</button>
-          <button class="btn" onclick="showPDF()" id="viewPdfBtn" style="display:none">檢視 PDF</button>
-        </div>
-
-        <div class="learn-panel" id="learnPanel" style="display:none;">
-          <div class="learn-panel-header" onclick="toggleLearnPanel()">
-            <h4>已學習的回覆範例</h4>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span class="learn-count" id="learnCount">0 筆</span>
-              <span style="font-size:11px;color:var(--text-hint);" id="learnToggleIcon">▼</span>
-            </div>
-          </div>
-          <div class="learn-panel-body" id="learnPanelBody" style="display:none;">
-            <div style="display:grid;grid-template-columns:90px 1fr 1fr 80px auto;gap:8px;margin-bottom:8px;">
-              <span class="ex-label">變項</span>
-              <span class="ex-label">不符合說明</span>
-              <span class="ex-label">原始答案</span>
-              <span class="ex-label">回覆值</span>
-              <span></span>
-            </div>
-            <div id="exampleList"></div>
-            <button class="btn" onclick="clearExamples()" style="margin-top:8px;font-size:11px;">清除所有範例</button>
-          </div>
-        </div>
-
-        <div class="table-wrap">
-          <table id="errorTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>變項名稱</th>
-                <th>原始答案</th>
-                <th>不符合說明</th>
-                <th>計畫回覆</th>
-                <th>狀態</th>
-              </tr>
-            </thead>
-            <tbody id="errorTbody">
-              <tr><td colspan="6" class="empty-msg">請從左側選擇受訪者</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="pdf-viewer" id="pdfViewer" style="display:none;">
-          <div class="pdf-viewer-header">
-            <span id="pdfViewerLabel">PDF 預覽</span>
-            <div style="display:flex;gap:8px;">
-              <button class="btn" onclick="pdfPagePrev()">◀ 上頁</button>
-              <span id="pdfPageInfo" style="font-size:12px;align-self:center;"></span>
-              <button class="btn" onclick="pdfPageNext()">下頁 ▶</button>
-            </div>
-          </div>
-          <canvas id="pdfCanvas"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- PDF.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>
-// ── State ──
-const state = {
-  apiKey: '',
-  rows: [],           // all rows from Excel
-  respondents: {},    // { id: [rows] }
-  pdfs: {},           // { id: File }
-  currentId: null,
-  pdfDoc: null,
-  pdfPage: 1,
-  pdfTotalPages: 0,
-};
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-// ── Excel loading ──
-function loadExcel(input) {
-  const file = input.files[0];
-  if (!file) return;
-  document.getElementById('xlsxLabel').textContent = file.name;
-  document.getElementById('xlsxBox').classList.add('loaded');
-
-  const reader = new FileReader();
-  reader.onload = e => {
-    const wb = XLSX.read(e.target.result, { type: 'array' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
-
-    // Normalize headers — try to detect column names flexibly
-    state.rows = data.map((row, i) => {
-      const keys = Object.keys(row);
-      // Find columns by partial match
-      const find = (patterns) => {
-        const k = keys.find(k => patterns.some(p => k.includes(p)));
-        return k ? String(row[k]).trim() : '';
-      };
-      return {
-        _idx: i,
-        respId: find(['受訪者編號', 'ID', 'id', '編號']),
-        varName: find(['變項名稱', '變項', 'var', 'variable']),
-        origVal: find(['原始答案', '原始', 'original']),
-        errorDesc: find(['不符合說明', '不符合', '錯誤說明', '說明', 'error']),
-        reply: find(['計畫回覆', '回覆', 'reply', '修正']),
-        _raw: row,
-        _modified: false,
-      };
-    }).filter(r => r.respId);
-
-    groupByRespondent();
-    updateStats();
-    showToast(`載入 ${state.rows.length} 筆資料`);
-  };
-  reader.readAsArrayBuffer(file);
+EVENTS_URL = "https://raw.githubusercontent.com/bigfoott/ScrapedDuck/data/events.min.json"
+NEWS_URL = "https://pokemongo.com/zh-Hant/news"
+FEEDS = {
+    "Pokemon Hubs": "https://pokemonhubs.com/feed/",
+    "ポケらく": "https://pokemongo-raku.com/feed",
 }
 
-function groupByRespondent() {
-  state.respondents = {};
-  state.rows.forEach(r => {
-    if (!state.respondents[r.respId]) state.respondents[r.respId] = [];
-    state.respondents[r.respId].push(r);
-  });
-  renderRespondentList();
-}
-
-// ── PDF loading from folder ──
-function loadPDFsFromFolder(input) {
-  const files = Array.from(input.files).filter(f =>
-    f.name.toLowerCase().endsWith('.pdf')
-  );
-  let added = 0;
-  files.forEach(f => {
-    const nameNoExt = f.name.replace(/\.pdf$/i, '');
-    const keyNoExt = nameNoExt.toLowerCase();
-    const keyFull = f.name.toLowerCase();
-    if (!state.pdfs[keyNoExt]) added++;
-    state.pdfs[keyNoExt] = f;
-    state.pdfs[keyFull] = f;
-  });
-  input.value = '';
-  const total = Object.keys(state.pdfs).filter(k => k.endsWith('.pdf')).length;
-  document.getElementById('pdfLabel').textContent = `共 ${total} 個 PDF（資料夾新增 ${added}）`;
-  document.getElementById('pdfBox').classList.add('loaded');
-  document.getElementById('pdfFolderBox').classList.add('loaded');
-  showToast(`從資料夾新增 ${added} 個 PDF，累計 ${total} 個`);
-  updatePDFMatchStats();
-}
-
-// ── PDF loading（累積，不清空）──
-function loadPDFs(input) {
-  const files = Array.from(input.files);
-  let added = 0;
-  files.forEach(f => {
-    const nameNoExt = f.name.replace(/\.pdf$/i, '');
-    const keyNoExt = nameNoExt.toLowerCase();
-    const keyFull = f.name.toLowerCase();
-    if (!state.pdfs[keyNoExt]) added++;
-    state.pdfs[keyNoExt] = f;
-    state.pdfs[keyFull] = f;
-  });
-  // Reset input so same folder can be re-selected
-  input.value = '';
-  const total = Object.keys(state.pdfs).filter(k => k.endsWith('.pdf')).length;
-  document.getElementById('pdfLabel').textContent = `共 ${total} 個 PDF（本次新增 ${added}）`;
-  document.getElementById('pdfBox').classList.add('loaded');
-  showToast(`新增 ${added} 個 PDF，累計 ${total} 個`);
-  updatePDFMatchStats();
-}
-
-function updatePDFMatchStats() {
-  const ids = Object.keys(state.respondents);
-  if (!ids.length) return;
-  const matched = ids.filter(id => findPDF(id)).length;
-  document.getElementById('pdfLabel').textContent =
-    `共 ${Object.keys(state.pdfs).filter(k=>k.endsWith('.pdf')).length} 個 PDF，比對到 ${matched}/${ids.length} 位受訪者`;
-}
-
-// ── System start ──
-function startSystem() {
-  if (!state.rows.length) { showToast('請先載入 Excel 報表'); return; }
-
-  document.getElementById('welcomeScreen').style.display = 'none';
-  document.getElementById('workScreen').style.display = 'block';
-  document.getElementById('exportBtn').style.display = '';
-  document.getElementById('localAllBtn').style.display = '';
-  document.getElementById('addPdfBtn').style.display = '';
-  document.getElementById('addFolderBtn').style.display = '';
-  
-  renderLearnPanel();
-}
-
-// ── Respondent list with grouping ──
-const SCHOOL_MAP = {
-  "011301": "私立淡江高中附設國中",
-  "011306": "私立金陵女中附設國中",
-  "011324": "私立竹林高中附設國中",
-  "014302": "市立海山高中附設國中",
-  "014322": "市立樹林高中附設國中",
-  "014332": "市立秀峰高中附設國中",
-  "014356": "市立清水高中附設國中",
-  "014364": "市立竹圍高中附設國中",
-  "014505": "市立中山國中",
-  "014509": "市立福營國中",
-  "014510": "市立頭前國中",
-  "014513": "市立明志國中",
-  "014514": "市立碧華國中",
-  "014516": "市立永和國中",
-  "014517": "市立福和國中",
-  "014518": "市立中和國中",
-  "014524": "市立土城國中",
-  "014525": "市立三峽國中",
-  "014531": "市立林口國中",
-  "014555": "市立中正國中",
-  "014559": "市立中平國中",
-  "014560": "市立鳳鳴國中",
-  "014566": "市立正德國中",
-  "014576": "市立鷺江國中",
-  "024503": "縣立復興國中",
-  "024507": "縣立頭城國中",
-  "024523": "縣立大同國中",
-  "034348": "市立羅浮高中附設國中",
-  "034502": "市立青溪國中",
-  "034506": "市立南崁國中",
-  "034508": "市立大竹國中",
-  "034513": "市立仁和國中",
-  "034517": "市立大成國中",
-  "034518": "市立中壢國中",
-  "034524": "市立龍岡國中",
-  "034527": "市立東興國中",
-  "034543": "市立平興國中",
-  "034554": "市立大有國中",
-  "034557": "市立楊光國中(小)",
-  "034560": "市立平鎮國中",
-  "034563": "市立過嶺國中",
-  "034565": "市立青埔國中",
-  "044501": "縣立竹東國中",
-  "044504": "縣立關西國中",
-  "044506": "縣立富光國中",
-  "044522": "縣立中正國中",
-  "044524": "縣立尖石國中",
-  "044529": "縣立成功國中",
-  "051302": "私立君毅高中附設國中",
-  "054502": "縣立大倫國中",
-  "054505": "縣立公館國中",
-  "054523": "縣立造橋國中",
-  "060323": "國立中科實驗高級中學附設國中",
-  "061313": "私立明道高中附設國中",
-  "061315": "私立華盛頓高中附設國中",
-  "061317": "私立弘文高中附設國中",
-  "064350": "市立龍津高中附設國中",
-  "064510": "市立大甲國中",
-  "064515": "市立沙鹿國中",
-  "064519": "市立大道國中",
-  "064521": "市立溪南國中",
-  "064523": "市立光復國中(小)",
-  "064526": "市立中平國中",
-  "064533": "市立和平國中",
-  "064537": "市立光榮國中",
-  "064538": "市立潭秀國中",
-  "064543": "市立新光國中",
-  "064545": "市立豐陽國中",
-  "064546": "市立光德國中",
-  "064548": "市立爽文國中",
-  "064551": "市立神圳國中",
-  "071311": "私立精誠高中附設國中",
-  "071318": "財團法人正德高中附設國中",
-  "074323": "縣立和美高中附設國中",
-  "074505": "縣立陽明國中",
-  "074510": "縣立員林國中",
-  "074511": "縣立明倫國中",
-  "074518": "縣立溪湖國中",
-  "074534": "縣立埤頭國中",
-  "074536": "縣立大同國中",
-  "074538": "縣立彰興國中",
-  "084503": "縣立中興國中",
-  "084507": "縣立宏仁國中",
-  "084516": "縣立名間國中",
-  "084523": "縣立明潭國中",
-  "084530": "縣立同富國中",
-  "091503": "私立東南國中(代用)",
-  "104319": "縣立竹崎高中附設國中",
-  "104326": "縣立永慶高中附設國中",
-  "104501": "縣立朴子國中",
-  "104506": "縣立新港國中",
-  "104518": "縣立中埔國中",
-  "104521": "縣立義竹國中",
-  "111321": "臺南市興國高中附設國中",
-  "111323": "私立黎明高中附設國中",
-  "114501": "市立仁德國中",
-  "114503": "市立歸仁國中",
-  "114510": "市立善化國中",
-  "114523": "市立佳里國中",
-  "114534": "市立鹽水國中",
-  "114537": "市立東山國中",
-  "121320": "私立義大國際高中附設國中",
-  "124311": "市立林園高中附設國中",
-  "124322": "市立路竹高中附設國中",
-  "124501": "市立鳳山國中",
-  "124503": "市立鳳西國中",
-  "124507": "市立大寮國中",
-  "124515": "市立岡山國中",
-  "124521": "市立阿蓮國中",
-  "124542": "市立那瑪夏國中",
-  "124546": "市立嘉興國中",
-  "124548": "市立桃源國中",
-  "124550": "市立鳳翔國中",
-  "134501": "縣立明正國中",
-  "134527": "縣立佳冬國中",
-  "134542": "縣立萬新國中",
-  "144501": "縣立新生國中",
-  "144504": "縣立卑南國中",
-  "144511": "縣立池上國中",
-  "144512": "縣立大王國中",
-  "144517": "縣立新港國中",
-  "154501": "縣立玉里國中",
-  "154505": "縣立花崗國中",
-  "154506": "縣立國風國中",
-  "154513": "縣立光復國中",
-  "154515": "縣立鳳林國中",
-  "154522": "縣立自強國中",
-  "164501": "縣立馬公國中",
-  "164513": "縣立文光國中",
-  "171306": "私立二信高中附設國中",
-  "183502": "市立培英國中",
-  "183510": "市立三民國中",
-  "191309": "私立明德高中附設國中",
-  "191311": "私立衛道高中附設國中",
-  "191313": "私立曉明女中附設國中",
-  "193315": "市立東山高中附設國中",
-  "193501": "市立居仁國中",
-  "193508": "市立黎明國中",
-  "193512": "市立四育國中",
-  "193526": "市立福科國中",
-  "201304": "私立興華高中附設國中",
-  "201310": "私立嘉華高中附設國中",
-  "203505": "市立民生國中",
-  "211318": "私立德光高中附設國中",
-  "213501": "市立後甲國中",
-  "213506": "市立民德國中",
-  "213509": "市立建興國中",
-  "213510": "市立中山國中",
-  "213514": "市立復興國中",
-  "313505": "市立敦化國中",
-  "323502": "市立興雅國中",
-  "333501": "市立仁愛國中",
-  "333505": "市立金華國中",
-  "343302": "市立大同高中附設國中",
-  "343507": "市立濱江實驗國中",
-  "353504": "市立弘道國中",
-  "353505": "市立中正國中",
-  "363501": "市立建成國中",
-  "381301": "私立東山高中附設國中",
-  "383501": "市立木柵國中",
-  "403501": "市立內湖國中",
-  "403502": "市立麗山國中",
-  "411303": "私立華興中學附設國中",
-  "413301": "市立陽明高中附設國中",
-  "413302": "市立百齡高中附設國中",
-  "413508": "市立天母國中",
-  "421302": "臺北市幼華高中附設國中",
-  "423505": "市立石牌國中",
-  "533503": "市立立德國中",
-  "533504": "市立龍華國中",
-  "533506": "市立文府國中",
-  "540301": "國立中山大學附屬國光高中附設國中",
-  "543501": "市立楠梓國中",
-  "551301": "私立立志高中附設國中",
-  "581302": "天主教道明中學附設國中",
-  "583501": "市立苓雅國中",
-  "593504": "市立光華國中",
-  "613503": "市立中山國中",
-  "714502": "縣立金湖國中"
-};
-
-// Extract 6-digit school code from ID: s112191313028 → 191313
-function getSchoolCode(id) {
-  const m = id.match(/^s\d{3}(\d{6})/i);
-  return m ? m[1] : id.slice(1, 7);
-}
-
-function getGroupKey(id) {
-  return getSchoolCode(id);
-}
-
-function getGroupLabel(gk) {
-  const name = SCHOOL_MAP[gk];
-  return name ? `${gk} ${name}` : gk;
-}
-
-function renderRespondentList() {
-  const el = document.getElementById('respondentList');
-  const ids = Object.keys(state.respondents);
-  if (!ids.length) { el.innerHTML = '<div class="empty-msg">無資料</div>'; return; }
-
-  // Group IDs
-  const groups = {};
-  ids.forEach(id => {
-    const gk = getGroupKey(id);
-    if (!groups[gk]) groups[gk] = [];
-    groups[gk].push(id);
-  });
-
-  const collapsedGroups = state.collapsedGroups || {};
-
-  el.innerHTML = Object.entries(groups).map(([gk, gids]) => {
-    // Default collapsed unless explicitly set to false
-    const collapsed = collapsedGroups[gk] !== false;
-    const totalItems = gids.reduce((s, id) => s + state.respondents[id].length, 0);
-    const doneItems = gids.reduce((s, id) => s + state.respondents[id].filter(r => r.reply && r.reply.trim()).length, 0);
-    const allSelected = gids.every(id => state.selectedIds && state.selectedIds.has(id));
-    const someSelected = gids.some(id => state.selectedIds && state.selectedIds.has(id));
-
-    const items = gids.map(id => {
-      const rows = state.respondents[id];
-      const doneCount = rows.filter(r => r.reply && r.reply.trim()).length;
-      const total = rows.length;
-      const done = doneCount === total;
-      const sel = state.selectedIds && state.selectedIds.has(id);
-      return `<div class="resp-item ${done ? 'done' : ''} ${id === state.currentId ? 'active' : ''}" onclick="selectRespondent('${id}')">
-        <input type="checkbox" class="resp-check" ${sel ? 'checked' : ''} onclick="event.stopPropagation();toggleSelectId('${id}',this)" />
-        <span class="resp-id">${id}</span>
-        <span class="resp-count">${doneCount}/${total}</span>
-      </div>`;
-    }).join('');
-
-    return `<div class="group-block">
-      <div class="group-header" onclick="toggleGroup('${gk}')">
-        <input type="checkbox" class="group-check" ${allSelected ? 'checked' : ''} id="gc-${gk}"
-          onclick="event.stopPropagation();toggleSelectGroup('${gk}',this)" />
-        <span class="group-toggle ${collapsed ? 'collapsed' : ''}">▼</span>
-        <span class="group-label">${getGroupLabel(gk)}</span>
-        <span class="group-stats">${doneItems}/${totalItems}</span>
-      </div>
-      <div class="group-body ${collapsed ? 'collapsed' : ''}" id="gb-${gk}">
-        ${items}
-      </div>
-    </div>`;
-  }).join('');
-
-  // Fix indeterminate state
-  Object.entries(groups).forEach(([gk, gids]) => {
-    const allSel = gids.every(id => state.selectedIds && state.selectedIds.has(id));
-    const someSel = gids.some(id => state.selectedIds && state.selectedIds.has(id));
-    const cb = document.getElementById('gc-' + gk);
-    if (cb) cb.indeterminate = !allSel && someSel;
-  });
-
-  document.getElementById('statResp').textContent = ids.length;
-  updateBatchBar();
-}
-
-function toggleGroup(gk) {
-  if (!state.collapsedGroups) state.collapsedGroups = {};
-  // Default is collapsed (true), toggle to open (false) and back
-  const current = state.collapsedGroups[gk] !== false;
-  state.collapsedGroups[gk] = !current;
-  renderRespondentList();
-}
-
-function toggleSelectId(id, cb) {
-  if (!state.selectedIds) state.selectedIds = new Set();
-  if (cb.checked) state.selectedIds.add(id);
-  else state.selectedIds.delete(id);
-  updateBatchBar();
-  renderRespondentList();
-}
-
-function toggleSelectGroup(gk, cb) {
-  if (!state.selectedIds) state.selectedIds = new Set();
-  const ids = Object.keys(state.respondents).filter(id => getGroupKey(id) === gk);
-  if (cb.checked) ids.forEach(id => state.selectedIds.add(id));
-  else ids.forEach(id => state.selectedIds.delete(id));
-  updateBatchBar();
-  renderRespondentList();
-}
-
-function clearSelection() {
-  state.selectedIds = new Set();
-  updateBatchBar();
-  renderRespondentList();
-}
-
-function updateBatchBar() {
-  const bar = document.getElementById('batchBar');
-  const cnt = document.getElementById('batchSelCount');
-  const n = state.selectedIds ? state.selectedIds.size : 0;
-  bar.classList.toggle('show', n > 0);
-  if (cnt) cnt.textContent = `已選 ${n} 位受訪者`;
-}
-
-async function runBatchSelected(mode) {
-  if (!state.selectedIds || state.selectedIds.size === 0) return;
-  const ids = Array.from(state.selectedIds);
-
-  if (mode === 'infer') {
-    ids.forEach(id => localInfer(state.respondents[id]));
-    if (state.currentId) renderErrorTable();
-    updateStats();
-    renderRespondentList();
-    showToast(`已對 ${ids.length} 位受訪者完成自動推論`);
-    return;
-  }
-
-  if (mode === 'ai') {
-    if (!state.apiKey) { showToast('請先輸入 Gemini API Key'); return; }
-    const btn = document.querySelector('#batchBar .btn-primary');
-    if (btn) { btn.disabled = true; btn.textContent = '辨識中...'; }
-
-    let ok = 0, fail = 0;
-    for (let i = 0; i < ids.length; i++) {
-      const id = ids[i];
-      const pdfFile = findPDF(id);
-      if (!pdfFile) { fail++; continue; }
-      try {
-        await processOneRespondent(id, state.respondents[id], pdfFile);
-        ok++;
-      } catch(e) { fail++; console.warn(id, e.message); }
-      if (i < ids.length - 1) await new Promise(r => setTimeout(r, 4000));
-    }
-
-    if (state.currentId) renderErrorTable();
-    updateStats();
-    renderRespondentList();
-    showToast(`完成！成功 ${ok} 筆，失敗 ${fail} 筆`);
-    if (btn) { btn.disabled = false; btn.textContent = 'AI 辨識選取'; }
-  }
-}
-
-// ── Select respondent ──
-function selectRespondent(id) {
-  state.currentId = id;
-  state.pdfPage = 1;
-  renderRespondentList();
-  renderErrorTable();
-
-  document.getElementById('workTitle').textContent = id;
-  document.getElementById('topbarTitle').textContent = id;
-
-  const hasPDF = findPDF(id) !== null;
-  document.getElementById('localOneBtn').style.display = '';
-  document.getElementById('saveExBtn').style.display = '';
-  
-  document.getElementById('viewPdfBtn').style.display = hasPDF ? '' : 'none';
-
-  if (hasPDF) loadPDFDoc(id);
-}
-
-function findPDF(id) {
-  const idLow = id.toLowerCase();
-  if (state.pdfs[idLow]) return state.pdfs[idLow];
-  if (state.pdfs[idLow + '.pdf']) return state.pdfs[idLow + '.pdf'];
-  // Partial match (case-insensitive)
-  const key = Object.keys(state.pdfs).find(k => k.includes(idLow));
-  return key ? state.pdfs[key] : null;
-}
-
-// ── Error table ──
-function renderErrorTable() {
-  const rows = state.respondents[state.currentId] || [];
-  const tbody = document.getElementById('errorTbody');
-
-  if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">此受訪者無需修正項目</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = rows.map((r, i) => {
-    const rawVal = stripPrefix(r.reply || '', r.varName);
-    const filled = rawVal.trim() !== '';
-    const isOk = rawVal.trim().toLowerCase() === 'ok';
-    // ok: export as just "ok", preview shows ok
-    const preview = filled ? (isOk ? 'ok' : `${r.varName}=${rawVal}`) : '';
-
-    // Detect row type for display logic
-    const desc = r.errorDesc || '';
-    const isLogicError = desc.includes('邏輯') || desc.includes('作息') || desc.includes('年齡') || desc.includes('出生') || desc.includes('結婚');
-    const isNeedsReview = rawVal.includes('請參閱') || rawVal.includes('請確認') || rawVal.includes('請查閱');
-
-    // For logic errors: show origVal in input box for editing
-    // For needs-review: clear the value so user manually fills
-    const displayVal = isNeedsReview ? '' : rawVal;
-    const isFilled = displayVal.trim() !== '';
-
-    // Prefix label: logic errors show origVal format hint, others show varName=
-    const prefixLabel = isLogicError
-      ? `<span style="font-family:var(--mono);font-size:11px;color:var(--warn);white-space:nowrap;" title="請修改原始答案格式">${escHtml(r.origVal)} →</span>`
-      : `<span style="font-family:var(--mono);font-size:12px;color:var(--text-muted);white-space:nowrap;">${escHtml(r.varName)}=</span>`;
-
-    return `<tr id="row-${r._idx}" class="${isFilled ? 'done-row' : ''}">
-      <td style="color:var(--text-hint);font-family:var(--mono);">${i + 1}</td>
-      <td><span class="tag tag-info" style="font-size:11px;">${escHtml(r.varName)}</span></td>
-      <td style="font-family:var(--mono);font-size:11px;">${escHtml(r.origVal)}</td>
-      <td style="color:var(--text-muted);font-size:12px;">${escHtml(desc)}</td>
-      <td>
-        <div class="reply-cell" style="flex-direction:column;align-items:flex-start;gap:4px;">
-          <div style="display:flex;align-items:center;gap:6px;width:100%;flex-wrap:wrap;">
-            ${prefixLabel}
-            <input class="reply-input ${isFilled ? 'filled' : ''}" 
-              id="reply-${r._idx}"
-              value="${escHtml(displayVal)}" 
-              placeholder="${isLogicError ? '修正後的值' : '數值'}"
-              style="width:${isLogicError ? '160px' : '100px'};"
-              onchange="updateReply(${r._idx}, this.value)"
-              oninput="updateReply(${r._idx}, this.value)" />
-            ${r._inferMethod === 'ai' ? `<span class="ai-badge" style="background:#E6F1FB;color:#185FA5;" title="${escHtml(r._pdfContent||'AI辨識')}">AI</span>` : ''}
-            ${r._inferMethod === 'local' ? `<span class="ai-badge" style="background:#EAF3DE;color:#2D6A4F;">推論</span>` : ''}
-          </div>
-          ${isFilled ? `<span style="font-family:var(--mono);font-size:11px;color:var(--success);">→ ${escHtml(preview)}</span>` : ''}
-        </div>
-      </td>
-      <td>
-        ${isFilled
-          ? `<span class="tag tag-ok">已填寫</span>`
-          : `<span class="tag tag-error">待填寫</span>`}
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-function updateReply(idx, val) {
-  const row = state.rows[idx];
-  if (!row) return;
-  // Store raw value only (no prefix)
-  row.reply = stripPrefix(val.trim(), row.varName);
-  row._modified = true;
-
-  const input = document.getElementById('reply-' + idx);
-  const tr = document.getElementById('row-' + idx);
-  const filled = row.reply.trim() !== '';
-  if (input) input.classList.toggle('filled', filled);
-  if (tr) {
-    // Target only the status tag (last td .tag), not the varName tag
-    const statusTd = tr.querySelector('td:last-child .tag');
-    if (statusTd) {
-      statusTd.className = filled ? 'tag tag-ok' : 'tag tag-error';
-      statusTd.textContent = filled ? '已填寫' : '待填寫';
-    }
-    // Update preview
-    const preview = tr.querySelector('span[data-preview]');
-    if (preview) preview.textContent = filled ? `→ ${row.varName}=${row.reply}` : '';
-  }
-  updateStats();
-  renderRespondentList();
-}
-
-// ── 本地自動推論（優先使用學習範例）──
-function localInfer(rows) {
-  const allRows = state.rows;
-
-  // 取 = 後的純值
-  function extractVal(orig) {
-    const m = String(orig || '').match(/=(.*)$/);
-    return m ? m[1].trim() : String(orig || '').trim();
-  }
-
-  // 同組子題（同前綴）中，有任一題有填答（含0）
-  function siblingHasAnswer(r) {
-    const prefix = getVarPrefix(r.varName);
-    return allRows.some(x => {
-      if (x.respId !== r.respId) return false;
-      if (x.varName === r.varName) return false;
-      if (getVarPrefix(x.varName) !== prefix) return false;
-      const v = extractVal(x.origVal);
-      return v !== '' && v !== '=';
-    });
-  }
-
-  // 相鄰題（±2題）是否有填答，用來判斷是否為整體跳答
-  function neighborHasAnswer(r) {
-    const idx = allRows.findIndex(x => x.respId === r.respId && x.varName === r.varName);
-    if (idx < 0) return false;
-    const sameResp = allRows.filter(x => x.respId === r.respId);
-    const myIdx = sameResp.findIndex(x => x.varName === r.varName);
-    for (let d = -3; d <= 3; d++) {
-      if (d === 0) continue;
-      const neighbor = sameResp[myIdx + d];
-      if (neighbor && extractVal(neighbor.origVal) !== '' && extractVal(neighbor.origVal) !== '=') return true;
-    }
-    return false;
-  }
-
-  // 嚴格配對：必須變項名稱 + 原始答案 + 說明 三者完全一致才套用
-  // 否則一律回傳 null（留空讓使用者判斷）
-  function matchExample(r) {
-    const desc = r.errorDesc || '';
-    const orig = String(r.origVal || '').trim();
-    const examples = state.examples || [];
-
-    // 【唯一規則】三者完全相同
-    const exact = examples.find(e =>
-      e.varName === r.varName &&
-      e.origVal === orig &&
-      e.errorDesc === desc
-    );
-    return exact ? exact.reply : null;
-  }
-
-  rows.forEach(r => {
-    // 跳過：已有值（但「請確認/參閱」類允許重新推論）
-    if (r.reply && r.reply.trim() &&
-        !r.reply.includes('請確認') &&
-        !r.reply.includes('請查閱') &&
-        !r.reply.includes('請參閱')) return;
-
-    const desc = r.errorDesc || '';
-    const orig = String(r.origVal || '').trim();
-    const rawVal = extractVal(orig);
-
-    // ── 步驟1：先查學習範例 ──
-    const exReply = matchExample(r);
-
-    // ── 步驟2：根據情境套用正確規則 ──
-
-    // 【數值為0】受訪者確實填了0 → ok
-    // 只接受同說明類型的範例，否則強制 ok
-    if (desc.includes('數值為0')) {
-      const safeReply = (exReply !== null && exReply !== '-9' && exReply !== '空白') ? exReply : 'ok';
-      r.reply = safeReply;
-      r._inferMethod = 'local';
-      return;
-    }
-
-    // 【時間數值皆為0】受訪者確實填了0 → ok
-    if (desc.includes('時間數值')) {
-      const safeReply = (exReply !== null && exReply !== '-9' && exReply !== '空白') ? exReply : 'ok';
-      r.reply = safeReply;
-      r._inferMethod = 'local';
-      return;
-    }
-
-    // 【欄位為空】三種情境：
-    //   a) 同組子題有填答 → 0（受訪者跳過此子題）
-    //   b) 前後題都沒填   → -9（整段跳答）
-    //   c) 其他           → 空白
-    if (desc.includes('欄位為空') || rawVal === '' || orig.endsWith('=')) {
-      if (siblingHasAnswer(r)) {
-        // 範例有指定同組情況的值就用，否則預設 0
-        r.reply = (exReply !== null && exReply !== '-9') ? exReply : '0';
-      } else if (!neighborHasAnswer(r)) {
-        // 前後題都沒填，整段跳答
-        r.reply = (exReply !== null) ? exReply : '-9';
-      } else {
-        r.reply = (exReply !== null) ? exReply : '空白';
-      }
-      r._inferMethod = 'local';
-      return;
-    }
-
-    // 所有類型統一規則：變項名稱 + 原始答案 + 說明 三者完全一致才套用，否則留空
-    // 例外：欄位為空 / 數值為0 / 時間數值 這三種已在上方處理，不走這裡
-
-    // 【Other欄位內容】原始答案通常每筆不同，但 Other 本身邏輯固定，允許只比對變項+說明
-    if (desc.includes('Other') || desc.includes('other')) {
-      const strictOther = (state.examples || []).find(e =>
-        e.varName === r.varName && e.origVal === orig && e.errorDesc === desc
-      );
-      // 找不到完全一致的 → 留空（不再預設 ok，讓使用者確認）
-      if (strictOther) {
-        r.reply = strictOther.reply;
-        r._inferMethod = 'local';
-      }
-      return;
-    }
-
-    // 【所有其他類型】三者完全一致才套用
-    const allExamples = state.examples || [];
-    // Debug: log mismatches for 格式錯誤
-    if (desc.includes('格式錯誤') || desc.includes('非整數')) {
-      const sameVar = allExamples.filter(e => e.varName === r.varName);
-      if (sameVar.length > 0) {
-        console.log(`[DEBUG] ${r.varName} 格式錯誤：row.origVal="${orig}" row.errorDesc="${desc}"`);
-        sameVar.forEach(e => console.log(`  範例: origVal="${e.origVal}" errorDesc="${e.errorDesc}" reply="${e.reply}" match=${e.origVal===orig && e.errorDesc===desc}`));
-      }
-    }
-    const strictMatch = allExamples.find(e =>
-      e.varName === r.varName &&
-      e.origVal === orig &&
-      e.errorDesc === desc
-    );
-    if (strictMatch) {
-      r.reply = strictMatch.reply;
-      r._inferMethod = 'local';
-    }
-    // 否則留空，等使用者手動判斷後儲存為學習範例
-  });
-}
-
-// 取變項前綴：v93_2_5 → v93_2，v40_5 → v40，v13_6 → v13
-function getVarPrefix(varName) {
-  const parts = varName.split('_');
-  if (parts.length >= 3) return parts.slice(0, -1).join('_');
-  if (parts.length === 2) return parts[0];
-  return varName;
-}
-
-// ── 本地推論按鈕 ──
-function runLocalInfer() {
-  const id = state.currentId;
-  if (!id) return;
-  const rows = state.respondents[id];
-  localInfer(rows);
-  renderErrorTable();
-  updateStats();
-  renderRespondentList();
-  showToast('本地推論完成，請檢查並確認建議值');
-}
-
-// ── 批次本地推論 ──
-function runLocalInferAll() {
-  Object.keys(state.respondents).forEach(id => {
-    localInfer(state.respondents[id]);
-  });
-  if (state.currentId) renderErrorTable();
-  updateStats();
-  renderRespondentList();
-  showToast('全部受訪者推論完成！');
-}
-
-// ── AI for one respondent ──
-async function runAIOne() {
-  const id = state.currentId;
-  if (!id) return;
-  const rows = state.respondents[id];
-  const pdfFile = findPDF(id);
-
-  if (!pdfFile) {
-    showToast(`❌ 找不到 ${id} 的 PDF，請先上傳對應檔案`);
-    return;
-  }
-  if (!state.apiKey) {
-    showToast('❌ 請先輸入 Gemini API Key');
-    return;
-  }
-
-  const btn = document.getElementById('aiOneBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>AI 辨識中...';
-
-  try {
-    await processOneRespondent(id, rows, pdfFile);
-    renderErrorTable();
-    updateStats();
-    renderRespondentList();
-    const filled = rows.filter(r => r.reply && r.reply.trim()).length;
-    const blank = rows.filter(r => !r.reply || !r.reply.trim()).length;
-    showToast(`${id} 辨識完成：已填 ${filled} 筆，待判斷 ${blank} 筆`);
-  } catch(e) {
-    showToast('❌ AI 辨識失敗：' + e.message);
-    renderErrorTable();
-    updateStats();
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'AI 辨識此受訪者';
-}
-
-// ── AI batch ──
-let _batchStop = false;
-
-async function runAIAll() {
-  const ids = Object.keys(state.respondents);
-  if (!ids.length) { showToast('沒有資料'); return; }
-  if (!state.apiKey) { showToast('需要 Gemini API Key 才能使用 AI 辨識'); return; }
-
-  _batchStop = false;
-  const btn = document.getElementById('aiAllBtn');
-  btn.disabled = true;
-  btn.textContent = '停止';
-  btn.onclick = () => { _batchStop = true; btn.textContent = '停止中...'; };
-
-  // Show progress bar
-  let progressBar = document.getElementById('batchProgress');
-  if (!progressBar) {
-    progressBar = document.createElement('div');
-    progressBar.id = 'batchProgress';
-    progressBar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:9999;';
-    progressBar.innerHTML = '<div id="batchFill" style="height:100%;background:var(--accent);width:0%;transition:width 0.3s;"></div>';
-    document.body.appendChild(progressBar);
-  }
-  progressBar.style.display = 'block';
-
-  let done = 0, success = 0, skipped = 0, failed = 0;
-  // Only process IDs with PDF, skip fully-filled ones
-  const toProcess = ids.filter(id => {
-    const pdfFile = findPDF(id);
-    if (!pdfFile) return false;
-    const rows = state.respondents[id];
-    const hasUnfilled = rows.some(r => {
-      const v = (r.reply || '').trim();
-      return v === '' || v.includes('請確認') || v.includes('請查閱') || v.includes('請參閱');
-    });
-    return hasUnfilled;
-  });
-
-  showToast(`開始 AI 批次辨識，共 ${toProcess.length} 位受訪者有待處理項目`);
-
-  for (let i = 0; i < toProcess.length; i++) {
-    if (_batchStop) break;
-
-    const id = toProcess[i];
-    const rows = state.respondents[id];
-    const pdfFile = findPDF(id);
-
-    // Update progress
-    const pct = Math.round(i / toProcess.length * 100);
-    document.getElementById('batchFill').style.width = pct + '%';
-    btn.textContent = `停止 (${i+1}/${toProcess.length})`;
-
-    try {
-      await processOneRespondent(id, rows, pdfFile);
-      success++;
-    } catch(e) {
-      failed++;
-      console.warn(`[AI] ${id} 失敗:`, e.message);
-    }
-    done++;
-
-    // Update UI every 3 items or on last
-    if (done % 3 === 0 || i === toProcess.length - 1) {
-      if (state.currentId) renderErrorTable();
-      updateStats();
-      renderRespondentList();
-    }
-
-    // Rate limit: wait 4s between calls to avoid API throttle
-    if (i < toProcess.length - 1 && !_batchStop) {
-      await new Promise(res => setTimeout(res, 4000));
-    }
-  }
-
-  document.getElementById('batchFill').style.width = '100%';
-  setTimeout(() => { progressBar.style.display = 'none'; }, 1500);
-
-  if (state.currentId) renderErrorTable();
-  updateStats();
-  renderRespondentList();
-
-  const msg = _batchStop
-    ? `已停止。成功 ${success} 筆，失敗 ${failed} 筆`
-    : `批次完成！成功 ${success} 筆，失敗 ${failed} 筆`;
-  showToast(msg);
-
-  btn.disabled = false;
-  btn.textContent = 'AI 批次辨識';
-  btn.onclick = runAIAll;
-  _batchStop = false;
-}
-
-// ── Core AI logic ──
-async function processOneRespondent(id, rows, pdfFile) {
-  const base64 = await fileToBase64(pdfFile);
-  const isPDF = pdfFile.type === 'application/pdf' || pdfFile.name.toLowerCase().endsWith('.pdf');
-
-  // 送全部未完成的 rows（空白、或含提示文字的）
-  const pendingRows = rows.filter(r => {
-    const v = (r.reply || '').trim();
-    return v === '' || v.includes('請確認') || v.includes('請查閱') || v.includes('請參閱');
-  });
-
-  if (!pendingRows.length) return;
-
-  // 整理學習範例供 AI 參考（含變項名、說明、原始值、對應回覆）
-  const exampleLines = (state.examples || []).map(e =>
-    `  {"varName":"${e.varName}","errorDesc":"${e.errorDesc}","origVal":"${e.origVal}","reply":"${e.reply}"}`
-  ).join(',\n');
-
-  const varList = pendingRows.map(r =>
-    `  {"variable":"${r.varName}","origVal":"${r.origVal}","errorDesc":"${r.errorDesc}"}`
-  ).join(',\n');
-
-  const prompt = `你是問卷資料檢誤專家。請仔細閱讀這份問卷掃描檔，對以下每個需要確認的變項：
-1. 找到該題在問卷中的實際填答內容
-2. 對照下方【學習範例】，找出最相符的範例，使用範例中的回覆值
-3. 如果找不到相符的範例，請回傳 "reply": null（留空讓使用者自行判斷）
-
-【需要確認的變項】：
-[
-${varList}
+# 當地時間活動要換算的時區：(顯示名稱, IANA 時區)
+ZONES = [
+    ("吉里巴斯（全球最早）", "Pacific/Kiritimati"),
+    ("紐西蘭", "Pacific/Auckland"),
+    ("日本", "Asia/Tokyo"),
+    ("台灣", "Asia/Taipei"),
+    ("英國", "Europe/London"),
+    ("巴西（巴西利亞）", "America/Sao_Paulo"),
+    ("美國東岸", "America/New_York"),
+    ("美國西岸", "America/Los_Angeles"),
+    ("夏威夷", "Pacific/Honolulu"),
+    ("美屬薩摩亞（全球最晚）", "Pacific/Pago_Pago"),
 ]
+LAST_ZONE = ZoneInfo("Pacific/Pago_Pago")
+FIRST_ZONE = ZoneInfo("Pacific/Kiritimati")
 
-【學習範例（你已經學習過的回覆模式）】：
-[
-${exampleLines || '（尚無範例）'}
-]
-
-【對照範例的規則】：
-- 同一個變項名稱（varName）+ 相同說明類型（errorDesc）→ 優先使用
-- 同題組變項（如 v93_2_1 和 v93_2_5 同屬 v93_2）且說明相同 → 可參考使用
-- 不同說明類型的範例不可混用（「數值為0」和「欄位為空」是不同情況）
-- 找不到相符範例 → reply 填 null，不要猜測
-
-【輸出格式（只輸出 JSON，不要其他文字）】：
-[
-  {"variable":"v93_2_5","reply":"0","pdfContent":"掃描中該題空白","reason":"同組v93_2_1有填答，範例v93_2_3也是0"},
-  {"variable":"v58_m","reply":null,"pdfContent":"掃描中顯示數字0","reason":"無符合範例，留空讓使用者判斷"}
-]`;
-
-  const parts = [
-    { inline_data: { mime_type: isPDF ? 'application/pdf' : pdfFile.type, data: base64 } },
-    { text: prompt }
-  ];
-
-  const resp = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${state.apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts }] })
-    }
-  );
-
-  if (!resp.ok) {
-    const err = await resp.json();
-    throw new Error(err.error?.message || resp.statusText);
-  }
-
-  const data = await resp.json();
-  const text = data.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
-  const clean = text.replace(/```json|```/g, '').trim();
-
-  let parsed;
-  try { parsed = JSON.parse(clean); } catch(e) { throw new Error('解析失敗：' + text.slice(0, 120)); }
-
-  parsed.forEach(item => {
-    const row = rows.find(r => r.varName === item.variable);
-    if (!row) return;
-    if (item.reply === null || item.reply === undefined || item.reply === '') {
-      // 找不到範例 → 留空，等使用者手動填寫並學習
-      row.reply = '';
-      row._inferMethod = null;
-    } else {
-      row.reply = stripPrefix(String(item.reply), item.variable);
-      row._modified = true;
-      row._inferMethod = 'ai';
-      // 存入 pdfContent 供顯示
-      if (item.pdfContent) row._pdfContent = item.pdfContent;
-    }
-  });
+TYPE_NAMES = {
+    "community-day": "社群日", "event": "活動", "go-battle-league": "GO對戰聯盟",
+    "go-pass": "GO Pass", "max-battles": "極巨對戰", "max-mondays": "極巨星期一",
+    "pokemon-go-tour": "GO Tour", "pokemon-spotlight-hour": "聚焦時刻",
+    "raid-battles": "團體戰", "raid-day": "團體戰日", "raid-hour": "團體戰時刻",
+    "research": "調查", "season": "季節", "wild-area": "曠野地帶",
+    "pokemon-go-fest": "GO Fest", "city-safari": "City Safari",
 }
+SKIP_TYPES = {"go-battle-league", "season", "twitch-drops"}
 
-// ── PDF viewer ──
-async function loadPDFDoc(id) {
-  const file = findPDF(id);
-  if (!file) return;
-  const ab = await file.arrayBuffer();
-  state.pdfDoc = await pdfjsLib.getDocument({ data: ab }).promise;
-  state.pdfTotalPages = state.pdfDoc.numPages;
-  state.pdfPage = 1;
-}
-
-async function showPDF() {
-  const viewer = document.getElementById('pdfViewer');
-  if (viewer.style.display === 'none' || !viewer.style.display) {
-    viewer.style.display = 'block';
-    await renderPDFPage();
-  } else {
-    viewer.style.display = 'none';
-  }
-}
-
-async function renderPDFPage() {
-  if (!state.pdfDoc) return;
-  const page = await state.pdfDoc.getPage(state.pdfPage);
-  const canvas = document.getElementById('pdfCanvas');
-  const ctx = canvas.getContext('2d');
-  const vp = page.getViewport({ scale: 1.5 });
-  canvas.width = vp.width;
-  canvas.height = vp.height;
-  await page.render({ canvasContext: ctx, viewport: vp }).promise;
-
-  document.getElementById('pdfViewerLabel').textContent =
-    `${state.currentId}.pdf`;
-  document.getElementById('pdfPageInfo').textContent =
-    `第 ${state.pdfPage} / ${state.pdfTotalPages} 頁`;
-}
-
-async function pdfPageNext() {
-  if (state.pdfPage < state.pdfTotalPages) { state.pdfPage++; await renderPDFPage(); }
-}
-async function pdfPagePrev() {
-  if (state.pdfPage > 1) { state.pdfPage--; await renderPDFPage(); }
-}
+errors = []
 
 
-// ── Learning system ──
-// examples: [{errorDesc, origPattern, reply, varName}]
-const STORAGE_KEY = 'questionnaire_checker_examples';
+# ---------- 基本工具 ----------
 
-// Auto-fill saved API key
-(function() {
-  try {
-    const saved = localStorage.getItem('gemini_api_key');
-    if (saved) {
-      const el = document.getElementById('apiKeyInput');
-      if (el) el.value = saved;
-    }
-  } catch(e) {}
-})();
+def now_tpe():
+    fake = os.environ.get("NOW")
+    if fake:
+        return datetime.fromisoformat(fake).replace(tzinfo=TPE)
+    return datetime.now(TPE)
 
-function loadExamplesFromStorage() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch(e) { return []; }
-}
 
-function saveExamplesToStorage(examples) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(examples)); } catch(e) {}
-}
+def fetch(url, timeout=30):
+    req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.read().decode("utf-8", errors="replace")
 
-state.examples = loadExamplesFromStorage();
 
-function debugExamples() {
-  // Show all examples for v94 in an alert
-  const examples = state.examples || [];
-  const v94 = examples.filter(e => e.varName === 'v94');
-  if (!v94.length) { alert('沒有 v94 的範例'); return; }
-  const msg = v94.map(e =>
-    `origVal: "${e.origVal}"\nerrorDesc: "${e.errorDesc}"\nreply: "${e.reply}"\n---`
-  ).join('\n');
-  alert('v94 範例內容：\n\n' + msg);
-}
+def try_fetch(label, url):
+    try:
+        return fetch(url)
+    except Exception as e:  # 任何來源失敗都不能讓整支程式停掉
+        errors.append(f"{label}：{type(e).__name__}")
+        return None
 
-function saveExamples() {
-  const id = state.currentId;
-  if (!id) return;
-  const rows = state.respondents[id];
-  let added = 0;
 
-  rows.forEach(r => {
-    if (!r.reply || !r.reply.trim()) return;
+def esc(s):
+    return html.escape(str(s), quote=False)
 
-    const example = {
-      id: Date.now() + Math.random(),
-      errorDesc: r.errorDesc || '',
-      origPattern: classifyOrigVal(r.origVal),
-      origVal: r.origVal,
-      varName: r.varName,
-      varGroup: getVarPrefix(r.varName),
-      // Context signals for smarter matching
-      hasSibling: siblingHasAnswerStatic(r),
-      reply: r.reply,
-      timestamp: new Date().toISOString(),
-    };
 
-    // Allow multiple examples for same desc+pattern (different replies are valid!)
-    // Only avoid exact same (desc + origVal + reply) triple
-    const dup = state.examples.find(e =>
-      e.errorDesc === example.errorDesc &&
-      e.origVal === example.origVal &&
-      e.reply === example.reply
-    );
-    if (!dup) {
-      state.examples.push(example);
-      added++;
-      r._savedAsExample = true;
-    }
-  });
+def fmt(dt):
+    """台灣時間，含星期。"""
+    return dt.astimezone(TPE).strftime("%m/%d") + "（" + "一二三四五六日"[dt.astimezone(TPE).weekday()] + "）" + dt.astimezone(TPE).strftime("%H:%M")
 
-  saveExamplesToStorage(state.examples);
-  renderLearnPanel();
-  showToast(added > 0 ? `已儲存 ${added} 筆學習範例` : '無新增範例（已存在或尚未填寫）');
-}
 
-// Static version of siblingHasAnswer for use outside localInfer
-function siblingHasAnswerStatic(r) {
-  const allRows = state.rows;
-  const prefix = getVarPrefix(r.varName);
-  return allRows.some(x => {
-    if (x.respId !== r.respId) return false;
-    if (x.varName === r.varName) return false;
-    if (getVarPrefix(x.varName) !== prefix) return false;
-    const m = String(x.origVal || '').match(/=(.*)$/);
-    const v = m ? m[1].trim() : String(x.origVal || '').trim();
-    return v !== '' && v !== '=';
-  });
-}
+def load_json(path, default):
+    try:
+        return json.loads(Path(path).read_text(encoding="utf-8"))
+    except Exception:
+        return default
 
-// Classify origVal into a pattern type for matching
-function classifyOrigVal(orig) {
-  const v = String(orig || '').trim();
-  const val = v.includes('=') ? v.split('=').pop().trim() : v;
-  if (val === '' || val === '=') return 'empty';
-  if (val === '0') return 'zero';
-  if (!isNaN(val)) return 'number';
-  return 'other';
-}
 
-function clearExamples() {
-  if (!confirm('確定要清除所有學習範例嗎？')) return;
-  state.examples = [];
-  saveExamplesToStorage([]);
-  renderLearnPanel();
-  showToast('已清除所有範例');
-}
+# ---------- 活動時間 ----------
 
-function deleteExample(id) {
-  state.examples = state.examples.filter(e => e.id !== id);
-  saveExamplesToStorage(state.examples);
-  renderLearnPanel();
-}
+def parse_time(s):
+    """回傳 (naive 或 aware datetime, 是否為各地當地時間)。"""
+    if not s:
+        return None, False
+    if s.endswith("Z"):
+        return datetime.fromisoformat(s[:-1].split(".")[0] + "+00:00"), False
+    return datetime.fromisoformat(s.split(".")[0]), True
 
-function renderLearnPanel() {
-  const panel = document.getElementById('learnPanel');
-  const list = document.getElementById('exampleList');
-  const count = document.getElementById('learnCount');
-  const n = state.examples.length;
 
-  panel.style.display = n > 0 ? '' : 'none';
-  count.textContent = n + ' 筆';
+def at(naive, tz):
+    return naive.replace(tzinfo=tz)
 
-  if (!list) return;
-  if (n === 0) { list.innerHTML = '<div style="color:var(--text-hint);font-size:12px;">尚無範例</div>'; return; }
 
-  list.innerHTML = state.examples.map(e => `
-    <div class="example-row" style="grid-template-columns:90px 1fr 1fr 80px auto;">
-      <span class="example-chip" style="font-size:10px;" title="${escHtml(e.varName||'')}">${escHtml((e.varName||'').slice(0,12))}</span>
-      <span class="example-chip" title="${escHtml(e.errorDesc)}">${escHtml(e.errorDesc.slice(0, 22))}${e.errorDesc.length > 22 ? '…' : ''}</span>
-      <span class="example-chip" title="${escHtml(e.origVal||'')}">${escHtml((e.origVal||'').slice(0,14))}${(e.origVal||'').length>14?'…':''} <small style="opacity:.6">${e.hasSibling?'有同組':'無同組'}</small></span>
-      <span class="example-chip reply">${escHtml(e.reply)}</span>
-      <button class="del-ex" onclick="deleteExample(${e.id})" title="刪除">×</button>
-    </div>`).join('');
-}
+class Event:
+    def __init__(self, raw):
+        self.id = raw.get("eventID", "")
+        self.name = raw.get("name", "")
+        self.type = raw.get("eventType", "event")
+        self.link = raw.get("link", "")
+        self.start, self.start_local = parse_time(raw.get("start"))
+        self.end, self.end_local = parse_time(raw.get("end"))
+        self.raw_start, self.raw_end = raw.get("start"), raw.get("end")
 
-function toggleLearnPanel() {
-  const body = document.getElementById('learnPanelBody');
-  const icon = document.getElementById('learnToggleIcon');
-  const open = body.style.display === 'none';
-  body.style.display = open ? '' : 'none';
-  icon.textContent = open ? '▲' : '▼';
-}
+    def start_in(self, tz=TPE):
+        if self.start is None:
+            return None
+        return at(self.start, tz) if self.start_local else self.start
 
-// Build few-shot examples string for AI prompt
-function buildFewShotPrompt() {
-  if (!state.examples.length) return '';
-  const lines = state.examples.slice(-15).map(e =>
-    `- 不符合說明="${e.errorDesc}"，原始答案="${e.origVal}" → 回覆值="${e.reply}"`
-  );
-  return `\n\n【你之前學習的回覆範例，請參考這些模式：】\n${lines.join('\n')}`;
-}
+    def end_in(self, tz=TPE):
+        if self.end is None:
+            return None
+        return at(self.end, tz) if self.end_local else self.end
 
-// ── Export Excel ──
-function exportExcel() {
-  const out = state.rows.map(r => {
-    const raw = { ...r._raw };
-    const replyKey = Object.keys(raw).find(k =>
-      ['計畫回覆', '回覆', 'reply', '修正'].some(p => k.includes(p))
-    );
-    // Format as varName=value for export; "ok" exports as just "ok"
-    const rawVal = stripPrefix(r.reply || '', r.varName);
-    const isOk = rawVal.trim().toLowerCase() === 'ok';
-    const formatted = rawVal.trim() !== ''
-      ? (isOk ? 'ok' : `${r.varName}=${rawVal}`)
-      : '';
-    if (replyKey) raw[replyKey] = formatted;
-    else raw['計畫回覆'] = formatted;
-    return raw;
-  });
+    @property
+    def label(self):
+        return TYPE_NAMES.get(self.type, self.type)
 
-  const ws = XLSX.utils.json_to_sheet(out);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-  XLSX.writeFile(wb, `檢誤回覆_${new Date().toISOString().slice(0,10)}.xlsx`);
-  showToast('已匯出 Excel');
-}
+    def title(self):
+        t = f"[{esc(self.label)}] {esc(self.name)}"
+        return f'<a href="{html.escape(self.link)}">{t}</a>' if self.link else t
 
-// ── Stats ──
-function updateStats() {
-  const total = state.rows.length;
-  const done = state.rows.filter(r => r.reply && r.reply.trim()).length;
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statDone').textContent = done;
-  document.getElementById('statPct').textContent =
-    total ? Math.round(done / total * 100) + '%' : '0%';
-}
 
-// ── Utils ──
-function fileToBase64(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result.split(',')[1]);
-    r.onerror = () => rej(new Error('Read failed'));
-    r.readAsDataURL(file);
-  });
-}
+def load_events():
+    text = try_fetch("活動時間表", EVENTS_URL)
+    if not text:
+        return []
+    try:
+        return [Event(r) for r in json.loads(text) if r.get("eventType") not in SKIP_TYPES]
+    except Exception as e:
+        errors.append(f"活動時間表解析：{type(e).__name__}")
+        return []
 
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
 
-// Strip "varName=" prefix from reply value if present
-function stripPrefix(val, varName) {
-  if (!val) return '';
-  const prefix = varName + '=';
-  if (String(val).startsWith(prefix)) return String(val).slice(prefix.length);
-  return String(val);
-}
+def zone_table(naive):
+    """當地時間 → 各時區對應的台灣時間。"""
+    rows = []
+    for name, tz in ZONES:
+        rows.append(f"　{esc(name)}：{fmt(at(naive, ZoneInfo(tz)))}")
+    return "\n".join(rows)
 
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
-}
-</script>
-</body>
-</html>
+
+def world_window_lines(ev, now):
+    """當地時間活動：寫出台灣、巴西、全球最晚的結束時刻。"""
+    if not (ev.end and ev.end_local):
+        return [f"　結束：{fmt(ev.end_in())}（全球同時）"] if ev.end else []
+    lines = [
+        f"　台灣結束：{fmt(ev.end_in(TPE))}",
+        f"　巴西結束：{fmt(ev.end_in(ZoneInfo('America/Sao_Paulo')))}",
+        f"　全球最晚（美屬薩摩亞）：{fmt(ev.end_in(LAST_ZONE))}",
+    ]
+    return lines
+
+
+# ---------- 官方新聞與攻略站 ----------
+
+def strip_tags(s):
+    s = re.sub(r"(?is)<(script|style|noscript|svg|header|footer|nav).*?</\1>", " ", s)
+    s = re.sub(r"(?s)<[^>]+>", "\n", s)
+    lines = [html.unescape(x).strip() for x in s.split("\n")]
+    return [x for x in lines if x]
+
+
+def official_news():
+    """回傳 [(標題, 網址)]。"""
+    text = try_fetch("官方新聞列表", NEWS_URL)
+    if not text:
+        return []
+    out, seen = [], set()
+    for m in re.finditer(r'(?is)<a\b[^>]*href="([^"]*?/news/[A-Za-z0-9\-_]+)"[^>]*>(.*?)</a>', text):
+        url = urllib.parse.urljoin(NEWS_URL, m.group(1))
+        slug = url.rstrip("/").rsplit("/", 1)[-1]
+        if slug in seen:
+            continue
+        title = " ".join(strip_tags(m.group(2)))[:120] or slug
+        seen.add(slug)
+        out.append((title, url))
+    if not out:
+        errors.append("官方新聞列表：找不到文章連結（網頁結構可能改了）")
+    return out[:40]
+
+
+def article_lines(url):
+    text = try_fetch("官方公告內文", url)
+    if not text:
+        return None
+    m = re.search(r"(?is)<(article|main)\b.*?</\1>", text)
+    lines = strip_tags(m.group(0) if m else text)
+    # 只留有實質內容的行，避免頁面雜訊造成誤報
+    return [x for x in lines if len(x) >= 8][:400]
+
+
+def feed_items(label, url):
+    text = try_fetch(label, url)
+    if not text:
+        return []
+    try:
+        root = ET.fromstring(text.encode("utf-8"))
+    except Exception:
+        errors.append(f"{label}：RSS 解析失敗")
+        return []
+    out = []
+    for it in root.iter("item"):
+        title = (it.findtext("title") or "").strip()
+        link = (it.findtext("link") or "").strip()
+        if title and link:
+            out.append((title, link))
+    return out[:30]
+
+
+# ---------- 地點限定活動 ----------
+
+def active_locations(now):
+    groups = load_json(LOCATIONS_FILE, [])
+    out = []
+    for g in groups:
+        tz = ZoneInfo(g.get("tz", "Asia/Taipei"))
+        start = datetime.fromisoformat(g["start"]).replace(tzinfo=tz)
+        end = datetime.fromisoformat(g["end"]).replace(tzinfo=tz)
+        if start - timedelta(days=7) <= now <= end:
+            out.append((g, start, end))
+    return out
+
+
+def locations_section(now, only_ending_days=None):
+    lines = []
+    for g, start, end in active_locations(now):
+        days_left = (end - now).total_seconds() / 86400
+        if only_ending_days is not None and days_left > only_ending_days:
+            continue
+        head = f"<b>{esc(g['name'])}</b>"
+        if now < start:
+            head += f"（{fmt(start)} 開始）"
+        lines.append(head)
+        lines.append(f"　到 {end.astimezone(TPE).strftime('%Y/%m/%d %H:%M')}（台灣時間）｜{esc(g.get('reward', ''))}")
+        for name, lat, lon in g.get("places", []):
+            lines.append(f"　・{esc(name)}　<code>{lat},{lon}</code>")
+    return lines
+
+
+# ---------- 組訊息 ----------
+
+def build(mode, now, state):
+    events = load_events()
+    first_run = not state.get("initialized")
+    seen_events = state.setdefault("events", {})
+    seen_articles = state.setdefault("articles", {})
+    seen_feed = state.setdefault("feed", [])
+
+    # --- 新增或變更的活動 ---
+    new_events, changed_events = [], []
+    for ev in events:
+        sig = f"{ev.raw_start}|{ev.raw_end}"
+        old = seen_events.get(ev.id)
+        if old is None:
+            if not first_run:
+                new_events.append(ev)
+        elif old != sig:
+            changed_events.append((ev, old))
+        seen_events[ev.id] = sig
+
+    # --- 官方公告：新公告與內文更新 ---
+    new_articles, updated_articles = [], []
+    for title, url in official_news():
+        lines = article_lines(url)
+        if lines is None:
+            continue
+        digest = hashlib.sha256("\n".join(lines).encode()).hexdigest()
+        old = seen_articles.get(url)
+        if old is None:
+            if not first_run:
+                new_articles.append((title, url))
+        elif old.get("hash") != digest:
+            added = [l[2:] for l in difflib.ndiff(old.get("lines", []), lines) if l.startswith("+ ")]
+            if added:
+                updated_articles.append((title, url, added[:4]))
+        seen_articles[url] = {"hash": digest, "lines": lines, "title": title}
+
+    # --- 攻略站新文章 ---
+    new_posts = []
+    for label, url in FEEDS.items():
+        for title, link in feed_items(label, url):
+            if link not in seen_feed:
+                if not first_run:
+                    new_posts.append((label, title, link))
+                seen_feed.append(link)
+    state["feed"] = seen_feed[-400:]
+    state["initialized"] = True
+
+    # --- 時間相關 ---
+    def ends_within(hours):
+        out = []
+        for ev in events:
+            e = ev.end_in(TPE)
+            if e and now <= e <= now + timedelta(hours=hours):
+                out.append(ev)
+        return sorted(out, key=lambda x: x.end_in(TPE))
+
+    # 台灣已結束，但其他時區還沒結束
+    still_alive = []
+    for ev in events:
+        if ev.end and ev.end_local and ev.end_in(TPE) < now < ev.end_in(LAST_ZONE):
+            still_alive.append(ev)
+    still_alive.sort(key=lambda x: x.end_in(LAST_ZONE))
+
+    msg = []
+    today = now.date()
+
+    if mode == "morning":
+        msg.append(f"<b>Pokémon GO 今日整理</b>　{now.strftime('%m/%d')}（{'一二三四五六日'[now.weekday()]}）")
+
+        todays = []
+        for ev in events:
+            s, e = ev.start_in(TPE), ev.end_in(TPE)
+            if s and s.date() == today:
+                todays.append((s, f"{s.strftime('%H:%M')} 開始　{ev.title()}"))
+            if e and e.date() == today:
+                todays.append((e, f"{e.strftime('%H:%M')} 結束　{ev.title()}"))
+        msg.append("\n<b>今天（台灣時間）</b>")
+        msg += [t for _, t in sorted(todays, key=lambda x: x[0])] or ["　今天沒有開始或結束的活動"]
+
+        soon = ends_within(48)
+        if soon:
+            msg.append("\n<b>48 小時內結束</b>")
+            for ev in soon:
+                msg.append(ev.title())
+                msg += world_window_lines(ev, now)
+
+        if still_alive:
+            msg.append("\n<b>台灣已結束，其他時區還在進行</b>")
+            for ev in still_alive:
+                msg.append(ev.title())
+                msg.append(f"　巴西結束：{fmt(ev.end_in(ZoneInfo('America/Sao_Paulo')))}")
+                msg.append(f"　全球最晚：{fmt(ev.end_in(LAST_ZONE))}")
+
+        running = [ev for ev in events if ev.start_in(TPE) and ev.end_in(TPE) and ev.start_in(TPE) <= now <= ev.end_in(TPE)]
+        if running:
+            msg.append("\n<b>進行中</b>")
+            for ev in sorted(running, key=lambda x: x.end_in(TPE)):
+                msg.append(f"{ev.title()}　到 {fmt(ev.end_in(TPE))}")
+
+        upcoming = [ev for ev in events if ev.start_in(TPE) and now < ev.start_in(TPE) <= now + timedelta(days=7)]
+        if upcoming:
+            msg.append("\n<b>未來 7 天</b>")
+            for ev in sorted(upcoming, key=lambda x: x.start_in(TPE)):
+                early = ""
+                if ev.start_local:
+                    early = f"（全球最早 {fmt(ev.start_in(FIRST_ZONE))}）"
+                msg.append(f"{fmt(ev.start_in(TPE))}　{ev.title()}{early}")
+
+        loc = locations_section(now)
+        if loc:
+            msg.append("\n<b>地點限定活動與座標</b>")
+            msg += loc
+    else:
+        msg.append(f"<b>Pokémon GO 新增與變更</b>　{now.strftime('%m/%d %H:%M')}")
+
+    # --- 新增與變更（兩種模式都報） ---
+    delta = []
+    for ev in new_events:
+        delta.append(f"🆕 {ev.title()}")
+        if ev.start:
+            delta.append(f"　開始：{fmt(ev.start_in(TPE))}" + ("（各地當地時間）" if ev.start_local else "（全球同時）"))
+        delta += world_window_lines(ev, now)
+    for ev, old in changed_events:
+        delta.append(f"✏️ 時間變更　{ev.title()}")
+        delta.append(f"　原本：{esc(old.replace('|', ' → '))}")
+        delta.append(f"　現在：{esc(ev.raw_start)} → {esc(ev.raw_end)}")
+    for title, url in new_articles:
+        delta.append(f'📰 官方新公告　<a href="{html.escape(url)}">{esc(title)}</a>')
+    for title, url, added in updated_articles:
+        delta.append(f'✏️ 官方公告更新　<a href="{html.escape(url)}">{esc(title)}</a>')
+        delta += [f"　＋{esc(a[:160])}" for a in added]
+    for label, title, link in new_posts:
+        delta.append(f'📝 {esc(label)}　<a href="{html.escape(link)}">{esc(title)}</a>')
+
+    if delta:
+        msg.append("\n<b>新增與變更</b>")
+        msg += delta
+
+    if mode == "delta":
+        soon = ends_within(12)
+        if soon or still_alive:
+            msg.append("\n<b>快結束了</b>")
+            for ev in soon:
+                msg.append(f"{ev.title()}　台灣 {fmt(ev.end_in(TPE))}")
+                if ev.end_local:
+                    msg.append(f"　全球最晚：{fmt(ev.end_in(LAST_ZONE))}")
+            for ev in still_alive:
+                msg.append(f"{ev.title()}　台灣已結束")
+                msg.append(f"　巴西：{fmt(ev.end_in(ZoneInfo('America/Sao_Paulo')))}｜全球最晚：{fmt(ev.end_in(LAST_ZONE))}")
+        loc = locations_section(now, only_ending_days=2)
+        if loc:
+            msg.append("\n<b>兩天內結束的地點限定活動</b>")
+            msg += loc
+        if not delta and not soon and not still_alive and not loc:
+            msg.append("這個時段沒有新增或變更的消息。")
+
+    if first_run:
+        msg.append("\n（第一次執行：已記下目前所有活動與公告，之後才會開始比對新增與變更。）")
+    if errors:
+        msg.append("\n<i>這次抓不到的來源：" + esc("、".join(dict.fromkeys(errors))) + "</i>")
+    return "\n".join(msg)
+
+
+# ---------- Telegram ----------
+
+def chunks(text, limit=3800):
+    buf = ""
+    for line in text.split("\n"):
+        if len(buf) + len(line) + 1 > limit and buf:
+            yield buf
+            buf = ""
+        buf += line + "\n"
+    if buf.strip():
+        yield buf
+
+
+def send(text):
+    if os.environ.get("DRY_RUN") == "1":
+        print(text)
+        return
+    token = os.environ["TELEGRAM_BOT_TOKEN"]
+    chat = os.environ["TELEGRAM_CHAT_ID"]
+    for part in chunks(text):
+        data = json.dumps({
+            "chat_id": chat, "text": part, "parse_mode": "HTML",
+            "disable_web_page_preview": True,
+        }).encode()
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{token}/sendMessage", data=data,
+            headers={"Content-Type": "application/json"})
+        try:
+            urllib.request.urlopen(req, timeout=30).read()
+        except Exception as e:
+            # 不把權杖印進錯誤訊息
+            detail = getattr(e, "read", lambda: b"")()[:300]
+            sys.exit(f"Telegram 發送失敗：{type(e).__name__} {detail!r}")
+
+
+def main():
+    now = now_tpe()
+    mode = os.environ.get("MODE", "auto")
+    if mode not in ("morning", "delta"):
+        mode = "morning" if now.hour < 11 else "delta"
+    state = load_json(STATE_FILE, {})
+    text = build(mode, now, state)
+    send(text)
+    STATE_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+if __name__ == "__main__":
+    main()
