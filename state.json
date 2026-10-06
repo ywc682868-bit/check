@@ -33,7 +33,7 @@
   "raidhour20261028": "2026-10-28T18:00:00.000|2026-10-28T19:00:00.000",
   "pokemonspotlighthour2026-10-29": "2026-10-29T18:00:00.000|2026-10-29T19:00:00.000",
   "super-mega-raid-day-october-2026": "2026-10-31T14:00:00.000|2026-10-31T17:00:00.000",
-  "halloween-2026-part-1": "2026-10-27T10:00:00.000|2026-10-31T20:00:00.000",
+  "halloween-2026-part-1": "2026-10-27T10:00:00.000|2026-11-01T10:00:00.000",
   "go-pass-october-2026": "2026-10-06T10:00:00.000|2026-11-03T10:00:00.000",
   "shadow-landorus-incarnate-forme-in-shadow-raids-october-2026": "2026-10-07T06:00:00.000|2026-11-03T22:00:00.000",
   "giratina-origin-forme-in-5-star-raid-battles-october-2026": "2026-10-28T06:00:00.000|2026-11-03T22:00:00.000",
@@ -1557,7 +1557,15 @@
   "https://pokemongo-raku.com/post159545",
   "https://pokemonhubs.com/pokemongo/54428/",
   "https://pokemonhubs.com/ptcg-pocket/deluxe-pack-mega-emblem-event/",
-  "https://pokemongo-raku.com/post95707"
+  "https://pokemongo-raku.com/post95707",
+  "https://pokemonhubs.com/news/pokexciting-taipei-2026-guide/",
+  "https://pokemongo-raku.com/post6616",
+  "https://pokemongo-raku.com/post22566",
+  "https://pokemongo-raku.com/post164276",
+  "https://pokemongo-raku.com/post162649",
+  "https://pokemongo-raku.com/post163443",
+  "https://pokemongo-raku.com/post164228",
+  "https://pokemongo-raku.com/post71607"
  ],
  "initialized": true,
  "zh": {
@@ -1612,6 +1620,7 @@
   "Pokémon GO Tour: Alola - Global 2027": "Pokémon GO Tour：阿羅拉 - 全球 2027",
   "Minior Showers: Eta Aquariids 2027": "小隕星流星雨：寶瓶座η 2027",
   "Minior Showers: Southern Delta Aquariids 2027": "小隕星流星雨：南寶瓶座δ 2027",
-  "Minior Showers: Perseids 2027": "小隕星流星雨：英仙座 2027"
+  "Minior Showers: Perseids 2027": "小隕星流星雨：英仙座 2027",
+  "Pokémon GO Halloween 2026 Part I": "Pokémon GO 萬聖節 2026 第一部"
  }
 }
