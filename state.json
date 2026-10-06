@@ -1,9 +1,9 @@
 {
  "events": {
   "gigantamax-cinderace-max-battle-day-2026": "None|None",
-  "harvest-festival-2026": "2026-09-29T10:00:00.000|2026-10-05T20:00:00.000",
-  "harvest-festival-taken-over-2026": "2026-10-02T00:00:00.000|2026-10-05T20:00:00.000",
-  "max-mondays-2026-10-05": "2026-10-05T06:00:00.000|2026-10-05T21:00:00.000",
+  "harvest-festival-2026": "None|None",
+  "harvest-festival-taken-over-2026": "None|None",
+  "max-mondays-2026-10-05": "None|None",
   "go-pass-september-2026": "2026-09-08T10:00:00.000|2026-10-06T10:00:00.000",
   "shadow-thundurus-incarnate-forme-in-shadow-raids-september-2026": "2026-09-09T06:00:00.000|2026-10-06T22:00:00.000",
   "mega-victreebel-in-mega-raids-september-2026": "2026-09-30T06:00:00.000|2026-10-06T22:00:00.000",
@@ -1575,7 +1575,14 @@
   "https://pokemongo-raku.com/post2077",
   "https://pokemongo-raku.com/post144578",
   "https://pokemongo-raku.com/post16451",
-  "https://pokemongo-raku.com/post4071"
+  "https://pokemongo-raku.com/post4071",
+  "https://pokemongo-raku.com/post163016",
+  "https://pokemongo-raku.com/post35932",
+  "https://pokemongo-raku.com/post28167",
+  "https://pokemongo-raku.com/post13982",
+  "https://pokemongo-raku.com/post38767",
+  "https://pokemongo-raku.com/post38714",
+  "https://pokemongo-raku.com/post37916"
  ],
  "initialized": true,
  "zh": {
