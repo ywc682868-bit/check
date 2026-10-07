@@ -5,9 +5,9 @@
   "harvest-festival-taken-over-2026": "None|None",
   "max-mondays-2026-10-05": "None|None",
   "go-pass-september-2026": "None|None",
-  "shadow-thundurus-incarnate-forme-in-shadow-raids-september-2026": "2026-09-09T06:00:00.000|2026-10-06T22:00:00.000",
-  "mega-victreebel-in-mega-raids-september-2026": "2026-09-30T06:00:00.000|2026-10-06T22:00:00.000",
-  "xerneas-in-5-star-raid-battles-september-2026": "2026-09-30T06:00:00.000|2026-10-06T22:00:00.000",
+  "shadow-thundurus-incarnate-forme-in-shadow-raids-september-2026": "None|None",
+  "mega-victreebel-in-mega-raids-september-2026": "None|None",
+  "xerneas-in-5-star-raid-battles-september-2026": "None|None",
   "raidhour20261007": "2026-10-07T18:00:00.000|2026-10-07T19:00:00.000",
   "pokemonspotlighthour2026-10-08": "2026-10-08T18:00:00.000|2026-10-08T19:00:00.000",
   "october-communityday2026": "2026-10-10T14:00:00.000|2026-10-10T17:00:00.000",
@@ -1596,7 +1596,10 @@
   "https://pokemongo-raku.com/post38915",
   "https://pokemongo-raku.com/post60751",
   "https://pokemongo-raku.com/post60745",
-  "https://pokemongo-raku.com/post164338"
+  "https://pokemongo-raku.com/post164338",
+  "https://pokemonhubs.com/pokemongo/54472/",
+  "https://pokemonhubs.com/pokemongo/54469/",
+  "https://pokemongo-raku.com/post162940"
  ],
  "initialized": true,
  "zh": {
