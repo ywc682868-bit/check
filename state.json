@@ -8,7 +8,7 @@
   "shadow-thundurus-incarnate-forme-in-shadow-raids-september-2026": "None|None",
   "mega-victreebel-in-mega-raids-september-2026": "None|None",
   "xerneas-in-5-star-raid-battles-september-2026": "None|None",
-  "raidhour20261007": "2026-10-07T18:00:00.000|2026-10-07T19:00:00.000",
+  "raidhour20261007": "None|None",
   "pokemonspotlighthour2026-10-08": "2026-10-08T18:00:00.000|2026-10-08T19:00:00.000",
   "october-communityday2026": "2026-10-10T14:00:00.000|2026-10-10T17:00:00.000",
   "world-space-week-2026": "2026-10-04T00:00:00.000|2026-10-10T23:59:00.000",
@@ -1713,7 +1713,17 @@
   "https://pokemongo-raku.com/post108830",
   "https://pokemongo-raku.com/post108825",
   "https://pokemongo-raku.com/post164396",
-  "https://pokemongo-raku.com/post60085"
+  "https://pokemongo-raku.com/post60085",
+  "https://pokemonhubs.com/pokemongo/54513/",
+  "https://pokemongo-raku.com/post4273",
+  "https://pokemongo-raku.com/post25467",
+  "https://pokemongo-raku.com/post3817",
+  "https://pokemongo-raku.com/post60757",
+  "https://pokemongo-raku.com/post20283",
+  "https://pokemongo-raku.com/post52656",
+  "https://pokemongo-raku.com/post52653",
+  "https://pokemongo-raku.com/post73821",
+  "https://pokemongo-raku.com/post12636"
  ],
  "initialized": true,
  "zh": {
@@ -1769,6 +1779,7 @@
   "Minior Showers: Eta Aquariids 2027": "小隕星流星雨：寶瓶座η 2027",
   "Minior Showers: Southern Delta Aquariids 2027": "小隕星流星雨：南寶瓶座δ 2027",
   "Minior Showers: Perseids 2027": "小隕星流星雨：英仙座 2027",
-  "Pokémon GO Halloween 2026 Part I": "Pokémon GO 萬聖節 2026 第一部"
+  "Pokémon GO Halloween 2026 Part I": "Pokémon GO 萬聖節 2026 第一部",
+  "Pokémon GO Halloween 2026 Part II": "Pokémon GO 萬聖節 2026 第二部"
  }
 }
