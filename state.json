@@ -12,7 +12,7 @@
   "pokemonspotlighthour2026-10-08": "None|None",
   "october-communityday2026": "None|None",
   "world-space-week-2026": "None|None",
-  "max-mondays-2026-10-12": "2026-10-12T06:00:00.000|2026-10-12T21:00:00.000",
+  "max-mondays-2026-10-12": "None|None",
   "mega-blastoise-in-mega-raids-october-2026": "2026-10-07T06:00:00.000|2026-10-13T22:00:00.000",
   "yveltal-in-5-star-raid-battles-october-2026": "2026-10-07T06:00:00.000|2026-10-13T22:00:00.000",
   "raidhour20261014": "2026-10-14T18:00:00.000|2026-10-14T19:00:00.000",
@@ -283,7 +283,7 @@
    "title": "「納噬草」即將在《Pokémon GO》「秋季遠足：與夥伴同行」期間首度登場！"
   },
   "https://pokemongo.com/zh_Hant/news/apac-mall-exploration-2026": {
-   "hash": "a70ea0edbbdaf89cba2907ce74179e585f2b9d91b2222d19bd730a59d09ffb1c",
+   "hash": "548b33ccec18d8955687e0cce62fdd6d927caca561d41e105d889413232d922f",
    "lines": [
     "《Pokémon GO》將在「寶可夢30週年商場探險」踏上探索商場的旅程！",
     "親愛的訓練家們：",
@@ -303,7 +303,7 @@
     "SM CDO Downtown：2027年3月13日～2027年3月28日",
     "樟宜國際機場：2026年11月7日～2027年2月28日",
     "星耀樟宜：2026年11月7日～2027年1月31日",
-    "又一城：敬請期待！",
+    "又一城 FESTIVAL WALK：敬請期待！",
     "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
     "—《Pokémon GO》開發團隊敬上"
    ],
@@ -1788,7 +1788,8 @@
   "https://pokemongo-raku.com/post96942",
   "https://pokemongo-raku.com/post52873",
   "https://pokemongo-raku.com/post61186",
-  "https://pokemongo-raku.com/post40792"
+  "https://pokemongo-raku.com/post40792",
+  "https://pokemongo-raku.com/post30606"
  ],
  "initialized": true,
  "zh": {
