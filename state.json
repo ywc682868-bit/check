@@ -13,8 +13,8 @@
   "october-communityday2026": "None|None",
   "world-space-week-2026": "None|None",
   "max-mondays-2026-10-12": "None|None",
-  "mega-blastoise-in-mega-raids-october-2026": "2026-10-07T06:00:00.000|2026-10-13T22:00:00.000",
-  "yveltal-in-5-star-raid-battles-october-2026": "2026-10-07T06:00:00.000|2026-10-13T22:00:00.000",
+  "mega-blastoise-in-mega-raids-october-2026": "None|None",
+  "yveltal-in-5-star-raid-battles-october-2026": "None|None",
   "raidhour20261014": "2026-10-14T18:00:00.000|2026-10-14T19:00:00.000",
   "pokemonspotlighthour2026-10-15": "2026-10-15T18:00:00.000|2026-10-15T19:00:00.000",
   "sandile-hatch-day-2026": "2026-10-17T11:00:00.000|2026-10-17T17:00:00.000",
@@ -54,7 +54,8 @@
   "minior-showers-southern-delta-aquariids-2027": "2027-07-28T17:00:00.000|2027-08-02T23:59:00.000",
   "minior-showers-perseids-2027": "2027-08-10T17:00:00.000|2027-08-15T23:59:00.000",
   "chandelure-super-mega-raid-day-2026": "2026-10-31T14:00:00.000|2026-10-31T17:00:00.000",
-  "pokemon-go-city-safari-boston-2026-rescheduled": "2026-10-24T10:00:00.000|2026-10-25T18:00:00.000"
+  "pokemon-go-city-safari-boston-2026-rescheduled": "2026-10-24T10:00:00.000|2026-10-25T18:00:00.000",
+  "into-the-wild-2026": "2026-11-09T10:00:00.000|2026-11-13T20:00:00.000"
  },
  "articles": {
   "https://pokemongo.com/zh_Hant/news/dynamax-uxie-mesprit-azelf-max-battle-day-2026": {
@@ -1966,7 +1967,16 @@
   "https://pokemongo-raku.com/post6229",
   "https://pokemonhubs.com/news/pokemon-beats-pill-pikachu-mimikyu-2026/",
   "https://pokemonhubs.com/pokemongo/54678/",
-  "https://pokemonhubs.com/pokemon-sleep/halloween-2026-double-candy/"
+  "https://pokemonhubs.com/pokemon-sleep/halloween-2026-double-candy/",
+  "https://pokemonhubs.com/news/pokexciting-pikachu-keychain-restock-taipei-october-2026/",
+  "https://pokemonhubs.com/pokemongo/54681/",
+  "https://pokemongo-raku.com/post127562",
+  "https://pokemongo-raku.com/post127988",
+  "https://pokemongo-raku.com/post60081",
+  "https://pokemongo-raku.com/post16403",
+  "https://pokemongo-raku.com/post98652",
+  "https://pokemongo-raku.com/post96147",
+  "https://pokemongo-raku.com/post122091"
  ],
  "initialized": true,
  "zh": {
@@ -2025,6 +2035,7 @@
   "Pokémon GO Halloween 2026 Part I": "Pokémon GO 萬聖節 2026 第一部",
   "Pokémon GO Halloween 2026 Part II": "Pokémon GO 萬聖節 2026 第二部",
   "Chandelure Super Mega Raid Day": "水晶燈火靈極致超級 · 團體戰日",
-  "Pokémon GO City Safari: Boston (Rescheduled)": "Pokémon GO 城市野生動物園：波士頓（已安排）"
+  "Pokémon GO City Safari: Boston (Rescheduled)": "Pokémon GO 城市野生動物園：波士頓（已安排）",
+  "Into the Wild": "「曠野週」即將帶來一章鋼屬性與龍屬性的冒險故事！"
  }
 }
