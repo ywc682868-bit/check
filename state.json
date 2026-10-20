@@ -37,7 +37,7 @@
   "go-pass-october-2026": "2026-10-06T10:00:00.000|2026-11-03T10:00:00.000",
   "shadow-landorus-incarnate-forme-in-shadow-raids-october-2026": "2026-10-07T06:00:00.000|2026-11-03T22:00:00.000",
   "giratina-origin-forme-in-5-star-raid-battles-october-2026": "2026-10-28T06:00:00.000|2026-11-03T22:00:00.000",
-  "mega-sableye-in-mega-raids-october-2026": "2026-10-28T06:00:00.000|2026-11-03T22:00:00.000",
+  "mega-sableye-in-mega-raids-october-2026": "2026-10-28T06:00:00.000|2026-11-08T22:00:00.000",
   "halloween-2026-part-2": "2026-11-01T10:00:00.000|2026-11-05T20:00:00.000",
   "pokemon-go-wild-area-2026-sendai-japan": "2026-11-06T01:00:00.000Z|2026-11-08T09:00:00.000Z",
   "pokemon-go-wild-area-2026-mexico-city": "2026-11-06T16:00:00.000Z|2026-11-09T00:00:00.000Z",
@@ -55,7 +55,27 @@
   "minior-showers-perseids-2027": "2027-08-10T17:00:00.000|2027-08-15T23:59:00.000",
   "chandelure-super-mega-raid-day-2026": "2026-10-31T14:00:00.000|2026-10-31T17:00:00.000",
   "pokemon-go-city-safari-boston-2026-rescheduled": "2026-10-24T10:00:00.000|2026-10-25T18:00:00.000",
-  "into-the-wild-2026": "2026-11-09T10:00:00.000|2026-11-13T20:00:00.000"
+  "into-the-wild-2026": "2026-11-09T10:00:00.000|2026-11-13T20:00:00.000",
+  "pokemon-night-out-los-angeles-2026": "2026-10-25T02:30:00.000Z|2026-10-25T06:59:59.000Z",
+  "max-mondays-2026-11-02": "2026-11-02T06:00:00.000|2026-11-02T21:00:00.000",
+  "raidhour20261104": "2026-11-04T18:00:00.000|2026-11-04T19:00:00.000",
+  "pokemonspotlighthour2026-11-05": "2026-11-05T18:00:00.000|2026-11-05T19:00:00.000",
+  "giratina-altered-forme-in-5-star-raid-battles-november-2026": "2026-11-04T06:00:00.000|2026-11-08T22:00:00.000",
+  "shadow-tornadus-incarnate-forme-in-shadow-raids-november-4-2026": "2026-11-04T06:00:00.000|2026-11-08T22:00:00.000",
+  "pokemon-night-out-london-2026": "2026-11-10T18:00:00.000Z|2026-11-10T22:30:00.000Z",
+  "max-mondays-2026-11-16": "2026-11-16T06:00:00.000|2026-11-16T21:00:00.000",
+  "raidhour20261118": "2026-11-18T18:00:00.000|2026-11-18T19:00:00.000",
+  "dynamax-trails-2026": "2026-11-16T10:00:00.000|2026-11-23T20:00:00.000",
+  "max-mondays-2026-11-23": "2026-11-23T06:00:00.000|2026-11-23T21:00:00.000",
+  "cresselia-darkrai-in-5-star-raid-battles-november-2026": "2026-11-16T06:00:00.000|2026-11-24T22:00:00.000",
+  "mega-banette-in-mega-raids-november-2026": "2026-11-16T06:00:00.000|2026-11-24T22:00:00.000",
+  "raidhour20261125": "2026-11-25T18:00:00.000|2026-11-25T19:00:00.000",
+  "pokemonspotlighthour2026-11-26": "2026-11-26T18:00:00.000|2026-11-26T19:00:00.000",
+  "twilight-wishes-2026": "2026-11-24T10:00:00.000|2026-11-30T20:00:00.000",
+  "max-mondays-2026-11-30": "2026-11-30T06:00:00.000|2026-11-30T21:00:00.000",
+  "shadow-tornadus-incarnate-forme-in-shadow-raids-november-16-2026": "2026-11-16T06:00:00.000|2026-12-01T22:00:00.000",
+  "deoxys-normal-defense-attack-speed-formes-in-5-star-raid-battles-november-2026": "2026-11-25T06:00:00.000|2026-12-01T22:00:00.000",
+  "mega-metagross-in-mega-raids-november-2026": "2026-11-25T06:00:00.000|2026-12-01T22:00:00.000"
  },
  "articles": {
   "https://pokemongo.com/zh_Hant/news/dynamax-uxie-mesprit-azelf-max-battle-day-2026": {
@@ -2035,7 +2055,17 @@
   "https://pokemongo-raku.com/post165029",
   "https://pokemongo-raku.com/post78249",
   "https://pokemonhubs.com/pokemongo/54300/",
-  "https://pokemongo-raku.com/post165040"
+  "https://pokemongo-raku.com/post165040",
+  "https://pokemonhubs.com/pokemongo/54865/",
+  "https://pokemonhubs.com/pokemongo/54867/",
+  "https://pokemonhubs.com/news/pokemon-center-taipei-2026-10-24-new-products/",
+  "https://pokemongo-raku.com/post74875",
+  "https://pokemongo-raku.com/post164974",
+  "https://pokemongo-raku.com/post78358",
+  "https://pokemongo-raku.com/post78380",
+  "https://pokemongo-raku.com/post78389",
+  "https://pokemongo-raku.com/post73533",
+  "https://pokemongo-raku.com/post60041"
  ],
  "initialized": true,
  "zh": {
@@ -2095,6 +2125,17 @@
   "Pokémon GO Halloween 2026 Part II": "Pokémon GO 萬聖節 2026 第二部",
   "Chandelure Super Mega Raid Day": "水晶燈火靈極致超級 · 團體戰日",
   "Pokémon GO City Safari: Boston (Rescheduled)": "Pokémon GO 城市野生動物園：波士頓（已安排）",
-  "Into the Wild": "「曠野週」即將帶來一章鋼屬性與龍屬性的冒險故事！"
+  "Into the Wild": "「曠野週」即將帶來一章鋼屬性與龍屬性的冒險故事！",
+  "Dynamax Machop during Max Monday": "極巨化腕力 · 極巨星期一",
+  "Giratina (Altered Forme) Raid Hour": "騎拉帝納（別種形態） · 團體戰時刻",
+  "Giratina (Altered Forme) in 5-star Raid Battles": "騎拉帝納（別種形態） · 五星團體戰",
+  "Shadow Tornadus (Incarnate Forme) in Shadow Raids": "暗影龍捲雲（化身形態） · 暗影團體戰",
+  "Cresselia and Darkrai Raid Hour": "克雷色利亞與達克萊伊 · 團體戰時刻",
+  "Dynamax Espurr during Max Monday": "極巨化妙喵 · 極巨星期一",
+  "Cresselia and Darkrai in 5-star Raid Battles": "克雷色利亞與達克萊伊 · 五星團體戰",
+  "Mega Banette in Mega Raids": "超級詛咒娃娃 · 超級團體戰",
+  "Noibat Spotlight Hour": "嗡蝠 · 聚焦時刻",
+  "Dynamax Cryogonal during Max Monday": "極巨化幾何雪花 · 極巨星期一",
+  "Mega Metagross in Mega Raids": "超級巨金怪 · 超級團體戰"
  }
 }
