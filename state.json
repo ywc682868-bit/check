@@ -18,8 +18,8 @@
   "raidhour20261014": "None|None",
   "pokemonspotlighthour2026-10-15": "None|None",
   "sandile-hatch-day-2026": "None|None",
-  "fall-marathon-buddy-trek-2026": "2026-10-13T10:00:00.000|2026-10-19T20:00:00.000",
-  "max-mondays-2026-10-19": "2026-10-19T06:00:00.000|2026-10-19T21:00:00.000",
+  "fall-marathon-buddy-trek-2026": "None|None",
+  "max-mondays-2026-10-19": "None|None",
   "pokemon-tcg-30th-celebration": "2026-09-27T10:00:00.000|2026-10-20T22:00:00.000",
   "dialga-in-5-star-raid-battles-october-2026": "2026-10-14T06:00:00.000|2026-10-20T22:00:00.000",
   "mega-dragonite-in-mega-raids-october-2026": "2026-10-14T06:00:00.000|2026-10-20T22:00:00.000",
@@ -75,7 +75,8 @@
   "max-mondays-2026-11-30": "2026-11-30T06:00:00.000|2026-11-30T21:00:00.000",
   "shadow-tornadus-incarnate-forme-in-shadow-raids-november-16-2026": "2026-11-16T06:00:00.000|2026-12-01T22:00:00.000",
   "deoxys-normal-defense-attack-speed-formes-in-5-star-raid-battles-november-2026": "2026-11-25T06:00:00.000|2026-12-01T22:00:00.000",
-  "mega-metagross-in-mega-raids-november-2026": "2026-11-25T06:00:00.000|2026-12-01T22:00:00.000"
+  "mega-metagross-in-mega-raids-november-2026": "2026-11-25T06:00:00.000|2026-12-01T22:00:00.000",
+  "go-pass-november-2026": "2026-11-03T10:00:00.000|2026-12-01T10:00:00.000"
  },
  "articles": {
   "https://pokemongo.com/zh_Hant/news/dynamax-uxie-mesprit-azelf-max-battle-day-2026": {
@@ -2127,7 +2128,9 @@
   "https://pokemongo-raku.com/post91746",
   "https://pokemongo-raku.com/post14984",
   "https://pokemonhubs.com/ptcg-pocket/dual-fusion-2026-announced",
-  "https://pokemongo-raku.com/post65940"
+  "https://pokemongo-raku.com/post65940",
+  "https://pokemonhubs.com/pokemongo/54951/",
+  "https://pokemongo-raku.com/post165131"
  ],
  "initialized": true,
  "zh": {
@@ -2205,6 +2208,7 @@
   "Dynamax Trails": "極巨化步道",
   "Deoxys (Normal, Defense, Attack, and Speed Formes) Raid Hour": "代歐奇希斯（普通、防禦、攻擊和速度形態）突襲時間",
   "Twilight Wishes": "暮光之願",
-  "Deoxys (Normal, Defense, Attack, and Speed Formes) in 5-star Raid Battles": "5 星級突襲戰中的代歐奇希斯（普通型態、防禦型態、攻擊型態和速度型態）"
+  "Deoxys (Normal, Defense, Attack, and Speed Formes) in 5-star Raid Battles": "5 星級突襲戰中的代歐奇希斯（普通型態、防禦型態、攻擊型態和速度型態）",
+  "GO Pass: November": "GO Pass：11月"
  }
 }
