@@ -20,9 +20,9 @@
   "sandile-hatch-day-2026": "None|None",
   "fall-marathon-buddy-trek-2026": "None|None",
   "max-mondays-2026-10-19": "None|None",
-  "pokemon-tcg-30th-celebration": "2026-09-27T10:00:00.000|2026-10-20T22:00:00.000",
-  "dialga-in-5-star-raid-battles-october-2026": "2026-10-14T06:00:00.000|2026-10-20T22:00:00.000",
-  "mega-dragonite-in-mega-raids-october-2026": "2026-10-14T06:00:00.000|2026-10-20T22:00:00.000",
+  "pokemon-tcg-30th-celebration": "None|None",
+  "dialga-in-5-star-raid-battles-october-2026": "None|None",
+  "mega-dragonite-in-mega-raids-october-2026": "None|None",
   "raidhour20261021": "2026-10-21T18:00:00.000|2026-10-21T19:00:00.000",
   "pokemonspotlighthour2026-10-22": "2026-10-22T18:00:00.000|2026-10-22T19:00:00.000",
   "dynamax-uxie-mesprit-azelf-max-battle-day-2026": "2026-10-24T14:00:00.000|2026-10-24T17:00:00.000",
@@ -2185,7 +2185,11 @@
   "https://pokemonhubs.com/pokemongo/54951/",
   "https://pokemongo-raku.com/post165131",
   "https://pokemonhubs.com/pokemongo/54974/",
-  "https://pokemonhubs.com/news/mister-donut-pokemon-2026/"
+  "https://pokemonhubs.com/news/mister-donut-pokemon-2026/",
+  "https://pokemonhubs.com/news/pokemon-center-taipei-pink-pikachu-sales-suspended-2026/",
+  "https://pokemonhubs.com/pokemongo/54979/",
+  "https://pokemongo-raku.com/post163995",
+  "https://pokemongo-raku.com/post163912"
  ],
  "initialized": true,
  "zh": {
@@ -2264,6 +2268,7 @@
   "Deoxys (Normal, Defense, Attack, and Speed Formes) Raid Hour": "代歐奇希斯（普通、防禦、攻擊和速度形態）突襲時間",
   "Twilight Wishes": "暮光之願",
   "Deoxys (Normal, Defense, Attack, and Speed Formes) in 5-star Raid Battles": "5 星級突襲戰中的代歐奇希斯（普通型態、防禦型態、攻擊型態和速度型態）",
-  "GO Pass: November": "GO Pass：11月"
+  "GO Pass: November": "GO Pass：11月",
+  "Pawniard Community Day": "駒刀小兵 · 社群日"
  }
 }
