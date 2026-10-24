@@ -24,7 +24,7 @@
   "dialga-in-5-star-raid-battles-october-2026": "None|None",
   "mega-dragonite-in-mega-raids-october-2026": "None|None",
   "raidhour20261021": "None|None",
-  "pokemonspotlighthour2026-10-22": "2026-10-22T18:00:00.000|2026-10-22T19:00:00.000",
+  "pokemonspotlighthour2026-10-22": "None|None",
   "dynamax-uxie-mesprit-azelf-max-battle-day-2026": "2026-10-24T14:00:00.000|2026-10-24T17:00:00.000",
   "minior-showers-orionids-2026": "2026-10-19T17:00:00.000|2026-10-24T23:59:00.000",
   "max-mondays-2026-10-26": "2026-10-26T06:00:00.000|2026-10-26T21:00:00.000",
@@ -1472,7 +1472,7 @@
    "title": "歡慶《Pokémon GO》10週年！與特別的「超夢」一同慶祝這個精彩時刻！"
   },
   "https://pokemongo.com/zh_Hant/news/halloween-part-1-2026": {
-   "hash": "134c21f31a503b73532f4a23e06909b98d74bbf2ed9cbc87f92f1a5f3f2609d7",
+   "hash": "3c0f411e5e7fec1063f0b8857507cf070ece08535bd22d2da6c52089deb483c2",
    "lines": [
     "不給糖就搗蛋！跟著扮裝「皮卡丘」、「超音蝠」與「來悲茶」在「萬聖節2026 Part 1」活動出門要糖吧！",
     "萬聖節2026 Part 1",
@@ -1502,6 +1502,12 @@
     "穿戴著帽子和披肩的皮卡丘*",
     "戴著蝴蝶結的來悲茶*",
     "*運氣好的話，還有機會遇見異色寶可夢喔！",
+    "免費的限時調查即將登場。",
+    "本次免費限時調查將會自動完成。",
+    "本次限時調查獎勵如下：",
+    "遇見「穿戴著帽子和披肩的皮卡丘」的機會*",
+    "*運氣好的話，還有機會遇見異色寶可夢喔！",
+    "請注意限時調查有時限。訓練家必須在台灣時間2026年11月1日10:00前完成限時調查相關課題並領取獎勵。",
     "田野調查課題獎勵",
     "活動主題的田野調查課題即將登場。",
     "完成田野調查課題來獲得與活動主題寶可夢相遇的機會吧。",
@@ -1571,7 +1577,7 @@
    "title": "《Pokémon GO》遊戲與功能更新"
   },
   "https://pokemongo.com/zh_Hant/news/halloween-part-2-2026": {
-   "hash": "0b8e6b8f2fd56a8b6eb80a42ae632d719e691d1506cb312e03083c120176e335",
+   "hash": "42792162e47c68cb1f7ec622007171d3b284c7136b0b4a82211bd7dcda10f296",
    "lines": [
     "「超級勾魂眼」增強、異色「墓仔狗」在《Pokémon GO》首度登場，盡在「萬聖節2026 Part 2」！",
     "萬聖節2026 Part 2",
@@ -1591,6 +1597,12 @@
     "這個招式的威力會隨著寶可夢的超級等級提升而有所提高！",
     "請注意：訓練家必須先讓寶可夢的超級等級提升至等級3「頂尖級」，才能進一步將其提升至「超級頂尖級」。",
     "除了讓寶可夢超級進化，訓練家還需要透過寶可夢的超級能量強化牠，才能讓寶可夢的「超級等級」提升至「超級頂尖級」！",
+    "免費的限時調查即將登場。",
+    "本次免費限時調查將會自動完成。",
+    "本次限時調查獎勵如下：",
+    "遇見「戴著蝴蝶結的來悲茶」的機會*",
+    "*運氣好的話，還有機會遇見異色寶可夢喔！",
+    "請注意限時調查有時限。訓練家必須在台灣時間2026年11月5日20:00前完成限時調查相關課題並領取獎勵。",
     "田野調查課題獎勵",
     "活動主題的田野調查課題即將登場。",
     "完成田野調查課題來獲得與活動主題寶可夢相遇的機會吧。",
@@ -2239,7 +2251,15 @@
   "https://pokemongo-raku.com/post165193",
   "https://pokemongo-raku.com/post117572",
   "https://pokemongo-raku.com/post165191",
-  "https://pokemongo-raku.com/post165195"
+  "https://pokemongo-raku.com/post165195",
+  "https://pokemongo-raku.com/post23716",
+  "https://pokemongo-raku.com/post155185",
+  "https://pokemongo-raku.com/post158931",
+  "https://pokemongo-raku.com/post159853",
+  "https://pokemongo-raku.com/post35675",
+  "https://pokemongo-raku.com/post159829",
+  "https://pokemongo-raku.com/post133784",
+  "https://pokemongo-raku.com/post11782"
  ],
  "initialized": true,
  "zh": {
