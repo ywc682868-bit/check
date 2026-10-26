@@ -25,8 +25,8 @@
   "mega-dragonite-in-mega-raids-october-2026": "None|None",
   "raidhour20261021": "None|None",
   "pokemonspotlighthour2026-10-22": "None|None",
-  "dynamax-uxie-mesprit-azelf-max-battle-day-2026": "2026-10-24T14:00:00.000|2026-10-24T17:00:00.000",
-  "minior-showers-orionids-2026": "2026-10-19T17:00:00.000|2026-10-24T23:59:00.000",
+  "dynamax-uxie-mesprit-azelf-max-battle-day-2026": "None|None",
+  "minior-showers-orionids-2026": "None|None",
   "max-mondays-2026-10-26": "2026-10-26T06:00:00.000|2026-10-26T21:00:00.000",
   "mega-charizard-x-mega-charizard-y-in-mega-raids-october-2026": "2026-10-21T06:00:00.000|2026-10-27T22:00:00.000",
   "palkia-in-5-star-raid-battles-october-2026": "2026-10-21T06:00:00.000|2026-10-27T22:00:00.000",
@@ -56,7 +56,7 @@
   "chandelure-super-mega-raid-day-2026": "2026-10-31T14:00:00.000|2026-10-31T17:00:00.000",
   "pokemon-go-city-safari-boston-2026-rescheduled": "2026-10-24T10:00:00.000|2026-10-25T18:00:00.000",
   "into-the-wild-2026": "2026-11-09T10:00:00.000|2026-11-13T20:00:00.000",
-  "pokemon-night-out-los-angeles-2026": "2026-10-25T02:30:00.000Z|2026-10-25T06:59:59.000Z",
+  "pokemon-night-out-los-angeles-2026": "None|None",
   "max-mondays-2026-11-02": "2026-11-02T06:00:00.000|2026-11-02T21:00:00.000",
   "raidhour20261104": "2026-11-04T18:00:00.000|2026-11-04T19:00:00.000",
   "pokemonspotlighthour2026-11-05": "2026-11-05T18:00:00.000|2026-11-05T19:00:00.000",
@@ -2274,7 +2274,12 @@
   "https://pokemongo-raku.com/post99795",
   "https://pokemongo-raku.com/post114652",
   "https://pokemongo-raku.com/post98056",
-  "https://pokemonhubs.com/pokemongo/55071/"
+  "https://pokemonhubs.com/pokemongo/55071/",
+  "https://pokemongo-raku.com/post165415",
+  "https://pokemongo-raku.com/post165409",
+  "https://pokemongo-raku.com/post165404",
+  "https://pokemongo-raku.com/post118775",
+  "https://pokemongo-raku.com/post157256"
  ],
  "initialized": true,
  "zh": {
