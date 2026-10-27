@@ -54,7 +54,7 @@
   "minior-showers-southern-delta-aquariids-2027": "2027-07-28T17:00:00.000|2027-08-02T23:59:00.000",
   "minior-showers-perseids-2027": "2027-08-10T17:00:00.000|2027-08-15T23:59:00.000",
   "chandelure-super-mega-raid-day-2026": "2026-10-31T14:00:00.000|2026-10-31T17:00:00.000",
-  "pokemon-go-city-safari-boston-2026-rescheduled": "2026-10-24T10:00:00.000|2026-10-25T18:00:00.000",
+  "pokemon-go-city-safari-boston-2026-rescheduled": "None|None",
   "into-the-wild-2026": "2026-11-09T10:00:00.000|2026-11-13T20:00:00.000",
   "pokemon-night-out-los-angeles-2026": "None|None",
   "max-mondays-2026-11-02": "2026-11-02T06:00:00.000|2026-11-02T21:00:00.000",
@@ -2287,7 +2287,11 @@
   "https://pokemongo-raku.com/post82099",
   "https://pokemonhubs.com/pokemongo/55586/",
   "https://pokemonhubs.com/pokemon-manhole-map/",
-  "https://pokemongo-raku.com/post165433"
+  "https://pokemongo-raku.com/post165433",
+  "https://pokemonhubs.com/pokemongo/55598/",
+  "https://pokemongo-raku.com/post16112",
+  "https://pokemongo-raku.com/post165393",
+  "https://pokemongo-raku.com/post121223"
  ],
  "initialized": true,
  "zh": {
