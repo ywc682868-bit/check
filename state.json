@@ -53,7 +53,7 @@
   "minior-showers-eta-aquariids-2027": "2027-05-03T17:00:00.000|2027-05-08T23:59:00.000",
   "minior-showers-southern-delta-aquariids-2027": "2027-07-28T17:00:00.000|2027-08-02T23:59:00.000",
   "minior-showers-perseids-2027": "2027-08-10T17:00:00.000|2027-08-15T23:59:00.000",
-  "chandelure-super-mega-raid-day-2026": "2026-10-31T14:00:00.000|2026-10-31T17:00:00.000",
+  "chandelure-super-mega-raid-day-2026": "None|None",
   "pokemon-go-city-safari-boston-2026-rescheduled": "None|None",
   "into-the-wild-2026": "2026-11-09T10:00:00.000|2026-11-13T20:00:00.000",
   "pokemon-night-out-los-angeles-2026": "None|None",
@@ -2064,7 +2064,6 @@
   }
  },
  "feed": [
-  "https://pokemonhubs.com/pokemongo/41098/",
   "https://pokemonhubs.com/pokemongo/53544/",
   "https://pokemonhubs.com/news/hoyacasa-pokemon-bedding-gift-recommend/",
   "https://pokemonhubs.com/news/pokemon-30th-skm-anniversary-event-gift/",
@@ -2463,7 +2462,8 @@
   "https://pokemongo-raku.com/post150593",
   "https://pokemongo-raku.com/post114843",
   "https://pokemonhubs.com/pokemongo/55798/",
-  "https://pokemonhubs.com/pokemongo/55837/"
+  "https://pokemonhubs.com/pokemongo/55837/",
+  "https://pokemonhubs.com/ptcg/pokemon-tcg-ex-star-entei-raikou-suicune/"
  ],
  "initialized": true,
  "zh": {
