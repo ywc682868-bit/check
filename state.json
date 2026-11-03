@@ -2167,7 +2167,7 @@
    "title": "一起仰望星空，許下「黃昏時分的心願」！"
   },
   "https://pokemongo.com/zh_Hant/news/get-ready-for-gowildarea-2026": {
-   "hash": "95545bc96f6369e2f836e959a61cbcebb593cd25b37be3d4d0f57e7ee6c79873",
+   "hash": "1df0a0e1c07d1164c93b177c2a8945f3485e65e0168190a40be1e7b62638b9d3",
    "lines": [
     "「Pokémon GO 曠野地帶2026」全新換裝道具、個人檔案上顯示的各種背卡與精彩活動內容公布！",
     "親愛的訓練家們：",
@@ -2203,7 +2203,7 @@
     "即刻起，訓練家可以把透過GO狩獵球捉到的寶可夢傳送至《Pokémon HOME》了！《Pokémon HOME》中所顯示的GO狩獵球外觀會是「奇異球」。",
     "別忘了冒險效果！",
     "從「曠野週」活動開始，你可以在團體戰或極巨對戰的大廳中啟動部分冒險效果。想在活動期間的極巨對戰中為你的小組獲得優勢嗎？在團體戰或極巨對戰開始前啟動「蒼響（劍之王）」的「巨獸斬」或「藏瑪然特（盾之王）」的「巨獸彈」的冒險效果吧！",
-    "Plus, ticket-holding Trainers at the GO Wild Area events in Sendai and Mexico City will have early access to this new feature!",
+    "此外，持有「Pokémon GO 曠野地帶：仙台／東北」與「Pokémon GO 曠野地帶：墨西哥城」現場活動入場券的訓練家，將可以提前體驗這項新功能！",
     "「Pokémon GO 曠野地帶：仙台／東北」與「Pokémon GO 曠野地帶：墨西哥城」現場活動即將登場！",
     "立即搶先查看活動地圖！",
     "預先下載與查看活動地圖，規劃自己的行程吧！",
@@ -2220,10 +2220,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post93840",
-  "https://pokemongo-raku.com/post160195",
-  "https://pokemonhubs.com/pokemongo/54378/",
-  "https://pokemongo-raku.com/post163917",
   "https://pokemongo-raku.com/post163701",
   "https://pokemongo-raku.com/post117754",
   "https://pokemongo-raku.com/post126084",
@@ -2619,7 +2615,11 @@
   "https://pokemongo-raku.com/post162389",
   "https://pokemongo-raku.com/post127552",
   "https://pokemongo-raku.com/post20430",
-  "https://pokemongo-raku.com/post6200"
+  "https://pokemongo-raku.com/post6200",
+  "https://pokemonhubs.com/news/pokemon-stamps-taiwan-2026/",
+  "https://pokemongo-raku.com/post41939",
+  "https://pokemongo-raku.com/post118477",
+  "https://pokemongo-raku.com/post120385"
  ],
  "initialized": true,
  "zh": {
