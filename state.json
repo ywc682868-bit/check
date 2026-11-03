@@ -2220,9 +2220,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post81624",
-  "https://pokemongo-raku.com/post93865",
-  "https://pokemongo-raku.com/post93827",
   "https://pokemongo-raku.com/post93840",
   "https://pokemongo-raku.com/post160195",
   "https://pokemonhubs.com/pokemongo/54378/",
@@ -2619,7 +2616,10 @@
   "https://pokemonhubs.com/news/pixel-pikachu-pokemon-center-taipei-restock-2026",
   "https://pokemongo-raku.com/post77960",
   "https://pokemongo-raku.com/post44782",
-  "https://pokemongo-raku.com/post162389"
+  "https://pokemongo-raku.com/post162389",
+  "https://pokemongo-raku.com/post127552",
+  "https://pokemongo-raku.com/post20430",
+  "https://pokemongo-raku.com/post6200"
  ],
  "initialized": true,
  "zh": {
