@@ -2220,10 +2220,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post163701",
-  "https://pokemongo-raku.com/post117754",
-  "https://pokemongo-raku.com/post126084",
-  "https://pokemongo-raku.com/post129691",
   "https://pokemongo-raku.com/post97900",
   "https://pokemonhubs.com/news/pokemon-center-taipei-2026-october-8-10-goods/",
   "https://pokemongo-raku.com/post160625",
@@ -2619,7 +2615,11 @@
   "https://pokemonhubs.com/news/pokemon-stamps-taiwan-2026/",
   "https://pokemongo-raku.com/post41939",
   "https://pokemongo-raku.com/post118477",
-  "https://pokemongo-raku.com/post120385"
+  "https://pokemongo-raku.com/post120385",
+  "https://pokemonhubs.com/pokemongo/55914/",
+  "https://pokemongo-raku.com/post41956",
+  "https://pokemongo-raku.com/post165865",
+  "https://pokemongo-raku.com/post165222"
  ],
  "initialized": true,
  "zh": {
