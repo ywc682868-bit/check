@@ -78,7 +78,9 @@
   "mega-metagross-in-mega-raids-november-2026": "2026-11-25T06:00:00.000|2026-12-01T22:00:00.000",
   "go-pass-november-2026": "2026-11-03T10:00:00.000|2026-12-01T10:00:00.000",
   "pokemonspotlighthour2026-11-19": "2026-11-19T18:00:00.000|2026-11-19T19:00:00.000",
-  "eternamax-eternatus-max-battles-2026": "2026-11-21T11:00:00.000|2026-11-21T14:00:00.000"
+  "eternamax-eternatus-max-battles-2026": "2026-11-21T11:00:00.000|2026-11-21T14:00:00.000",
+  "go-wild-area-gigantamax-machamp-power-up-timed-research": "2026-11-06T10:00:00.000|2026-11-15T23:59:00.000",
+  "clefable-super-mega-raid-day-2026": "2026-11-28T14:00:00.000|2026-11-28T17:00:00.000"
  },
  "articles": {
   "https://pokemongo.com/zh_Hant/news/dynamax-uxie-mesprit-azelf-max-battle-day-2026": {
@@ -2373,16 +2375,43 @@
     "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "在月光下翩翩起舞！「皮可西極致超級團體戰日」即將登場！"
+  },
+  "https://pokemongo.com/zh_Hant/news/2026hk-fw": {
+   "hash": "5daec9c7edfd37455d687c37fa479e35992e56d35d936ef7bdae7008728599d8",
+   "lines": [
+    "《Pokémon GO》將在香港又一城FESTIVAL WALK與訓練家一起展開各式各樣的遊戲內冒險！",
+    "親愛的訓練家們：",
+    "準備好與《Pokémon GO》一起在又一城FESTIVAL WALK體驗各式各樣的遊戲內冒險了嗎！今年11月，一起到又一城展開冒險的旅途吧！",
+    "香港時間2026年11月9日10:00 ～2027年1月3日23:59",
+    "*《Pokémon GO》遊戲內活動將於2026年11月9日展開，其開始時間將早於2026年11月11日「POKÉMON’S 30 YEARS OF JOY AT FESTIVAL WALK」的正式開幕。",
+    "前往又一城FESTIVAL WALK，即可獲得遊戲內限時調查。並解鎖遇見活動主題寶可夢的機會！請注意：本次限時調查限領1次（無論前往幾間指定商場），且限時調查將於成功領取後10天到期。",
+    "活動期間，指定區域內的誘餌模組效果時間將延長至 4 小時。",
+    "10 週年明信片領取活動",
+    "香港時間2026年11月11日~ 2027年1月3日 每日11:00~19:00",
+    "香港九龍九龍塘達之路80號G層《Pokémon GO》 攤位",
+    "於指定地點出示《Pokémon GO》遊戲內畫面，即可領取10週年主題紀念明信片乙張。",
+    "*每日發放數量有限，送完即止。",
+    "「Pokémon GO曠野地帶：全球」",
+    "活動期間，你可以隨時隨地打開遊戲展開旅程，也別忘了前往又一城，享受最淋漓盡致的「GO曠野地帶」週末活動！除了能參與變得更盛大的冒險之旅和遊戲內的體驗，還有現場限定的活動內容、當地的社群大使和眾多訓練家伙伴們一起等你加入！",
+    "香港時間2026年11月14日及15日，每日11:00～21:00",
+    "【活動主會場】又一城FESTIVAL WALK",
+    "地點：香港九龍九龍塘達之路80號G層《Pokémon GO》 攤位",
+    "「Pokémon GO曠野地帶：全球」活動主題明信片",
+    "活動當日出示《Pokémon GO》遊戲畫面予現場工作人員，即可獲得「Pokémon GO曠野地帶：全球」活動主題明信片。",
+    "「Pokémon GO曠野地帶：全球」活動主題資料夾",
+    "於社群平台上公開分享活動現場或遊戲畫面，並附上指定 Hashtag「#PokemonGO曠野地帶」，完成後出示予現場工作人員，即可獲得「Pokémon GO曠野地帶：全球」活動主題資料夾乙份。",
+    "快來現場與其他訓練家們交換寶可夢，與社群大使們進行更多互動吧！",
+    "現場攤位與贈品發放服務開放至 21:00（遊戲內活動時間為 10:00～18:00，請依現場工作人員指示排隊領取）。",
+    "每人限領一次，數量有限，送完為止。",
+    "了解更多「Pokémon GO曠野地帶：全球」的活動資訊",
+    "事不宜遲，準備加入為期 2 天的「Pokémon GO曠野地帶：全球」遊戲內冒險吧！",
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
+   ],
+   "title": "《Pokémon GO》將在香港又一城FESTIVAL WALK與訓練家一起展開各式各樣的遊戲內冒險！"
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post71607",
-  "https://pokemongo-raku.com/post163015",
-  "https://pokemongo-raku.com/post21182",
-  "https://pokemongo-raku.com/post21023",
-  "https://pokemongo-raku.com/post6513",
-  "https://pokemongo-raku.com/post34886",
-  "https://pokemongo-raku.com/post9918",
   "https://pokemongo-raku.com/post2077",
   "https://pokemongo-raku.com/post144578",
   "https://pokemongo-raku.com/post16451",
@@ -2775,7 +2804,14 @@
   "https://pokemonhubs.com/pokemongo/55962/",
   "https://pokemongo-raku.com/post25513",
   "https://pokemongo-raku.com/post165509",
-  "https://pokemongo-raku.com/post165931"
+  "https://pokemongo-raku.com/post165931",
+  "https://pokemonhubs.com/news/new-era-pokemon-30th-anniversary-collection/",
+  "https://pokemonhubs.com/pokemongo/55976/",
+  "https://pokemonhubs.com/pokemongo/55971/",
+  "https://pokemonhubs.com/pokemongo/55968/",
+  "https://pokemongo-raku.com/post165948",
+  "https://pokemongo-raku.com/post117586",
+  "https://pokemongo-raku.com/post165942"
  ],
  "initialized": true,
  "zh": {
@@ -2857,6 +2893,8 @@
   "GO Pass: November": "GO Pass：11月",
   "Pawniard Community Day": "駒刀小兵 · 社群日",
   "Grookey, Scorbunny, and Sobble Spotlight Hour": "敲音猴、炎兔兒、淚眼蜥 · 聚焦時刻",
-  "Eternamax Eternatus Returns": "永恆巨輪永恆回歸"
+  "Eternamax Eternatus Returns": "永恆巨輪永恆回歸",
+  "GO Wild Area: Gigantamax Machamp Power Up! Timed Research": "GO 曠野地帶：超極巨化怪力強化！定時研究",
+  "Clefable Super Mega Raid Day": "皮可西極致超級 · 團體戰日"
  }
 }
