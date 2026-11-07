@@ -2377,7 +2377,7 @@
    "title": "在月光下翩翩起舞！「皮可西極致超級團體戰日」即將登場！"
   },
   "https://pokemongo.com/zh_Hant/news/2026hk-fw": {
-   "hash": "5daec9c7edfd37455d687c37fa479e35992e56d35d936ef7bdae7008728599d8",
+   "hash": "1ce924656cdf080e4957b0db5ea0bce8b1c4ae9dd48df348697520c2bd876352",
    "lines": [
     "《Pokémon GO》將在香港又一城FESTIVAL WALK與訓練家一起展開各式各樣的遊戲內冒險！",
     "親愛的訓練家們：",
@@ -2385,8 +2385,8 @@
     "香港時間2026年11月9日10:00 ～2027年1月3日23:59",
     "*《Pokémon GO》遊戲內活動將於2026年11月9日展開，其開始時間將早於2026年11月11日「POKÉMON’S 30 YEARS OF JOY AT FESTIVAL WALK」的正式開幕。",
     "前往又一城FESTIVAL WALK，即可獲得遊戲內限時調查。並解鎖遇見活動主題寶可夢的機會！請注意：本次限時調查限領1次（無論前往幾間指定商場），且限時調查將於成功領取後10天到期。",
-    "活動期間，指定區域內的誘餌模組效果時間將延長至 4 小時。",
-    "10 週年明信片領取活動",
+    "活動期間，指定區域內的誘餌模組效果時間將延長至4小時。",
+    "10週年明信片領取活動",
     "香港時間2026年11月11日~ 2027年1月3日 每日11:00~19:00",
     "香港九龍九龍塘達之路80號G層《Pokémon GO》 攤位",
     "於指定地點出示《Pokémon GO》遊戲內畫面，即可領取10週年主題紀念明信片乙張。",
@@ -2399,9 +2399,9 @@
     "「Pokémon GO曠野地帶：全球」活動主題明信片",
     "活動當日出示《Pokémon GO》遊戲畫面予現場工作人員，即可獲得「Pokémon GO曠野地帶：全球」活動主題明信片。",
     "「Pokémon GO曠野地帶：全球」活動主題資料夾",
-    "於社群平台上公開分享活動現場或遊戲畫面，並附上指定 Hashtag「#PokemonGO曠野地帶」，完成後出示予現場工作人員，即可獲得「Pokémon GO曠野地帶：全球」活動主題資料夾乙份。",
+    "於社群平台上公開分享活動現場或遊戲畫面，並附上指定Hashtag「#PokemonGO曠野地帶」，完成後出示予現場工作人員，即可獲得「Pokémon GO曠野地帶：全球」活動主題資料夾乙份。",
     "快來現場與其他訓練家們交換寶可夢，與社群大使們進行更多互動吧！",
-    "現場攤位與贈品發放服務開放至 21:00（遊戲內活動時間為 10:00～18:00，請依現場工作人員指示排隊領取）。",
+    "現場攤位與贈品發放服務開放至21:00（遊戲內活動時間為10:00～18:00，請依現場工作人員指示排隊領取）。",
     "每人限領一次，數量有限，送完為止。",
     "了解更多「Pokémon GO曠野地帶：全球」的活動資訊",
     "事不宜遲，準備加入為期 2 天的「Pokémon GO曠野地帶：全球」遊戲內冒險吧！",
@@ -2430,10 +2430,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post144578",
-  "https://pokemongo-raku.com/post16451",
-  "https://pokemongo-raku.com/post4071",
-  "https://pokemongo-raku.com/post163016",
   "https://pokemongo-raku.com/post35932",
   "https://pokemongo-raku.com/post28167",
   "https://pokemongo-raku.com/post13982",
@@ -2829,7 +2825,11 @@
   "https://pokemongo-raku.com/post165948",
   "https://pokemongo-raku.com/post117586",
   "https://pokemongo-raku.com/post165942",
-  "https://pokemonhubs.com/pokemongo/53580/"
+  "https://pokemonhubs.com/pokemongo/53580/",
+  "https://pokemonhubs.com/pokemongo/55996/",
+  "https://pokemonhubs.com/pokemongo/56005/",
+  "https://pokemongo-raku.com/post162591",
+  "https://pokemongo-raku.com/post164610"
  ],
  "initialized": true,
  "zh": {
