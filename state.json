@@ -2430,10 +2430,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post35932",
-  "https://pokemongo-raku.com/post28167",
-  "https://pokemongo-raku.com/post13982",
-  "https://pokemongo-raku.com/post38767",
   "https://pokemongo-raku.com/post38714",
   "https://pokemongo-raku.com/post37916",
   "https://pokemonhubs.com/pokemongo/54461/",
@@ -2829,7 +2825,11 @@
   "https://pokemonhubs.com/pokemongo/55996/",
   "https://pokemonhubs.com/pokemongo/56005/",
   "https://pokemongo-raku.com/post162591",
-  "https://pokemongo-raku.com/post164610"
+  "https://pokemongo-raku.com/post164610",
+  "https://pokemonhubs.com/pokemongo/56011/",
+  "https://pokemonhubs.com/ptcg/m7-aura-seeker-card-list/",
+  "https://pokemongo-raku.com/post165785",
+  "https://pokemongo-raku.com/post81624"
  ],
  "initialized": true,
  "zh": {
