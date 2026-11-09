@@ -39,8 +39,8 @@
   "giratina-origin-forme-in-5-star-raid-battles-october-2026": "2026-10-28T06:00:00.000|2026-11-03T22:00:00.000",
   "mega-sableye-in-mega-raids-october-2026": "2026-10-28T06:00:00.000|2026-11-08T22:00:00.000",
   "halloween-2026-part-2": "None|None",
-  "pokemon-go-wild-area-2026-sendai-japan": "2026-11-06T01:00:00.000Z|2026-11-08T09:00:00.000Z",
-  "pokemon-go-wild-area-2026-mexico-city": "2026-11-06T16:00:00.000Z|2026-11-09T00:00:00.000Z",
+  "pokemon-go-wild-area-2026-sendai-japan": "None|None",
+  "pokemon-go-wild-area-2026-mexico-city": "None|None",
   "pokemon-go-wild-area-2026-global": "2026-11-14T10:00:00.000|2026-11-15T18:00:00.000",
   "minior-showers-leonids-2026": "2026-11-14T17:00:00.000|2026-11-19T23:59:00.000",
   "november-communityday2026": "2026-11-21T14:00:00.000|2026-11-21T17:00:00.000",
@@ -2453,7 +2453,6 @@
   }
  },
  "feed": [
-  "https://pokemonhubs.com/pokemongo/54469/",
   "https://pokemongo-raku.com/post162940",
   "https://pokemonhubs.com/news/pokemon-center-dedenne-joltik-goods-2026/",
   "https://pokemonhubs.com/pokemongo/54482/",
@@ -2852,7 +2851,8 @@
   "https://pokemongo-raku.com/post166120",
   "https://pokemongo-raku.com/post164858",
   "https://pokemongo-raku.com/post93941",
-  "https://pokemongo-raku.com/post166108"
+  "https://pokemongo-raku.com/post166108",
+  "https://pokemonhubs.com/pokemongo/56136/"
  ],
  "initialized": true,
  "zh": {
