@@ -37,7 +37,7 @@
   "go-pass-october-2026": "2026-10-06T10:00:00.000|2026-11-03T10:00:00.000",
   "shadow-landorus-incarnate-forme-in-shadow-raids-october-2026": "2026-10-07T06:00:00.000|2026-11-03T22:00:00.000",
   "giratina-origin-forme-in-5-star-raid-battles-october-2026": "2026-10-28T06:00:00.000|2026-11-03T22:00:00.000",
-  "mega-sableye-in-mega-raids-october-2026": "2026-10-28T06:00:00.000|2026-11-08T22:00:00.000",
+  "mega-sableye-in-mega-raids-october-2026": "None|None",
   "halloween-2026-part-2": "None|None",
   "pokemon-go-wild-area-2026-sendai-japan": "None|None",
   "pokemon-go-wild-area-2026-mexico-city": "None|None",
@@ -60,8 +60,8 @@
   "max-mondays-2026-11-02": "2026-11-02T06:00:00.000|2026-11-02T21:00:00.000",
   "raidhour20261104": "None|None",
   "pokemonspotlighthour2026-11-05": "None|None",
-  "giratina-altered-forme-in-5-star-raid-battles-november-2026": "2026-11-04T06:00:00.000|2026-11-08T22:00:00.000",
-  "shadow-tornadus-incarnate-forme-in-shadow-raids-november-4-2026": "2026-11-04T06:00:00.000|2026-11-08T22:00:00.000",
+  "giratina-altered-forme-in-5-star-raid-battles-november-2026": "None|None",
+  "shadow-tornadus-incarnate-forme-in-shadow-raids-november-4-2026": "None|None",
   "pokemon-night-out-london-2026": "2026-11-10T18:00:00.000Z|2026-11-10T22:30:00.000Z",
   "max-mondays-2026-11-16": "2026-11-16T06:00:00.000|2026-11-16T21:00:00.000",
   "raidhour20261118": "2026-11-18T18:00:00.000|2026-11-18T19:00:00.000",
@@ -80,7 +80,8 @@
   "pokemonspotlighthour2026-11-19": "2026-11-19T18:00:00.000|2026-11-19T19:00:00.000",
   "eternamax-eternatus-max-battles-2026": "2026-11-21T11:00:00.000|2026-11-21T14:00:00.000",
   "go-wild-area-gigantamax-machamp-power-up-timed-research": "2026-11-06T10:00:00.000|2026-11-15T23:59:00.000",
-  "clefable-super-mega-raid-day-2026": "2026-11-28T14:00:00.000|2026-11-28T17:00:00.000"
+  "clefable-super-mega-raid-day-2026": "2026-11-28T14:00:00.000|2026-11-28T17:00:00.000",
+  "zacian-crowned-sword-zamazenta-crowned-shield-in-5-star-raid-battles-november-2026": "2026-11-09T10:00:00.000|2026-11-13T20:00:00.000"
  },
  "articles": {
   "https://pokemongo.com/zh_Hant/news/dynamax-uxie-mesprit-azelf-max-battle-day-2026": {
@@ -2450,10 +2451,33 @@
     "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "透過「黑色星期五」特賣活動，取得雙倍獎勵寶可幣吧！"
+  },
+  "https://pokemongo.com/zh_Hant/news/save-the-date-s25": {
+   "hash": "dace0f1d400c2c2d60082927960a91055c1e770eff19757498be6bc4be585c04",
+   "lines": [
+    "記得把下一季的社群日時間記下來喔！",
+    "親愛的訓練家們：",
+    "很高興向大家宣布，下一季的社群日活動日期出來了！",
+    "2026年12月12日～2026年12月13日",
+    "2027年1月2日：經典社群日",
+    "2027年1月16日",
+    "2027年2月6日",
+    "即將開放的活動可不只有社群日──下一季還有其他好玩有趣的遊戲內活動，以下是部分活動日期！",
+    "2026年12月5日：極巨對戰日",
+    "2026年12月19日：團體戰日",
+    "2026年12月26日：孵化日",
+    "2027年1月9日：極致超級團體戰日",
+    "2027年1月23日：極巨對戰日",
+    "2027年1月30日：極致超級團體戰日",
+    "2027年2月13日：團體戰日",
+    "敬請持續關注以獲得12月社群日與其他活動的最新消息！",
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
+   ],
+   "title": "記得把下一季的社群日時間記下來喔！"
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post162940",
   "https://pokemonhubs.com/news/pokemon-center-dedenne-joltik-goods-2026/",
   "https://pokemonhubs.com/pokemongo/54482/",
   "https://pokemonhubs.com/pokemongo/54376/",
@@ -2852,7 +2876,8 @@
   "https://pokemongo-raku.com/post164858",
   "https://pokemongo-raku.com/post93941",
   "https://pokemongo-raku.com/post166108",
-  "https://pokemonhubs.com/pokemongo/56136/"
+  "https://pokemonhubs.com/pokemongo/56136/",
+  "https://pokemongo-raku.com/post131377"
  ],
  "initialized": true,
  "zh": {
