@@ -2490,8 +2490,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post162577",
-  "https://pokemongo-raku.com/post164351",
   "https://pokemongo-raku.com/post164363",
   "https://pokemongo-raku.com/post117464",
   "https://pokemongo-raku.com/post151528",
@@ -2889,7 +2887,9 @@
   "https://pokemonhubs.com/news/pokemon-30th-billionaire-boys-club-2026-collection/",
   "https://pokemonhubs.com/pokemongo/56124/",
   "https://pokemongo-raku.com/post166177",
-  "https://pokemongo-raku.com/post166160"
+  "https://pokemongo-raku.com/post166160",
+  "https://pokemonhubs.com/pokemongo/41676/",
+  "https://pokemonhubs.com/pokemongo/56170/"
  ],
  "initialized": true,
  "zh": {
@@ -2981,6 +2981,7 @@
   "Hatch Day": "孵化日",
   "January Community Day Classic": "1月 · 經典社群日",
   "January Community Day": "1月 · 社群日",
-  "February Community Day": "2月 · 社群日"
+  "February Community Day": "2月 · 社群日",
+  "Zacian (Crowned Sword) and Zamazenta (Crowned Shield) in 5-star Raid Battles": "扎西安（皇冠劍）和紮馬森塔（皇冠盾）參加 5 星級突襲戰"
  }
 }
