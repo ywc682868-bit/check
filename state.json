@@ -2530,9 +2530,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post108825",
-  "https://pokemongo-raku.com/post164396",
-  "https://pokemongo-raku.com/post60085",
   "https://pokemonhubs.com/pokemongo/54513/",
   "https://pokemongo-raku.com/post4273",
   "https://pokemongo-raku.com/post25467",
@@ -2929,7 +2926,10 @@
   "https://pokemongo-raku.com/post166223",
   "https://pokemongo-raku.com/post4043",
   "https://pokemongo-raku.com/post154396",
-  "https://pokemongo-raku.com/post95707"
+  "https://pokemongo-raku.com/post95707",
+  "https://pokemonhubs.com/pokemongo/41683/",
+  "https://pokemongo-raku.com/post166242",
+  "https://pokemongo-raku.com/post108830"
  ],
  "initialized": true,
  "zh": {
