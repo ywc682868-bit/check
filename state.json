@@ -2530,8 +2530,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post164497",
-  "https://pokemongo-raku.com/post73324",
   "https://pokemongo-raku.com/post163905",
   "https://pokemongo-raku.com/post164473",
   "https://pokemongo-raku.com/post158282",
@@ -2929,7 +2927,9 @@
   "https://pokemonhubs.com/pokemongo/42228/",
   "https://pokemonhubs.com/pokemongo/56254/",
   "https://pokemongo-raku.com/post5038",
-  "https://pokemongo-raku.com/post109439"
+  "https://pokemongo-raku.com/post109439",
+  "https://pokemonhubs.com/news/pokemon-apple-gift-card-applin-2026/",
+  "https://pokemongo-raku.com/post109258"
  ],
  "initialized": true,
  "zh": {
