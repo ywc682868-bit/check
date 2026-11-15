@@ -2530,8 +2530,6 @@
   }
  },
  "feed": [
-  "https://pokemonhubs.com/news/pokexciting-pink-pikachu-taipei-sales-suspended-2026/",
-  "https://pokemonhubs.com/pokemongo/54596/",
   "https://pokemonhubs.com/ptcg/30th-celebration-japan-december-2026-lottery/",
   "https://pokemongo-raku.com/post70912",
   "https://pokemongo-raku.com/post88527",
@@ -2929,7 +2927,9 @@
   "https://pokemongo-raku.com/post91552",
   "https://pokemongo-raku.com/post73324",
   "https://pokemonhubs.com/news/pokemon-crocs-30th-anniversary-2026/",
-  "https://pokemonhubs.com/pokemongo/56324/"
+  "https://pokemonhubs.com/pokemongo/56324/",
+  "https://pokemonhubs.com/pokopia/applin-honey-apple-event/",
+  "https://pokemonhubs.com/news/boss-coffee-pokemon-30th-tommy-lee-jones/"
  ],
  "initialized": true,
  "zh": {
