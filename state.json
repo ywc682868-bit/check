@@ -41,7 +41,7 @@
   "halloween-2026-part-2": "None|None",
   "pokemon-go-wild-area-2026-sendai-japan": "None|None",
   "pokemon-go-wild-area-2026-mexico-city": "None|None",
-  "pokemon-go-wild-area-2026-global": "2026-11-14T10:00:00.000|2026-11-15T18:00:00.000",
+  "pokemon-go-wild-area-2026-global": "None|None",
   "minior-showers-leonids-2026": "2026-11-14T17:00:00.000|2026-11-19T23:59:00.000",
   "november-communityday2026": "2026-11-21T14:00:00.000|2026-11-21T17:00:00.000",
   "super-mega-raid-day-november-2026": "2026-11-28T14:00:00.000|2026-11-28T17:00:00.000",
@@ -2530,14 +2530,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post161952",
-  "https://pokemongo-raku.com/post36623",
-  "https://pokemongo-raku.com/post85383",
-  "https://pokemonhubs.com/pokemongo/54036/",
-  "https://pokemonhubs.com/news/pokemon-craft-exhibition-taipei-2027-ticket/",
-  "https://pokemongo-raku.com/post164623",
-  "https://pokemongo-raku.com/post164605",
-  "https://pokemonhubs.com/news/pokemon-center-taipei-october-17-2026-new-goods/",
   "https://pokemonhubs.com/news/2015-art-academy-pikachu-8-4-million/",
   "https://pokemongo-raku.com/post84847",
   "https://pokemongo-raku.com/post4982",
@@ -2929,7 +2921,15 @@
   "https://pokemongo-raku.com/post77569",
   "https://pokemongo-raku.com/post159545",
   "https://pokemongo-raku.com/post122922",
-  "https://pokemongo-raku.com/post72705"
+  "https://pokemongo-raku.com/post72705",
+  "https://pokemonhubs.com/news/pokemon-center-taipei-holiday-helpers-2026/",
+  "https://pokemongo-raku.com/post166325",
+  "https://pokemongo-raku.com/post93827",
+  "https://pokemongo-raku.com/post93865",
+  "https://pokemongo-raku.com/post93840",
+  "https://pokemongo-raku.com/post93379",
+  "https://pokemongo-raku.com/post166323",
+  "https://pokemongo-raku.com/post130858"
  ],
  "initialized": true,
  "zh": {
@@ -3022,6 +3022,7 @@
   "January Community Day Classic": "1月 · 經典社群日",
   "January Community Day": "1月 · 社群日",
   "February Community Day": "2月 · 社群日",
-  "Zacian (Crowned Sword) and Zamazenta (Crowned Shield) in 5-star Raid Battles": "扎西安（皇冠劍）和紮馬森塔（皇冠盾）參加 5 星級突襲戰"
+  "Zacian (Crowned Sword) and Zamazenta (Crowned Shield) in 5-star Raid Battles": "扎西安（皇冠劍）和紮馬森塔（皇冠盾）參加 5 星級突襲戰",
+  "[Canceled] Max Monday": "[取消] 最大週一"
  }
 }
