@@ -63,7 +63,7 @@
   "giratina-altered-forme-in-5-star-raid-battles-november-2026": "None|None",
   "shadow-tornadus-incarnate-forme-in-shadow-raids-november-4-2026": "None|None",
   "pokemon-night-out-london-2026": "None|None",
-  "max-mondays-2026-11-16": "2026-11-16T06:00:00.000|2026-11-16T21:00:00.000",
+  "max-mondays-2026-11-16": "None|None",
   "raidhour20261118": "2026-11-18T18:00:00.000|2026-11-18T19:00:00.000",
   "dynamax-trails-2026": "2026-11-16T10:00:00.000|2026-11-23T20:00:00.000",
   "max-mondays-2026-11-23": "2026-11-23T06:00:00.000|2026-11-23T21:00:00.000",
@@ -2585,11 +2585,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post30606",
-  "https://pokemongo-raku.com/post144121",
-  "https://pokemongo-raku.com/post5226",
-  "https://pokemongo-raku.com/post3981",
-  "https://pokemonhubs.com/news/pokemon-run-30-popup-store-entry-pikachu-update/",
   "https://pokemonhubs.com/pokemongo/50521/",
   "https://pokemonhubs.com/pokemongo/54656/",
   "https://pokemonhubs.com/news/pokemon-firered-leafgreen-home-support-live/",
@@ -2984,7 +2979,12 @@
   "https://pokemongo-raku.com/post163521",
   "https://pokemongo-raku.com/post130866",
   "https://pokemongo-raku.com/post154971",
-  "https://pokemongo-raku.com/post166537"
+  "https://pokemongo-raku.com/post166537",
+  "https://pokemongo-raku.com/post166630",
+  "https://pokemongo-raku.com/post7890",
+  "https://pokemongo-raku.com/post24313",
+  "https://pokemongo-raku.com/post3817",
+  "https://pokemongo-raku.com/post6303"
  ],
  "initialized": true,
  "zh": {
