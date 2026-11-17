@@ -92,7 +92,8 @@
   "max-battle-day-january-2027": "2027-01-23T14:00:00.000|2027-01-23T17:00:00.000",
   "super-mega-raid-day-january-30-2027": "2027-01-30T14:00:00.000|2027-01-30T17:00:00.000",
   "february-communityday2027": "2027-02-06T14:00:00.000|2027-02-06T17:00:00.000",
-  "raid-day-february-2027": "2027-02-13T14:00:00.000|2027-02-13T17:00:00.000"
+  "raid-day-february-2027": "2027-02-13T14:00:00.000|2027-02-13T17:00:00.000",
+  "duolingo-timed-research-2026": "2026-11-17T10:00:00.000|2026-12-31T23:59:00.000"
  },
  "articles": {
   "https://pokemongo.com/zh_Hant/news/dynamax-uxie-mesprit-azelf-max-battle-day-2026": {
@@ -2529,14 +2530,14 @@
    "title": "迎接慶典！《Pokémon GO》與香港麥當勞的限時聯乘活動即將登場！"
   },
   "https://pokemongo.com/zh_Hant/news/pokemon-crocs-2026": {
-   "hash": "5fdc0e5b37d0d3b31c97d1e61231fe91213211f831bcc0c38683274725f3755e",
+   "hash": "3940d2df8f054fcade80fdaed3fef4a9b67dc733f50dc0fbce5f29fe9d6d8daf",
    "lines": [
     "「Crocs」的全新寶可夢系列鞋款將化作換裝道具在《Pokémon GO》登場！",
     "親愛的訓練家們：",
     "準備自信展示身上的新裝扮吧！即日起，全球訓練家將能透過促銷代碼，兌換引領潮流的",
     "「Crocs」全新寶可夢系列鞋款",
     "Pokémon GO Web Store",
-    "輸入代碼「PIKACHUCODE」，就能兌換以「經典 寶可夢皮卡丘 克駱格」為設計靈感的換裝道具",
+    "輸入代碼「POKEMONGOxCROCSxELECTRIFYING」，就能兌換以「經典 寶可夢皮卡丘 克駱格」為設計靈感的換裝道具",
     "「經典 寶可夢皮卡丘 克駱格」",
     "，讓自己的步伐變得格外耀眼！",
     "訓練家必須購買「經典 寶可夢耿鬼 克駱格」與「經典雲朵 寶可夢胖丁 克駱格」，才能分別獲得換裝道具",
@@ -2547,17 +2548,43 @@
     "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "「Crocs」的全新寶可夢系列鞋款將化作換裝道具在《Pokémon GO》登場！"
+  },
+  "https://pokemongo.com/zh_Hant/news/duolingo-2026": {
+   "hash": "52533b9870cc1ca1dae9a8546bfa67412b9463928a7e17895b7872d386dce95f",
+   "lines": [
+    "跟著《Pokémon GO》與《Duolingo》一起學習語言！",
+    "親愛的訓練家們：",
+    "《Pokémon GO》與《Duolingo》決定攜手合作，向全球訓練家散播探索寶可夢與學習新語言的歡樂！本次聯名合作活動將邀請《Pokémon GO》訓練家與《Duolingo》學習者一同參與在這兩款應用程式推出的特別活動。",
+    "繼續閱讀來瞭解更多活動詳情，也別忘記下載",
+    "《Pokémon GO》",
+    "《Duolingo》",
+    "來踏上新的冒險之旅！",
+    "訓練家，該上課了！Let's GO！",
+    "立即透過《Duolingo》上課",
+    "跟著《Pokémon GO》一起學習語言",
+    "立即透過《Duolingo》上課",
+    "透過《Duolingo》解鎖《Pokémon GO》獎勵",
+    "立即挑戰《Duolingo》於最新版本推出的限時特別任務「多兒的寶可夢派對」！只要在《Duolingo》完成任意1堂課程單元，就能解鎖第1個獎勵。每天至少完成1堂課程單元，即可天天領取新的獎勵，包括在《Duolingo》的4套全新寶可夢裝扮套裝，以及《Pokémon GO》限時調查的參加券！",
+    "「多兒的寶可夢派對」將於台灣時間11月17日09:00起登場，且訓練家必須於台灣時間12月21日23:59前開始進行特別任務。特別任務開始之後，記得在台灣時間2026年12月29日23:59之前完成特別任務並領取獎勵喔！",
+    "跟著《Pokémon GO》一起學習語言！",
+    "只要7天，每天至少完成1堂《Duolingo》課程單元，就能領取本次限時調查的優惠代碼，並於",
+    "Pokémon GO Web Store",
+    "兌換本次推出的活動主題限時調查。訓練家將能透過限時調查，開始運用新學到的語言！",
+    "訓練家在限時調查選擇1種語言後，將跟著維羅博士一邊完成以該語言顯示的《Pokémon GO》調查課題，一邊練習使用這個新語言。記得在卡關的時候，查看維羅博士給予的提示喔！",
+    "只要完成調查課題，就能獲得XP、星星沙子，以及遇見下列擁有特別背卡的主題寶可夢的機會！",
+    "*運氣好的話，還有機會遇見異色的寶可夢喔！",
+    "請注意：訓練家必須於台灣時間2026年12月21日23:59前參與《Duolingo》推出的特別任務，並於台灣時間2026年12月29日23:59之前，在不同天累計完成至少7堂課程單元以領取本次的限時調查。",
+    "領取限時調查後，訓練家必須在台灣時間2026年12月31日23:59前完成限時調查相關課題並領取獎勵。",
+    "全新功能「語言標籤」登場",
+    "是「Pikachu」、「ピカチュウ」還是「皮卡丘」？",
+    "透過活動主題限時調查遇見的特定寶可夢，牠們的資訊頁面上將顯示全新的「語言標籤」！寶可夢會有不同的外語名字，而訓練家只要點擊「語言標籤」，就能查看寶可夢在其他語言的名字！",
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
+   ],
+   "title": "跟著《Pokémon GO》與《Duolingo》一起學習語言！"
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post84847",
-  "https://pokemongo-raku.com/post4982",
-  "https://pokemongo-raku.com/post21168",
-  "https://pokemongo-raku.com/post142493",
-  "https://pokemongo-raku.com/post96942",
-  "https://pokemongo-raku.com/post52873",
-  "https://pokemongo-raku.com/post61186",
-  "https://pokemongo-raku.com/post40792",
   "https://pokemongo-raku.com/post30606",
   "https://pokemongo-raku.com/post144121",
   "https://pokemongo-raku.com/post5226",
@@ -2949,7 +2976,15 @@
   "https://pokemongo-raku.com/post93379",
   "https://pokemongo-raku.com/post166323",
   "https://pokemongo-raku.com/post130858",
-  "https://pokemonhubs.com/pokemongo/56438/"
+  "https://pokemonhubs.com/pokemongo/56438/",
+  "https://pokemonhubs.com/pokemongo/56472/",
+  "https://pokemonhubs.com/pokemongo/56460/",
+  "https://pokemonhubs.com/pokemongo/56437/",
+  "https://pokemonhubs.com/ptcg/mega-aura-seeker-crasher-wake-sar-tetsuo-hara/",
+  "https://pokemongo-raku.com/post163521",
+  "https://pokemongo-raku.com/post130866",
+  "https://pokemongo-raku.com/post154971",
+  "https://pokemongo-raku.com/post166537"
  ],
  "initialized": true,
  "zh": {
