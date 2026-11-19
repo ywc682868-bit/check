@@ -2585,11 +2585,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post164299",
-  "https://pokemongo-raku.com/post72362",
-  "https://pokemongo-raku.com/post164707",
-  "https://pokemongo-raku.com/post4426",
-  "https://pokemongo-raku.com/post6229",
   "https://pokemonhubs.com/news/pokemon-beats-pill-pikachu-mimikyu-2026/",
   "https://pokemonhubs.com/pokemongo/54678/",
   "https://pokemonhubs.com/pokemon-sleep/halloween-2026-double-candy/",
@@ -2984,7 +2979,12 @@
   "https://pokemongo-raku.com/post6303",
   "https://pokemonhubs.com/ptcg/ex-star-may-2027-release-date/",
   "https://pokemonhubs.com/ptcg-pocket/promo-pack-c-series-vol-1-mega-mewtwo-y-ex/",
-  "https://pokemonhubs.com/pokemongo/56515/"
+  "https://pokemonhubs.com/pokemongo/56515/",
+  "https://pokemonhubs.com/pokemongo/56522/",
+  "https://pokemonhubs.com/pokemongo/56502/",
+  "https://pokemongo-raku.com/post166703",
+  "https://pokemongo-raku.com/post20283",
+  "https://pokemongo-raku.com/post108493"
  ],
  "initialized": true,
  "zh": {
