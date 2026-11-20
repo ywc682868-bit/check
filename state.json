@@ -42,7 +42,7 @@
   "pokemon-go-wild-area-2026-sendai-japan": "None|None",
   "pokemon-go-wild-area-2026-mexico-city": "None|None",
   "pokemon-go-wild-area-2026-global": "None|None",
-  "minior-showers-leonids-2026": "2026-11-14T17:00:00.000|2026-11-19T23:59:00.000",
+  "minior-showers-leonids-2026": "None|None",
   "november-communityday2026": "2026-11-21T14:00:00.000|2026-11-21T17:00:00.000",
   "super-mega-raid-day-november-2026": "2026-11-28T14:00:00.000|2026-11-28T17:00:00.000",
   "minior-showers-geminids-2026": "2026-12-11T17:00:00.000|2026-12-16T23:59:00.000",
@@ -77,7 +77,7 @@
   "deoxys-normal-defense-attack-speed-formes-in-5-star-raid-battles-november-2026": "2026-11-25T06:00:00.000|2026-12-01T22:00:00.000",
   "mega-metagross-in-mega-raids-november-2026": "2026-11-25T06:00:00.000|2026-12-01T22:00:00.000",
   "go-pass-november-2026": "2026-11-03T10:00:00.000|2026-12-01T10:00:00.000",
-  "pokemonspotlighthour2026-11-19": "2026-11-19T18:00:00.000|2026-11-19T19:00:00.000",
+  "pokemonspotlighthour2026-11-19": "None|None",
   "eternamax-eternatus-max-battles-2026": "2026-11-21T11:00:00.000|2026-11-21T14:00:00.000",
   "go-wild-area-gigantamax-machamp-power-up-timed-research": "None|None",
   "clefable-super-mega-raid-day-2026": "2026-11-28T14:00:00.000|2026-11-28T17:00:00.000",
@@ -2585,10 +2585,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post161832",
-  "https://pokemonhubs.com/ptcg-pocket/mega-garchomp-ex-drop-event/",
-  "https://pokemonhubs.com/news/pokemon-fossil-museum-korea-2026/",
-  "https://pokemongo-raku.com/post164851",
   "https://pokemongo-raku.com/post164755",
   "https://pokemongo-raku.com/post124819",
   "https://pokemonhubs.com/pokemongo/54734/",
@@ -2984,7 +2980,11 @@
   "https://pokemongo-raku.com/post116470",
   "https://pokemongo-raku.com/post114880",
   "https://pokemongo-raku.com/post166770",
-  "https://pokemongo-raku.com/post133002"
+  "https://pokemongo-raku.com/post133002",
+  "https://pokemonhubs.com/pokemongo/56569/",
+  "https://pokemongo-raku.com/post166821",
+  "https://pokemongo-raku.com/post166782",
+  "https://pokemongo-raku.com/post96942"
  ],
  "initialized": true,
  "zh": {
