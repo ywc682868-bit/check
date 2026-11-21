@@ -2661,10 +2661,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post116007",
-  "https://pokemongo-raku.com/post163951",
-  "https://pokemonhubs.com/news/pokemon-team-rocket-board-game-2026-jp/",
-  "https://pokemongo-raku.com/post128976",
   "https://pokemongo-raku.com/post16799",
   "https://pokemongo-raku.com/post121121",
   "https://pokemongo-raku.com/post15500",
@@ -3060,7 +3056,11 @@
   "https://pokemongo-raku.com/post96942",
   "https://pokemonhubs.com/pokemongo/56574/",
   "https://pokemonhubs.com/pokemon-sleep/dream-shard-week-vol-3-2026/",
-  "https://pokemongo-raku.com/post166841"
+  "https://pokemongo-raku.com/post166841",
+  "https://pokemonhubs.com/pokemongo/56600/",
+  "https://pokemonhubs.com/pokemongo/42756/",
+  "https://pokemongo-raku.com/post114469",
+  "https://pokemongo-raku.com/post4273"
  ],
  "initialized": true,
  "zh": {
@@ -3154,6 +3154,7 @@
   "January Community Day": "1月 · 社群日",
   "February Community Day": "2月 · 社群日",
   "Zacian (Crowned Sword) and Zamazenta (Crowned Shield) in 5-star Raid Battles": "扎西安（皇冠劍）和紮馬森塔（皇冠盾）參加 5 星級突襲戰",
-  "[Canceled] Max Monday": "[取消] 最大週一"
+  "[Canceled] Max Monday": "[取消] 最大週一",
+  "December Community Day 2026": "12月社群日 2026"
  }
 }
