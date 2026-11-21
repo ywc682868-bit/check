@@ -2661,8 +2661,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post16799",
-  "https://pokemongo-raku.com/post121121",
   "https://pokemongo-raku.com/post15500",
   "https://pokemongo-raku.com/post16096",
   "https://pokemongo-raku.com/post16093",
@@ -3060,7 +3058,9 @@
   "https://pokemonhubs.com/pokemongo/56600/",
   "https://pokemonhubs.com/pokemongo/42756/",
   "https://pokemongo-raku.com/post114469",
-  "https://pokemongo-raku.com/post4273"
+  "https://pokemongo-raku.com/post4273",
+  "https://pokemonhubs.com/news/pokemon-fender-30th-anniversary-guitar-japan-lottery/",
+  "https://pokemongo-raku.com/post165065"
  ],
  "initialized": true,
  "zh": {
