@@ -2661,9 +2661,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post164790",
-  "https://pokemonhubs.com/news/pokemon-run-30-taichung-controversy/",
-  "https://pokemonhubs.com/ptcg-pocket/update-new-features-oct-2026/",
   "https://pokemonhubs.com/pokopia/halloween-pumpkaboo-event-2026/",
   "https://pokemonhubs.com/pokemongo/54808/",
   "https://pokemonhubs.com/pokemongo/54812/",
@@ -3060,7 +3057,10 @@
   "https://pokemongo-raku.com/post113644",
   "https://pokemongo-raku.com/post128614",
   "https://pokemongo-raku.com/post36417",
-  "https://pokemongo-raku.com/post71087"
+  "https://pokemongo-raku.com/post71087",
+  "https://pokemonhubs.com/pokemongo/56705/",
+  "https://pokemongo-raku.com/post126084",
+  "https://pokemongo-raku.com/post166978"
  ],
  "initialized": true,
  "zh": {
