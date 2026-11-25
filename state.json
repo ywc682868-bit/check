@@ -67,8 +67,8 @@
   "raidhour20261118": "None|None",
   "dynamax-trails-2026": "None|None",
   "max-mondays-2026-11-23": "None|None",
-  "cresselia-darkrai-in-5-star-raid-battles-november-2026": "2026-11-16T06:00:00.000|2026-11-24T22:00:00.000",
-  "mega-banette-in-mega-raids-november-2026": "2026-11-16T06:00:00.000|2026-11-24T22:00:00.000",
+  "cresselia-darkrai-in-5-star-raid-battles-november-2026": "None|None",
+  "mega-banette-in-mega-raids-november-2026": "None|None",
   "raidhour20261125": "2026-11-25T18:00:00.000|2026-11-25T19:00:00.000",
   "pokemonspotlighthour2026-11-26": "2026-11-26T18:00:00.000|2026-11-26T19:00:00.000",
   "twilight-wishes-2026": "2026-11-24T10:00:00.000|2026-11-30T20:00:00.000",
@@ -2976,8 +2976,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post164974",
-  "https://pokemongo-raku.com/post78358",
   "https://pokemongo-raku.com/post78380",
   "https://pokemongo-raku.com/post78389",
   "https://pokemongo-raku.com/post73533",
@@ -3375,7 +3373,9 @@
   "https://pokemonhubs.com/pokemongo/56806/",
   "https://pokemonhubs.com/pokemongo/56802/",
   "https://pokemonhubs.com/pokemongo/56743/",
-  "https://pokemongo-raku.com/post12636"
+  "https://pokemongo-raku.com/post12636",
+  "https://pokemonhubs.com/news/pokemon-30th-anniversary-pop-up-store-taiwan/",
+  "https://pokemonhubs.com/pokemongo/2848/"
  ],
  "initialized": true,
  "zh": {
@@ -3497,6 +3497,12 @@
   "Choose Your Path: Daydream Destinations (December 15, 2026)": "「自選限時調查」即將在「夢途漫漫」期間登場！",
   "Choose Your Path: Daydream Destinations (January 12, 2027)": "「自選限時調查」即將在「夢途漫漫」期間登場！",
   "Choose Your Path: Daydream Destinations (January 26, 2027)": "「自選限時調查」即將在「夢途漫漫」期間登場！",
-  "Choose Your Path: Daydream Destinations (February 16, 2027)": "「自選限時調查」即將在「夢途漫漫」期間登場！"
+  "Choose Your Path: Daydream Destinations (February 16, 2027)": "「自選限時調查」即將在「夢途漫漫」期間登場！",
+  "Tropical Paradise": "熱帶天堂",
+  "Unannounced Raid Hour": "未宣布的突襲時間",
+  "Unannounced Event": "未宣布的事件",
+  "Unannounced Pokémon in 5-star Raid Battles": "五星級團體戰中未公佈的神奇寶貝",
+  "Winter Holiday 2026": "2026 年寒假",
+  "New Year's 2027": "2027 年新年"
  }
 }
