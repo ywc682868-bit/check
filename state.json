@@ -69,7 +69,7 @@
   "max-mondays-2026-11-23": "None|None",
   "cresselia-darkrai-in-5-star-raid-battles-november-2026": "None|None",
   "mega-banette-in-mega-raids-november-2026": "None|None",
-  "raidhour20261125": "2026-11-25T18:00:00.000|2026-11-25T19:00:00.000",
+  "raidhour20261125": "None|None",
   "pokemonspotlighthour2026-11-26": "2026-11-26T18:00:00.000|2026-11-26T19:00:00.000",
   "twilight-wishes-2026": "2026-11-24T10:00:00.000|2026-11-30T20:00:00.000",
   "max-mondays-2026-11-30": "2026-11-30T06:00:00.000|2026-11-30T21:00:00.000",
@@ -3691,6 +3691,7 @@
   "Unannounced Pokémon in 5-star Raid Battles": "五星級團體戰中未公佈的神奇寶貝",
   "Winter Holiday 2026": "2026 年寒假",
   "New Year's 2027": "2027 年新年",
-  "Gigantamax Inteleon Max Battle Day": "超極巨化千面避役 · 極巨對戰日"
+  "Gigantamax Inteleon Max Battle Day": "超極巨化千面避役 · 極巨對戰日",
+  "Pokémon Champions Celebration 5-star Raid Battles": "神奇寶貝冠軍慶典五星級突襲戰"
  }
 }
