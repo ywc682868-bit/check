@@ -3163,8 +3163,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post28157",
-  "https://pokemongo-raku.com/post4019",
   "https://pokemongo-raku.com/post91746",
   "https://pokemongo-raku.com/post14984",
   "https://pokemonhubs.com/ptcg-pocket/dual-fusion-2026-announced",
@@ -3562,7 +3560,9 @@
   "https://pokemonhubs.com/pokemongo/56765/",
   "https://pokemonhubs.com/pokemongo/56875/",
   "https://pokemonhubs.com/pokemongo/56858/",
-  "https://pokemonhubs.com/pokemongo/56857/"
+  "https://pokemonhubs.com/pokemongo/56857/",
+  "https://pokemonhubs.com/ptcg/pokemon-30th-pikachu-figure-japan/",
+  "https://pokemonhubs.com/pokemongo/56885/"
  ],
  "initialized": true,
  "zh": {
