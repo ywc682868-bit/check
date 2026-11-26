@@ -127,7 +127,10 @@
   "choose-your-path-daydream-destinations-2026-12-15": "2026-12-15T10:00:00.000|2026-12-21T20:00:00.000",
   "choose-your-path-daydream-destinations-2027-01-12": "2027-01-12T10:00:00.000|2027-01-18T20:00:00.000",
   "choose-your-path-daydream-destinations-2027-01-26": "2027-01-26T10:00:00.000|2027-02-01T20:00:00.000",
-  "choose-your-path-daydream-destinations-2027-02-16": "2027-02-16T10:00:00.000|2027-02-21T20:00:00.000"
+  "choose-your-path-daydream-destinations-2027-02-16": "2027-02-16T10:00:00.000|2027-02-21T20:00:00.000",
+  "gigantamax-inteleon-max-battle-day-2026": "2026-12-05T14:00:00.000|2026-12-05T17:00:00.000",
+  "pokemon-champions-celebration-event-2026": "2026-12-08T10:00:00.000|2026-12-14T20:00:00.000",
+  "pokemon-champions-celebration-5-star-raid-battles-december-2026": "2026-12-09T06:00:00.000|2026-12-15T22:00:00.000"
  },
  "articles": {
   "https://pokemongo.com/zh_Hant/news/dynamax-uxie-mesprit-azelf-max-battle-day-2026": {
@@ -1603,7 +1606,7 @@
    "title": "不給糖就搗蛋！跟著扮裝「皮卡丘」、「超音蝠」與「來悲茶」在「萬聖節2026 Part 1」活動出門要糖吧！"
   },
   "https://pokemongo.com/zh_Hant/news/pgo-gameplay-update-oct-2026": {
-   "hash": "91db795cbcebfda263f3e953f9d67481e666ef7667d9f53e9f35f677a63cd322",
+   "hash": "15d920a1e8fd017d439cb02c10406868d8e76e742b0f575a7b539304460284e8",
    "lines": [
     "《Pokémon GO》遊戲與功能更新",
     "《Pokémon GO》遊戲更新",
@@ -1625,13 +1628,13 @@
     "確認該活動是否標有「由社群大使舉辦」的註記",
     "*請注意：「簽到」功能會於該場聚會開始前15分鐘開放使用。",
     "歡迎大家踴躍回饋，幫助我們進一步改善《Pokémon GO》的遊戲體驗！",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "《Pokémon GO》遊戲與功能更新"
   },
   "https://pokemongo.com/zh_Hant/news/halloween-part-2-2026": {
-   "hash": "0c24b83207cc062c891e3e752dc8d640bfdf098c5f7c3c1924bdc7dcf505fe6c",
+   "hash": "baed7400236327c149561d52ae5e242476955a39e72d7458d5dcf917ac882b35",
    "lines": [
     "「超級勾魂眼」增強、異色「墓仔狗」在《Pokémon GO》首度登場，盡在「萬聖節2026 Part 2」！",
     "萬聖節2026 Part 2",
@@ -1702,13 +1705,13 @@
     "或是購買Web Store專屬的",
     "「GO Pass豪華版：萬聖節2026＋10級高級禮盒」",
     "，獲得20顆高級球、10個活力塊、10個全滿藥與5張特級對戰入場券作為獎勵！",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "「超級勾魂眼」增強、異色「墓仔狗」在《Pokémon GO》首度登場，盡在「萬聖節2026 Part 2」！"
   },
   "https://pokemongo.com/zh_Hant/news/chandelure-super-mega-raid-day-2026": {
-   "hash": "82d061045bcc56121bd5bf9fde62e995229b416e4648af179f94a2e047d61c52",
+   "hash": "64cbba03f64e195b212600c101b044bbd57888b3dcef31bc395c65faaaf31afe",
    "lines": [
     "燭光搖曳的「水晶燈火靈極致超級團體戰日」即將登場！",
     "水晶燈火靈極致超級團體戰日",
@@ -1757,13 +1760,13 @@
     "Pokémon GO Web Store：「水晶燈火靈極致超級團體戰日」究極入場券禮盒",
     "只要花費4.99美元（或等值當地貨幣），即可購買「水晶燈火靈極致超級團體戰日」究極入場券禮盒，獲得1張活動入場券與額外1張特級對戰入場券！",
     "Pokémon GO Web Store",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "燭光搖曳的「水晶燈火靈極致超級團體戰日」即將登場！"
   },
   "https://pokemongo.com/zh_Hant/news/into-the-wild-2026": {
-   "hash": "69352bcdbe851e629f1bbd6648c2901188fdc60abf2e856bcd6b62e48540b83c",
+   "hash": "ff72d33545b9e310f110376e8abb772f2f188fada6c42c32299841b734258466",
    "lines": [
     "「曠野週」即將帶來一章鋼屬性與龍屬性的冒險故事！",
     "台灣時間2026年11月9日10:00～2026年11月13日20:00",
@@ -1862,13 +1865,13 @@
     "防禦：將受訓寶可夢設為夥伴後，與其玩耍、探索並捕捉寶可夢，以培養你們之間的感情。",
     "HP：將受訓寶可夢設為夥伴並一起探索，如：旋轉寶可補給站轉盤、獲得夥伴寶可夢找到的糖果或進行其他冒險。",
     "使用「銀色王冠」後，將有365天的時間可以完成「極限特訓」。只要完成這個漫長又充滿挑戰的過程，受訓寶可夢就能變得比以往更加強大！",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "「曠野週」即將帶來一章鋼屬性與龍屬性的冒險故事！"
   },
   "https://pokemongo.com/zh_Hant/news/go-pass-november-2026": {
-   "hash": "c2b360238d09c9bb923575b1b1bfcc4e949c2dccf0889e06397620d3ca4d8902",
+   "hash": "039a508ec4cb527bd26603d446d4b945a0c22a5947855d963fb9d5679ba8e855",
    "lines": [
     "透過「GO Pass：11月」獲得寶可幣吧！",
     "GO Pass：11月",
@@ -1916,8 +1919,8 @@
     "每日可開啟最多50個友情禮物。",
     "旋轉寶可補給站或道館的轉盤時，每日可獲得最多150個友情禮物。",
     "包包內可多存放20個友情禮物。",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "透過「GO Pass：11月」獲得寶可幣吧！"
   },
@@ -2008,7 +2011,7 @@
    "title": "新光三越將和訓練家一起展開「Pokémon GO曠野地帶：全球」的遊戲內冒險！"
   },
   "https://pokemongo.com/zh_Hant/news/dynamax-trails-eternamax-eternatus-2026": {
-   "hash": "69dec82dc83b3891c1e7e70e709c2a265851e6bb64fe551e1f1306bd100a9ad7",
+   "hash": "43d5c6741587f1ea8e27b1a84614bb5ae47654c0a1aca0a8a49a04aab0a19e90",
    "lines": [
     "「巨大足跡」活動期間，循著條條大路前往挑戰再次襲來的「無極汰那」吧！",
     "親愛的訓練家們：",
@@ -2082,13 +2085,13 @@
     "只要透過Pokémon GO Web Store購買",
     "「GO Pass豪華版：巨大足跡」",
     "，即可額外獲得10顆高級球、5個活力塊、1張特級對戰入場券與5個全滿藥作為獎勵。",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "「巨大足跡」活動期間，循著條條大路前往挑戰再次襲來的「無極汰那」吧！"
   },
   "https://pokemongo.com/zh_Hant/news/go-wild-area-stamp-rally-details-2026": {
-   "hash": "fa559a12f83ef7629eb4efe28a9e3c11c47082b4e56ce178b85695adbfd5b5dc",
+   "hash": "6e31a4166172dff8d2106492ba34998192c6da753abc96b7a8ec249f2164a9f9",
    "lines": [
     "「GO曠野地帶」活動集章趣說明公告",
     "親愛的訓練家們：",
@@ -2113,13 +2116,13 @@
     "如欲瞭解活動詳情，敬請參閱「GO曠野地帶：墨西哥市」活動官方網站。",
     "https://pokemongo.com/zh-Hant/gowildarea/mexico-city/faq",
     "https://pokemongo.com/zh-Hant/gowildarea/mexico-city/experiences",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "「GO曠野地帶」活動集章趣說明公告"
   },
   "https://pokemongo.com/zh_Hant/news/pgo-explorer-gadget-2026-update": {
-   "hash": "4bdc0edacc37ff12cb1aae9da947be3a387b40d24127ced598d7af7765a32bf3",
+   "hash": "2db0951994f457323e3170ba03614f488962e1b7cfad0894303df5be7e4c8537",
    "lines": [
     "「出遊捕捉器」進化！",
     "親愛的訓練家們：",
@@ -2148,13 +2151,13 @@
     "寶可補給站的色彩飽和度：",
     "調整已旋轉轉盤的寶可補給站的色彩飽和度，和尚未旋轉轉盤的寶可補給站形成更明顯的視覺對比。",
     "更新受到「神秘盒子」或「重要的寶箱」吸引的寶可夢身邊環繞的視覺效果。",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "「出遊捕捉器」進化！"
   },
   "https://pokemongo.com/zh_Hant/news/twilight-wishes-2026": {
-   "hash": "bc5a05ff3189e31ddbef6959a5c26f6f10cca861c0afb356eecea35091f10191",
+   "hash": "539240dc71912e60cfe24c858b12e75ff4a27672eb8fe49a16468b4d75c0483d",
    "lines": [
     "一起仰望星空，許下「黃昏時分的心願」！",
     "台灣時間2026年11月24日10:00～2026年11月30日20:00",
@@ -2217,13 +2220,13 @@
     "或是購買Web Store專屬的",
     "「GO Pass豪華版：黃昏時分的心願＋6級高級禮盒」",
     "，獲得20顆高級球、10個活力塊、10個全滿藥與5張特級對戰入場券作為獎勵！",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "一起仰望星空，許下「黃昏時分的心願」！"
   },
   "https://pokemongo.com/zh_Hant/news/get-ready-for-gowildarea-2026": {
-   "hash": "89671f92734e58fb34dbc292fb3da5e3df6c313109e06427fb98c981c98d8e60",
+   "hash": "1df0a0e1c07d1164c93b177c2a8945f3485e65e0168190a40be1e7b62638b9d3",
    "lines": [
     "「Pokémon GO 曠野地帶2026」全新換裝道具、個人檔案上顯示的各種背卡與精彩活動內容公布！",
     "親愛的訓練家們：",
@@ -2269,13 +2272,13 @@
     "訓練家還有機會加購活動加值包，透過升級活動獎勵加碼內容、追加遊玩天數或預購活動官方周邊商品，讓自己的「GO曠野地帶」之旅更加精彩！",
     "入場券加值包將於2026年11月6日～2026年11月8日期間生效──也就是說，訓練家將能在整個週末充分享受加值包的獎勵加碼內容！",
     "前往加值包加購頁面，瞭解詳情。",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "「Pokémon GO 曠野地帶2026」全新換裝道具、個人檔案上顯示的各種背卡與精彩活動內容公布！"
   },
   "https://pokemongo.com/zh_Hant/news/community-meetups-go-wild-area-2026-details-asia-pacific": {
-   "hash": "db6ef97d52f83d8bc2b7f32be24eab4fe5f62bbc159ac2f66a7809d54aedea6a",
+   "hash": "9bdf0ba90669dade56aaa65a037e7303cfe1ccb0ae89b1c1e9ac757b7b736c79",
    "lines": [
     "「Pokémon GO 曠野地帶2026：全球」在亞太地區的社群聚會活動即將登場！",
     "親愛的訓練家們：",
@@ -2325,13 +2328,13 @@
     "在各會場能體驗到什麼活動內容？",
     "《Pokémon GO》快閃活動即將登場，帶來的有趣互動體驗、限量好禮大放送、留下美好回憶的拍照機會、社群大使與其社群舉辦的好玩活動，以及與當地訓練家見面和對戰的機會！訓練家甚至還能在簽到時領取限時調查，解鎖道具與遇見寶可夢的機會等獎勵內容！",
     "體驗「Pokémon GO 曠野地帶」最好的方式就是參加現場活動。訓練家們，我們曠野見！",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "「Pokémon GO 曠野地帶2026：全球」在亞太地區的社群聚會活動即將登場！"
   },
   "https://pokemongo.com/zh_Hant/news/forever-stamp-rally-go-wild-area-2026": {
-   "hash": "2a2bec9a9d984442a69a06813fb31ca0bd255cac5bed50ec5d7c65937d60534f",
+   "hash": "ff6c3c95a9fcc919c2ae07ee2effedc1ae3153ecb3f43cb2e8452b32883945e7",
    "lines": [
     "立即展開嶄新的冒險，探索城市的每個角落吧！所有訓練家都能在日本的仙台／東北，以及墨西哥的墨西哥城暢玩全新的《Pokémon GO》集章趣！",
     "親愛的訓練家們：",
@@ -2370,13 +2373,13 @@
     "3. 完成「集章趣」並領取相關獎勵",
     "訓練家需要蒐集8枚圖章來完成本次的「集章趣」。只要集滿8枚圖章，就能遇見擁有仙台／東北紀念背卡的「拉普拉斯」* 或擁有墨西哥城紀念背卡的「摔角鷹人」* ！",
     "*運氣好的話，還有機會遇見異色寶可夢喔！",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "立即展開嶄新的冒險，探索城市的每個角落吧！所有訓練家都能在日本的仙台／東北，以及墨西哥的墨西哥城暢玩全新的《Pokémon GO》集章趣！"
   },
   "https://pokemongo.com/zh_Hant/news/clefable-super-mega-raid-day-2026": {
-   "hash": "d16fea651ddff6ec47ee641d1a7e2f0c671589b4d3dbdef4516be59c3d583ee5",
+   "hash": "aec600e723274235cc534ee32a3b892677adb4734e310e4049ee3385e7418c8a",
    "lines": [
     "在月光下翩翩起舞！「皮可西極致超級團體戰日」即將登場！",
     "皮可西極致超級團體戰日",
@@ -2426,8 +2429,8 @@
     "「皮可西極致超級團體戰日」究極入場券禮盒",
     "，獲得1張活動入場券與額外1張特級對戰入場券！",
     "Pokémon GO Web Store",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "在月光下翩翩起舞！「皮可西極致超級團體戰日」即將登場！"
   },
@@ -2466,7 +2469,7 @@
    "title": "《Pokémon GO》將在香港又一城FESTIVAL WALK與訓練家一起展開各式各樣的遊戲內冒險！"
   },
   "https://pokemongo.com/zh_Hant/news/gowildarea-2026-timed-research": {
-   "hash": "c01a88df13e054bf8cf5d6964e00b21dfc4c10456c03d4320a810819a416ff6e",
+   "hash": "eff24050552647af763bd3e26770d007dddae7ca854421a518bf7999af7aec15",
    "lines": [
     "本週末的獨家機會來了！只要在11月6日～11月8日登入，即可領取免費的限時調查，遇見超極巨化「怪力」！",
     "本週末限定──「GO曠野地帶：超極巨化怪力強化週！」限時調查",
@@ -2478,13 +2481,13 @@
     "腕力的糖果與糖果XL",
     "請注意限時調查有時限。訓練家必須在台灣時間2026年11月6日10:00～2026年11月8日23:59期間登入以領取本次的限時調查，且訓練家必須在台灣時間2026年11月15日23:59前完成限時調查相關課題並領取獎勵。",
     "*If you’re lucky, you may encounter a Shiny one!",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "本週末的獨家機會來了！只要在11月6日～11月8日登入，即可領取免費的限時調查，遇見超極巨化「怪力」！"
   },
   "https://pokemongo.com/zh_Hant/news/black-friday-2026": {
-   "hash": "0ed1845b60dd1d4016d121fd94db3f2c8a2de4a5962e5b80b3f8f967205b343c",
+   "hash": "226a947cb36b81f1963c5fc3e1b8ae5a9673f3fff9ba6ecb0a0b698ac43d235c",
    "lines": [
     "透過「黑色星期五」特賣活動，取得雙倍獎勵寶可幣吧！",
     "“親愛的訓練家們：",
@@ -2501,13 +2504,13 @@
     "也將在台灣時間2026年11月9日09:00～2026年11月28日12:00期間，獨家推出「冬季特別禮盒」！",
     "只要6,095寶可幣，即可將內含40個孵化器、40個超級孵化器、3張遠距團體戰入場券、5張特級對戰入場券與1個極巨粒子組合的「冬季特別禮盒」帶回家！*",
     "*每位玩家限兌換3次。",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "透過「黑色星期五」特賣活動，取得雙倍獎勵寶可幣吧！"
   },
   "https://pokemongo.com/zh_Hant/news/save-the-date-s25": {
-   "hash": "aa13ab6a196e237ef7a3ad03611c54b152649f475440f3e04948ea5f87f7d7d9",
+   "hash": "dace0f1d400c2c2d60082927960a91055c1e770eff19757498be6bc4be585c04",
    "lines": [
     "記得把下一季的社群日時間記下來喔！",
     "親愛的訓練家們：",
@@ -2525,8 +2528,8 @@
     "2027年1月30日：極致超級團體戰日",
     "2027年2月13日：團體戰日",
     "敬請持續關注以獲得12月社群日與其他活動的最新消息！",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "記得把下一季的社群日時間記下來喔！"
   },
@@ -2571,7 +2574,7 @@
    "title": "迎接慶典！《Pokémon GO》與香港麥當勞的限時聯乘活動即將登場！"
   },
   "https://pokemongo.com/zh_Hant/news/pokemon-crocs-2026": {
-   "hash": "6a96e776f485bec15577fc9f814b7434c111f8013ca67a9b4b117445b0287dc6",
+   "hash": "3940d2df8f054fcade80fdaed3fef4a9b67dc733f50dc0fbce5f29fe9d6d8daf",
    "lines": [
     "「Crocs」的全新寶可夢系列鞋款將化作換裝道具在《Pokémon GO》登場！",
     "親愛的訓練家們：",
@@ -2585,13 +2588,13 @@
     "「經典 寶可夢耿鬼 克駱格」",
     "「經典雲朵 寶可夢胖丁 克駱格」",
     "*本次促銷代碼的兌換期限至2027年12月31日為止。",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "「Crocs」的全新寶可夢系列鞋款將化作換裝道具在《Pokémon GO》登場！"
   },
   "https://pokemongo.com/zh_Hant/news/duolingo-2026": {
-   "hash": "ff80bd3de50330ab68bd908c5ef2a9c5921f068a4c44b8654408905654b8c46d",
+   "hash": "58364fd4358610175ed917a2fd5c97f62c21c9b65695b25a09bbb273af67e02d",
    "lines": [
     "跟著《Pokémon GO》與《Duolingo》一起學習語言！",
     "親愛的訓練家們：",
@@ -2620,13 +2623,13 @@
     "全新功能「語言標籤」登場",
     "是「Pikachu」、「ピカチュウ」還是「皮卡丘」？",
     "透過活動主題限時調查遇見的特定寶可夢，牠們的資訊頁面上將顯示全新的「語言標籤」！寶可夢會有不同的外語名字，而訓練家只要點擊「語言標籤」，就能查看寶可夢在其他語言的名字！",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "跟著《Pokémon GO》與《Duolingo》一起學習語言！"
   },
   "https://pokemongo.com/zh_Hant/news/community-day-december-2026": {
-   "hash": "7ee22426e6a1727b58acc4c48839a6caac727cb4e8d231b44bc0ad91663c602f",
+   "hash": "4e1ed1a83d49775ee0e955fabb3b5e3f85570c4dc2841708942a57640d2eaa76",
    "lines": [
     "跟著2026年所有社群日的主角寶可夢，回顧一年來的點點滴滴！",
     "2026年12月社群日",
@@ -2698,13 +2701,13 @@
     "標記在社群日地圖上的公園都是過往社群日期間，訓練家們齊聚的熱門地點。前往這些公園踏青也是加入當地社群一起遊玩的好選擇！* 希望這張地圖能夠幫助訓練家們認識彼此！",
     "*我們僅提供熱門地點作為遊玩參考，Scopely並未在這些地點舉辦任何官方或非官方的現場活動。遊玩時請注意周遭環境。",
     "趕快加入社群大使舉辦的活動，領取特別的限時調查，並於完成後額外遇見擁有特別背卡的2026年社群日主角寶可夢，還有豐富的付費道具獎勵等你來拿！",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "跟著2026年所有社群日的主角寶可夢，回顧一年來的點點滴滴！"
   },
   "https://pokemongo.com/zh_Hant/news/go-battle-league-daydream-destinations": {
-   "hash": "dfbf96f90a8efc9b347990a58bdb4ec48a8792c87564359dd075495f173d8967",
+   "hash": "902a34a2f5870aa8927a7935c3b052061f1da633655c07384729d332b062a20d",
    "lines": [
     "「GO對戰聯盟：夢途漫漫」賽季更新",
     "親愛的訓練家們：",
@@ -2875,13 +2878,13 @@
     "「噬沙堡爺」現在能學會特殊招式「潑冷水」了。",
     "「多刺菊石獸」現在能學會特殊招式「熱水」了。",
     "「卡咪龜」現在能學會一般招式「攀瀑」了。",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "「GO對戰聯盟：夢途漫漫」賽季更新"
   },
   "https://pokemongo.com/zh_Hant/news/go-pass-december-2026": {
-   "hash": "e3c7ee121144755d724d997708a3813a52e393d61a2a596edd34735eba017474",
+   "hash": "177960f5d59f8fbefd1325d6962ddd9b5bcc74c3160158893e83a33d9cd60a3a",
    "lines": [
     "透過「GO Pass：12月」的獎勵內容孵蛋孵個GO！",
     "GO Pass：12月",
@@ -2940,25 +2943,25 @@
     "這個厲害的道具是可重複使用的額外孵化器，能夠幫助訓練家一邊探索、一邊孵蛋！「限時孵化器」無使用次數限制，但有效期限為解鎖當日起至當月「GO Pass」到期後一週為止。",
     "無論在何時領取獎勵，透過「GO Pass豪華版：12月」獲得的「限時孵化器」都將於台灣時間2027年1月12日10:00到期。*",
     "*「限時孵化器」到期時，其中仍未孵化的蛋將轉移至全新的一次性孵化器內。新的一次性孵化器將於蛋孵化後消失。",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "透過「GO Pass：12月」的獎勵內容孵蛋孵個GO！"
   },
   "https://pokemongo.com/zh_Hant/news/monthly-content-update-dec2026": {
-   "hash": "9d0dcd8455839ef105b84f320630e6dfca7e8d5eaec4002d0893490b524bc009",
+   "hash": "5b1b678cdddd741e75ceaa1e2ab00dad4020e0f3ff502b81ed8a15a420589d51",
    "lines": [
     "《Pokémon GO》即將在12月帶來「熱帶樂園」、再度登場的「小隕星雨」以及一年一度的「12月社群日」等精彩冒險！",
     "其他《Pokémon GO》遊戲與功能更新",
     "道館與團體戰畫面更新：",
     "道館與團體戰提升視覺區分度，讓未舉行團體戰的道館顯得較矮小。另外也改善了道館與團體戰相關圖示與倒數計時的視覺設計。",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "12月更新內容"
   },
   "https://pokemongo.com/zh_Hant/news/choose-your-path-daydream-destinations-2026": {
-   "hash": "5e4844dd950ae5c52964bd67ad4ef0b615eabe2afb5edf142786a08820844bef",
+   "hash": "27e91c6412cad3636f0aae2df53a84cc0425664d3a734bb513bb2ad5129e0dc3",
    "lines": [
     "「自選限時調查」即將在「夢途漫漫」期間登場！",
     "台灣時間12月15日10:00～12月21日20:00",
@@ -2969,8 +2972,8 @@
     "訓練家在「自選限時調查」登場當週，將能自「探索」、「捕捉」與「對戰」之間擇一作為調查主題，且這個選擇將決定當週限時調查課題的主題與對應的獎勵加碼內容！",
     "請注意：限時調查有時限，且「自選限時調查」實際截止時間將視訓練家領取該限時調查時所身處的時區而定。訓練家必須在限時調查截止前，完成限時調查相關課題並領取獎勵。",
     "訓練家的調查課題可能會與其他訓練家有所不同。",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "「自選限時調查」即將在「夢途漫漫」期間登場！"
   },
@@ -3039,7 +3042,7 @@
    "title": "「《Pokémon Champions》聯名活動」即將登場！"
   },
   "https://pokemongo.com/zh_Hant/news/tropical-paradise-2026": {
-   "hash": "c1eae9b6093221c2c923ae08a62512ddfefc184868be9280b6d30ff66b6d9321",
+   "hash": "4a54cc5d9c41f44aa92d9cc4f7f80dceb7205a0df63c6a95470335ff3b54b71c",
    "lines": [
     "在《Pokémon GO》「熱帶樂園」活動期間盡情戲水吧！",
     "台灣時間2026年12月1日10:00～2026年12月7日20:00",
@@ -3106,16 +3109,60 @@
     "或是購買Web Store專屬的",
     "「GO Pass豪華版：熱帶樂園＋6級高級禮盒」",
     "，獲得20顆高級球、10個活力塊、10個全滿藥、5張特級對戰入場券作為獎勵！",
-    "Please be aware of your surroundings and follow guidelines from local health authorities when playing Pokémon GO. Upcoming events are subject to change. Be sure to follow us on social media, opt in to receiving push notifications, and subscribe to our emails to stay updated.",
-    "—The Pokémon GO team"
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
    ],
    "title": "在《Pokémon GO》「熱帶樂園」活動期間盡情戲水吧！"
+  },
+  "https://pokemongo.com/zh_Hant/news/gigantamax-inteleon-max-battle-day-2026": {
+   "hash": "1c923e0e8bd13c183002e713bcd1c1d147917eecd8ef9af4a9483aaefc71887c",
+   "lines": [
+    "特工寶可夢「千面避役」即將在「超極巨化千面避役極巨對戰日」出動！",
+    "超極巨化千面避役極巨對戰日",
+    "台灣時間2026年12月5日14:00～17:00",
+    "Featured Pokémon",
+    "下列寶可夢將在六星極巨對戰登場！",
+    "超極巨化「千面避役」",
+    "運氣好的話，還有機會遇見在《Pokémon GO》首度登場的異色超極巨化「千面避役」喔！",
+    "活動獎勵加碼內容",
+    "下列獎勵加碼內容將於活動期間生效。",
+    "每日蒐集極巨粒子的上限增加至1,600",
+    "超極巨化對戰會出現在所有能量點",
+    "能量點會更常刷新",
+    "地圖上將出現額外能量點",
+    "可從能量點獲得的極巨粒子增加為8倍",
+    "每日最多可以進行3次特殊交換",
+    "台灣時間12月5日08:00～12月6日12:00期間，遠距團體戰的參加上限將從10次增加至20次",
+    "下列獎勵加碼內容將於台灣時間2026年12月5日00:00～17:00期間生效。",
+    "探索時蒐集的極巨粒子加倍*",
+    "獲得極巨粒子的探索距離縮短為1/4**",
+    "*訓練家可於每日四處探險，並從「看看附近」選單蒐集極巨粒子。開啟「時時刻刻冒險」模式即可時時追蹤你的行走距離！記得留意「看看附近」選單的圖示，並在達成行走目標時蒐集極巨粒子吧！",
+    "**訓練家必須先蒐集所有可從「看看附近」選單獲得的極巨粒子，這些獎勵加碼內容才會生效。",
+    "只要4.99美元（或等值當地貨幣），即可解鎖活動限定限時調查。",
+    "限時調查獎勵如下：",
+    "25,000 XP",
+    "6,400個極巨粒子",
+    "訓練家也會獲得以下獎勵加碼內容：",
+    "極巨對戰可獲得的XP加倍",
+    "限時調查將於台灣時間2026年12月5日14:00～17:00期間展開。",
+    "訓練家能為《Pokémon GO》中友誼等級高於或等於「給力好朋友」的朋友購買並贈送入場券。請注意，所有購買行為恕不進行退款（適用法律與服務條款中規定的例外事項）。入場券不能使用寶可幣進行購買。",
+    "請注意：本次入場券僅會在遊戲內商店販售至台灣時間2026年12月5日17:00為止。",
+    "「極巨對戰」會在哪裡出現？",
+    "由於「極巨對戰」需要多名訓練家協力挑戰，且只會不定期於不同地點的能量點出現，因此我們決定幫助訓練家輕鬆尋找「極巨對戰」與其他有意加入的訓練家！",
+    "來查看活動期間附近即將登場及正在進行的「極巨對戰」。",
+    "除此之外，訓練家還能篩選類別或檢視附近的",
+    "，搶先查看附近即將舉辦的社群聚會，讓訓練家能夠輕鬆規劃行程。社群大使會在官方的幫助下，在自己的社區舉辦《Pokémon GO》活動的社群聚會。如果附近沒有社群大使舉辦活動，你也可以搜尋看看附近有沒有其他的聚會。",
+    "對從未參與過聚會的訓練家來說，「極巨對戰」就是首度面對面加入當地訓練家社群的絕佳機會！現在訓練家能夠更輕鬆地與親朋好友，甚至與其他訓練家一起安排時間，攜手克服對戰中出現的難關！",
+    "Pokémon GO Web Store：「超極巨化千面避役極巨對戰日」究極入場券禮盒",
+    "只要花費4.99美元（或等值當地貨幣），即可購買「超極巨化千面避役極巨對戰日」究極入場券禮盒，獲得1張活動入場券與額外800個極巨粒子！",
+    "Pokémon GO Web Store",
+    "遊玩《Pokémon GO》時請注意周遭環境，並請遵循當地醫療主管機關的指示。未來活動將有可能調整。請務必追蹤我們的社群媒體、設定接收推播通知，並且訂閱我們的電子郵件，以獲得最新資訊。",
+    "—《Pokémon GO》開發團隊敬上"
+   ],
+   "title": "特工寶可夢「千面避役」即將在「超極巨化千面避役極巨對戰日」出動！"
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post60041",
-  "https://pokemonhubs.com/news/pink-afro-pikachu-october-20-queue-rules/",
-  "https://pokemongo-raku.com/post28147",
   "https://pokemongo-raku.com/post28157",
   "https://pokemongo-raku.com/post4019",
   "https://pokemongo-raku.com/post91746",
@@ -3512,7 +3559,10 @@
   "https://pokemonhubs.com/pokemongo/2848/",
   "https://pokemonhubs.com/pokemongo/56839/",
   "https://pokemonhubs.com/pokemongo/56820/",
-  "https://pokemonhubs.com/pokemongo/56765/"
+  "https://pokemonhubs.com/pokemongo/56765/",
+  "https://pokemonhubs.com/pokemongo/56875/",
+  "https://pokemonhubs.com/pokemongo/56858/",
+  "https://pokemonhubs.com/pokemongo/56857/"
  ],
  "initialized": true,
  "zh": {
@@ -3640,6 +3690,7 @@
   "Unannounced Event": "未宣布的事件",
   "Unannounced Pokémon in 5-star Raid Battles": "五星級團體戰中未公佈的神奇寶貝",
   "Winter Holiday 2026": "2026 年寒假",
-  "New Year's 2027": "2027 年新年"
+  "New Year's 2027": "2027 年新年",
+  "Gigantamax Inteleon Max Battle Day": "超極巨化千面避役 · 極巨對戰日"
  }
 }
