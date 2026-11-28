@@ -3163,8 +3163,6 @@
   }
  },
  "feed": [
-  "https://pokemongo-raku.com/post165131",
-  "https://pokemonhubs.com/pokemongo/54974/",
   "https://pokemonhubs.com/news/mister-donut-pokemon-2026/",
   "https://pokemonhubs.com/news/pokemon-center-taipei-pink-pikachu-sales-suspended-2026/",
   "https://pokemonhubs.com/pokemongo/54979/",
@@ -3562,7 +3560,9 @@
   "https://pokemongo-raku.com/post116007",
   "https://pokemongo-raku.com/post18412",
   "https://pokemongo-raku.com/post166680",
-  "https://pokemongo-raku.com/post167008"
+  "https://pokemongo-raku.com/post167008",
+  "https://pokemonhubs.com/news/pokemon-center-jp-winds-waves-starter-plush",
+  "https://pokemongo-raku.com/post91746"
  ],
  "initialized": true,
  "zh": {
